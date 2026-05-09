@@ -1,26 +1,22 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@plugin "daisyui" {
+  themes: light --default;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --font-dm-sans: var(--font-dm_sans);
+  --breakpoint-xs: 480px;
+  --color-main: #b30602;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.custom-search {
+  @apply hidden lg:flex! justify-between items-center w-full [&>input]:w-full [&>input]:focus:outline-0 gap-5 border border-main rounded-full p-1 pl-5!;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.btn-main {
+  @apply bg-main text-white hover:text-white/70 border-main;
+}
+
+.btn-main-outline {
+  @apply btn-outline border-main text-main hover:bg-main hover:text-white;
 }
