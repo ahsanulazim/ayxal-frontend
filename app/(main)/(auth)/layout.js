@@ -5,7 +5,7 @@ const layout = ({ children }) => {
     <section className="min-h-[calc(100dvh-95px)] flex items-center justify-center bg-base-300 max-lg:p-5">
       <div className="flex flex-col lg:flex-row gap-5 bg-base-200 p-5 rounded-xl items-center max-lg:flex-1">
         <div className="bg-base-300 rounded-lg p-10 max-lg:order-2 w-full">
-          <h2 className="text-center text-main font-bold text-3xl text-balance">
+          <h2 className="text-center text-main font-bold text-xl xs:text-3xl text-balance">
             Safe and Secure Shopping Starts Here
           </h2>
           <Image

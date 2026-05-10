@@ -5,6 +5,7 @@
 
 @theme {
   --font-dm-sans: var(--font-dm_sans);
+  --font-hind-siliguri: var(--font-hind-siliguri);
   --breakpoint-xs: 480px;
   --color-main: #b30602;
 }

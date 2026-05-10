@@ -1,4 +1,4 @@
-import { DM_Sans } from "next/font/google";
+import { DM_Sans, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/query/QueryProvider";
 import { Toaster } from "react-hot-toast";
@@ -6,6 +6,12 @@ import { Toaster } from "react-hot-toast";
 const dm_sans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
+});
+
+const hind_siliguri = Hind_Siliguri({
+  variable: "--font-hind-siliguri",
+  subsets: ["latin", "bengali"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata = {
@@ -18,7 +24,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${dm_sans.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${dm_sans.variable} ${hind_siliguri.variable} h-full antialiased`}
+    >
       <body className="min-h-full font-dm-sans">
         <QueryProvider>
           <Toaster />
