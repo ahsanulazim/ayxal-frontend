@@ -2,6 +2,7 @@ import { DM_Sans, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/query/QueryProvider";
 import { Toaster } from "react-hot-toast";
+import MyProvider from "@/context/MyProvider";
 
 const dm_sans = DM_Sans({
   variable: "--font-dm-sans",
@@ -30,8 +31,10 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full font-dm-sans">
         <QueryProvider>
-          <Toaster />
-          {children}
+          <MyProvider>
+            <Toaster />
+            {children}
+          </MyProvider>
         </QueryProvider>
       </body>
     </html>

@@ -1,13 +1,31 @@
 "use client";
 
+import { auth } from "@/firebase/firebase.config";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { LuEye, LuEyeClosed, LuKey, LuMail, LuUser } from "react-icons/lu";
+import toast from "react-hot-toast";
+import {
+  LuArrowRight,
+  LuEye,
+  LuEyeClosed,
+  LuKey,
+  LuMail,
+  LuUser,
+} from "react-icons/lu";
 
 const UserForm = ({ isLogin }) => {
   const [isHidden, setIsHidden] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const {
     register,
@@ -16,8 +34,73 @@ const UserForm = ({ isLogin }) => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    const name = data.name;
+    const email = data.email;
+    const password = data.password;
+    if (isLogin) {
+      // Handle login logic here
+      try {
+        setIsLoading(true);
+        const loggedInUser = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
+
+        const userEmail = loggedInUser.user.email;
+
+        const userRes = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/users/getUser?email=${userEmail}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        const userData = await userRes.json();
+        console.log(userData);
+
+        setIsLoading(false);
+        toast.success("Login Successful");
+        router.push("/dashboard");
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      // Handle registration logic here
+      try {
+        setIsLoading(true);
+        await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        const userRes = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/users/createUser`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name,
+              email: email,
+            }),
+          },
+        );
+        const userData = await userRes.json();
+        setIsLoading(false);
+        toast.success("Registration Successful");
+        router.push("/dashboard");
+        reset();
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Registration Failed");
+        console.error("Registration Error:", error);
+      }
+    }
   };
 
   return (
@@ -119,13 +202,26 @@ const UserForm = ({ isLogin }) => {
         </Link>
       )}
 
-      <button className="btn btn-main mt-4">
-        {isLogin ? "Login" : "Registation"}
+      <button
+        type="submit"
+        className={`btn ${isLoading ? "" : "btn-main"} mt-4`}
+        disabled={isLoading}
+      >
+        {!isLoading ? (
+          <>
+            {isLogin ? "Login" : "Registration"} <LuArrowRight />
+          </>
+        ) : (
+          <span className="loading loading-spinner"></span>
+        )}
       </button>
 
       <div className="divider my-2">or</div>
 
-      <button className="btn bg-white text-black border-[#e5e5e5]">
+      <button
+        type="button"
+        className="btn bg-white text-black border-[#e5e5e5]"
+      >
         <svg
           aria-label="Google logo"
           width="16"

@@ -1,6 +1,25 @@
+"use client";
+
+import Spinner from "@/components/skeleton/Spinner";
+import { MyContext } from "@/context/MyProvider";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect } from "react";
 
 const layout = ({ children }) => {
+  const { newUser, loading } = useContext(MyContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && newUser) {
+      router.push("/dashboard");
+    }
+  }, [loading, newUser, router]);
+
+  if (loading) {
+    return <Spinner />;
+  }
+
   return (
     <section className="min-h-[calc(100dvh-95px)] flex items-center justify-center bg-base-300 max-lg:p-5">
       <div className="flex flex-col lg:flex-row gap-5 bg-base-200 p-5 rounded-xl items-center max-lg:flex-1">
