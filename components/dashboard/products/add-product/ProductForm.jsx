@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuCloudUpload, LuX } from "react-icons/lu";
 import ReactQuill from "react-quill-new";
+import Variants from "./Variants";
+import VariantImageUploader from "./VariantImageUploader";
 
 const ProductForm = ({ ref }) => {
   const {
@@ -155,21 +157,7 @@ const ProductForm = ({ ref }) => {
             <p className="text-red-600">{errors.price.message}</p>
           )}
         </div>
-        <div className="fieldset bg-base-100 p-5 rounded-box mt-5">
-          <h2 className="font-bold text-xl">Product Variants</h2>
-
-          <label htmlFor="price" className="label">
-            Options
-          </label>
-          <select defaultValue="" className="select">
-            <option value="" disabled={true}>
-              options
-            </option>
-            <option>Size</option>
-            <option>Color</option>
-            <option>Fabric</option>
-          </select>
-        </div>
+        <Variants register={register} control={control} />
       </div>
       <div>
         <div className="fieldset bg-base-100 p-5 rounded-box">

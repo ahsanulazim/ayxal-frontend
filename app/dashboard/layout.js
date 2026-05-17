@@ -5,7 +5,12 @@ import { MyContext } from "@/context/MyProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
-import { LuBox, LuLayoutDashboard, LuSettings2 } from "react-icons/lu";
+import {
+  LuBox,
+  LuLayoutDashboard,
+  LuSettings2,
+  LuSwatchBook,
+} from "react-icons/lu";
 
 const layout = ({ children }) => {
   const { newUser, loading } = useContext(MyContext);
@@ -65,14 +70,15 @@ const layout = ({ children }) => {
 
             {/* List item */}
             <li>
-              <button
+              <Link
+                href="/dashboard/variants"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Settings"
+                data-tip="Variants"
               >
                 {/* Settings icon */}
-                <LuSettings2 className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Settings</span>
-              </button>
+                <LuSwatchBook className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Variants</span>
+              </Link>
             </li>
           </ul>
         </div>
