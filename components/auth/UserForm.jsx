@@ -11,7 +11,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import {
   LuArrowRight,
   LuEye,
@@ -20,6 +19,7 @@ import {
   LuMail,
   LuUser,
 } from "react-icons/lu";
+import { toast } from "react-toastify";
 
 const UserForm = ({ isLogin }) => {
   const [isHidden, setIsHidden] = useState(false);

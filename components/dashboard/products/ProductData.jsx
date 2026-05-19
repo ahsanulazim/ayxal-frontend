@@ -1,6 +1,15 @@
-import { LuEllipsis, LuStar } from "react-icons/lu";
+"use client";
+
+import { getAllProducts } from "@/api/productApi";
+import { useQuery } from "@tanstack/react-query";
+import { LuStar, LuTrash2 } from "react-icons/lu";
 
 const ProductData = () => {
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: getAllProducts,
+  });
+
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
       <table className="table">
@@ -22,45 +31,62 @@ const ProductData = () => {
           </tr>
         </thead>
         <tbody>
-          {/* row 1 */}
-          <tr>
-            <th>
-              <label>
-                <input type="checkbox" className="checkbox" />
-              </label>
-            </th>
-            <td>
-              <div className="flex items-center gap-3">
-                <div className="avatar">
-                  <div className="mask mask-squircle h-12 w-12">
-                    <img
-                      src="https://img.daisyui.com/images/profile/demo/2@94.webp"
-                      alt="Avatar Tailwind CSS Component"
-                    />
+          {isLoading ? (
+            <tr>
+              <td colSpan="8" className="text-center">
+                Loading...
+              </td>
+            </tr>
+          ) : products.length <= 0 ? (
+            <tr>
+              <td colSpan="8" className="text-center">
+                No Products Found
+              </td>
+            </tr>
+          ) : (
+            products.map((product) => (
+              <tr key={product.slug}>
+                <th>
+                  <label>
+                    <input type="checkbox" className="checkbox" />
+                  </label>
+                </th>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div className="avatar">
+                      <div className="mask mask-squircle h-12 w-12">
+                        <img
+                          src={product.productImages[0]}
+                          alt={product.productName}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{product.productName}</div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="font-bold">Hart Hagerty</div>
-                </div>
-              </div>
-            </td>
-            <td>OK123</td>
-            <td>$10000</td>
-            <td>Kurti</td>
-            <td>
-              <button className="btn btn-circle btn-soft btn-warning">
-                <LuStar />
-              </button>
-            </td>
-            <td>
-              <span className="badge badge-success">In Stock</span>
-            </td>
-            <td>
-              <button className="btn btn-soft btn-circle">
-                <LuEllipsis />
-              </button>
-            </td>
-          </tr>
+                </td>
+                <td>{product.sku || "N/A"}</td>
+                <td>{product.price}</td>
+                <td>{product.category}</td>
+                <td>
+                  <button className="btn btn-circle btn-soft btn-warning">
+                    <LuStar />
+                  </button>
+                </td>
+                <td>
+                  <span className="badge badge-success">
+                    {product.stock < 0 ? "Out of Stock" : "In Stock"}
+                  </span>
+                </td>
+                <td>
+                  <button className="btn btn-soft btn-error btn-circle">
+                    <LuTrash2 />
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

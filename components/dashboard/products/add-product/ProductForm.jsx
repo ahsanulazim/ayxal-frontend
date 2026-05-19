@@ -1,12 +1,13 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuCloudUpload, LuX } from "react-icons/lu";
 import ReactQuill from "react-quill-new";
-import Variants from "./Variants";
-import VariantImageUploader from "./VariantImageUploader";
+import Variations from "./Variations";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createProduct } from "@/api/productApi";
+import { toast } from "react-toastify";
 
 const ProductForm = ({ ref }) => {
   const {
@@ -14,14 +15,32 @@ const ProductForm = ({ ref }) => {
     reset,
     control,
     handleSubmit,
+    watch,
+    setValue,
+    getValues,
     formState: { errors, isDirty },
   } = useForm();
 
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product created successfully");
+      reset();
+      setImages([]);
+      setCoverIndex(0);
+    },
+    onError: () => {
+      toast.error("Failed to create product");
+    },
+  });
+
   const onSubmit = (data) => {
     console.log(data);
+    mutation.mutate(data);
   };
-
-  const queryClient = useQueryClient();
 
   //quill formats
   const formats = [
@@ -56,20 +75,34 @@ const ProductForm = ({ ref }) => {
   const handleDrop = (e) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
-    const previewUrls = files.map((file) => URL.createObjectURL(file));
-    setImages((prev) => [...prev, ...previewUrls]);
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImages((prev) => [...prev, event.target.result]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const previewUrls = files.map((file) => URL.createObjectURL(file));
-    setImages((prev) => [...prev, ...previewUrls]);
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImages((prev) => [...prev, event.target.result]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const removeImage = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
     if (index === coverIndex) setCoverIndex(0); // reset cover if removed
   };
+
+  useEffect(() => {
+    setValue("productImages", images);
+  }, [images, setValue]);
 
   return (
     <form
@@ -157,7 +190,13 @@ const ProductForm = ({ ref }) => {
             <p className="text-red-600">{errors.price.message}</p>
           )}
         </div>
-        <Variants register={register} control={control} />
+        <Variations
+          register={register}
+          control={control}
+          setValue={setValue}
+          getValues={getValues}
+          errors={errors}
+        />
       </div>
       <div>
         <div className="fieldset bg-base-100 p-5 rounded-box">
@@ -179,15 +218,7 @@ const ProductForm = ({ ref }) => {
               type="file"
               multiple
               accept="image/*"
-              {...register("productImage", {
-                required: "Upload atleast one product Image",
-                validate: {
-                  lessThan5MB: (files) =>
-                    files[0].size <= 5 * 1024 * 1024 ||
-                    "File size must be less than 5MB",
-                },
-                onChange: (e) => handleImageUpload(e),
-              })}
+              onChange={handleImageUpload}
             />
           </label>
           {/* Preview thumbnails */}
@@ -211,8 +242,10 @@ const ProductForm = ({ ref }) => {
               ))}
             </div>
           )}
-          {errors.productImage && (
-            <p className="text-red-600">{errors.productImage.message}</p>
+          {images.length === 0 && (
+            <p className="text-red-600 text-sm mt-2">
+              Upload at least one product image
+            </p>
           )}
         </div>
         <div className="fieldset bg-base-100 p-5 rounded-box mt-5">

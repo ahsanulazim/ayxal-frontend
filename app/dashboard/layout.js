@@ -71,13 +71,13 @@ const layout = ({ children }) => {
             {/* List item */}
             <li>
               <Link
-                href="/dashboard/variants"
+                href="/dashboard/attributes"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Variants"
+                data-tip="Attributes"
               >
                 {/* Settings icon */}
                 <LuSwatchBook className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Variants</span>
+                <span className="is-drawer-close:hidden">Attributes</span>
               </Link>
             </li>
           </ul>

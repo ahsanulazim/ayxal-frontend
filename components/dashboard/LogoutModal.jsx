@@ -2,8 +2,8 @@ import { auth } from "@/firebase/firebase.config";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { FaTriangleExclamation } from "react-icons/fa6";
+import { toast } from "react-toastify";
 
 const LogoutModal = ({ ref }) => {
   const [loading, setLoading] = useState(false);
