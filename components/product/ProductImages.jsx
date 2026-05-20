@@ -26,7 +26,7 @@ const ProductImages = ({ product }) => {
   };
 
   return (
-    <div className="slider-container max-lg:max-w-dvw">
+    <div className="slider-container">
       <Slider {...settings}>
         {product?.productImages?.map((image, i) => (
           <div key={i}>

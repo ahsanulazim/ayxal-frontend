@@ -14,11 +14,11 @@ const ProductInfo = ({ product }) => {
   return (
     <section className="mt-3 px-5">
       <div className="max-w-360 mx-auto w-full">
-        <div className="grid lg:grid-cols-12 gap-8 xl:gap-10">
+        <div className="lg:grid lg:grid-cols-12 gap-8 xl:gap-10">
           <div className="lg:col-span-5 col-span-1">
             <ProductImages product={product} />
           </div>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 col-span-1 max-lg:my-5">
             <div className="badge badge-success badge-soft mb-3">
               <FaStar /> Best Seller
             </div>
@@ -71,7 +71,7 @@ const ProductInfo = ({ product }) => {
                 <p className="text-lg font-bold">Quantity:</p>
                 <input
                   type="number"
-                  className="input"
+                  className="input w-15"
                   min="1"
                   max={product.stock}
                   defaultValue={1}
@@ -83,7 +83,7 @@ const ProductInfo = ({ product }) => {
               </div>
             </div>
             <div className="flex max-md:flex-col items-center xl:gap-4">
-              <div className="flex items-center gap-5 justify-between">
+              <div className="flex items-center gap-5 justify-between max-lg:mb-5">
                 <div className="flex flex-col items-center">
                   <div className="size-10 bg-main/10 text-main rounded-full flex items-center justify-center">
                     <LuShirt />
