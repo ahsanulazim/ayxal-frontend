@@ -40,7 +40,7 @@ const ProductInfo = ({ product }) => {
               </div>
               <div className="divider divider-horizontal"></div>
               <p>
-                <span className="font-bold">🔥500+</span> Sold This Week!
+                <span className="font-bold">🔥400+</span> Sold This Week!
               </p>
             </div>
             <div className="bg-base-300 p-5 rounded-box my-5">
