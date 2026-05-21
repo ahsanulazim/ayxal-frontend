@@ -1,51 +1,24 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { getAllAttribute } from "@/api/attributeApi";
+import { useEffect, useMemo, useState } from "react";
 import { getAllVariations } from "@/api/typeApi";
 import { useQuery } from "@tanstack/react-query";
-import { Controller, useWatch } from "react-hook-form";
 import Select from "react-select";
+import { LuPlus, LuX } from "react-icons/lu";
 
 const toOptions = (items) =>
-  items?.map((item) => ({ value: item._id, label: item.name })) ?? [];
+  items?.map((item) => ({
+    id: item._id,
+    value: item.value,
+    label: item.name,
+    swatchImage: item.image ?? item.swatchImage ?? null,
+  })) ?? [];
 
-const SelectField = ({ label, name, control, options, isLoading }) => (
-  <>
-    <label htmlFor={name} className="label">
-      {label}
-    </label>
-    <Controller
-      name={name}
-      control={control}
-      defaultValue={[]}
-      render={({ field }) => (
-        <Select {...field} options={options} isMulti isLoading={isLoading} />
-      )}
-    />
-  </>
-);
-
-const Variations = ({ register, control, setValue, getValues, errors }) => {
-  const { data: attributes, isLoading: attributesLoading } = useQuery({
-    queryKey: ["attributes"],
-    queryFn: getAllAttribute,
-  });
-
+const Variations = ({ register, setValue, getValues, errors }) => {
   const { data: variations, isLoading: variationsLoading } = useQuery({
     queryKey: ["variations"],
     queryFn: getAllVariations,
   });
-
-  const variationOptions = useMemo(() => toOptions(attributes), [attributes]);
-
-  const sizeOptions = useMemo(
-    () =>
-      toOptions(
-        variations?.filter((variation) => variation.attributeSlug === "size"),
-      ),
-    [variations],
-  );
 
   const colorOptions = useMemo(
     () =>
@@ -55,68 +28,150 @@ const Variations = ({ register, control, setValue, getValues, errors }) => {
     [variations],
   );
 
-  const [variantsValue, sizeValue, colorValue] = useWatch({
-    control,
-    name: ["variants", "size", "color"],
-    defaultValue: [[], [], []],
-  });
-
-  const selectedVariantLabels = useMemo(
+  const sizeOptions = useMemo(
     () =>
-      Array.isArray(variantsValue)
-        ? variantsValue.map((option) => option.label.toLowerCase())
-        : [],
-    [variantsValue],
+      toOptions(
+        variations?.filter((variation) => variation.attributeSlug === "size"),
+      ),
+    [variations],
   );
 
-  const selectedSizes = useMemo(
-    () =>
-      Array.isArray(sizeValue) ? sizeValue.map((option) => option.label) : [],
-    [sizeValue],
-  );
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizesByColor, setSelectedSizesByColor] = useState({});
+  const [colorMeta, setColorMeta] = useState({});
 
-  const selectedColors = useMemo(
-    () =>
-      Array.isArray(colorValue) ? colorValue.map((option) => option.label) : [],
-    [colorValue],
-  );
+  const normalizeOptions = (options) => options ?? [];
 
-  const variantRows = useMemo(() => {
-    if (selectedSizes.length && selectedColors.length) {
-      return selectedSizes.flatMap((size) =>
-        selectedColors.map((color) => ({ size, color })),
-      );
-    }
+  const handleColorChange = (colors) => {
+    const nextColors = normalizeOptions(colors);
 
-    if (selectedSizes.length) {
-      return selectedSizes.map((size) => ({ size, color: "" }));
-    }
+    setSelectedColors(nextColors);
+    setSelectedSizesByColor((previous) => {
+      const next = {};
+      nextColors.forEach((color) => {
+        next[color.label] = previous[color.label] ?? [];
+      });
+      return next;
+    });
+    setColorMeta((previous) => {
+      const next = {};
+      nextColors.forEach((color) => {
+        next[color.label] = previous[color.label] ?? {
+          swatchImage: null,
+          imageGallery: [],
+        };
+      });
+      return next;
+    });
+  };
 
-    if (selectedColors.length) {
-      return selectedColors.map((color) => ({ size: "", color }));
-    }
+  const handleSizeChange = (colorLabel, sizes) => {
+    setSelectedSizesByColor((previous) => ({
+      ...previous,
+      [colorLabel]: normalizeOptions(sizes),
+    }));
+  };
 
-    return [];
-  }, [selectedSizes, selectedColors]);
+  const handleSwatchUpload = (colorLabel, file) => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setColorMeta((previous) => ({
+        ...previous,
+        [colorLabel]: {
+          ...previous[colorLabel],
+          swatchImage: event.target.result,
+        },
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleGalleryUpload = (colorLabel, files) => {
+    const fileArray = Array.from(files || []);
+    if (!fileArray.length) return;
+
+    Promise.all(
+      fileArray.map(
+        (file) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target.result);
+            reader.readAsDataURL(file);
+          }),
+      ),
+    ).then((newImages) => {
+      setColorMeta((previous) => ({
+        ...previous,
+        [colorLabel]: {
+          ...previous[colorLabel],
+          imageGallery: [
+            ...(previous[colorLabel]?.imageGallery ?? []),
+            ...newImages,
+          ],
+        },
+      }));
+    });
+  };
+
+  const removeGalleryImage = (colorLabel, indexToRemove) => {
+    setColorMeta((previous) => ({
+      ...previous,
+      [colorLabel]: {
+        ...previous[colorLabel],
+        imageGallery: (previous[colorLabel]?.imageGallery ?? []).filter(
+          (_, index) => index !== indexToRemove,
+        ),
+      },
+    }));
+  };
+
+  const removeSwatchImage = (colorLabel) => {
+    setColorMeta((previous) => ({
+      ...previous,
+      [colorLabel]: {
+        ...previous[colorLabel],
+        swatchImage: null,
+      },
+    }));
+  };
 
   useEffect(() => {
     const previousVariantDetails = getValues("variantDetails") || [];
 
-    const nextVariantDetails = variantRows.map((variant) => {
-      const matched = Array.isArray(previousVariantDetails)
-        ? previousVariantDetails.find(
-            (item) =>
-              item?.size === variant.size && item?.color === variant.color,
-          )
+    const nextVariantDetails = selectedColors.map((color) => {
+      const previousColor = Array.isArray(previousVariantDetails)
+        ? previousVariantDetails.find((item) => item.color === color.label)
         : undefined;
 
+      const sizes = (selectedSizesByColor[color.label] ?? []).map((size) => {
+        const previousSize = previousColor?.sizes?.find(
+          (item) => item.size === size.label,
+        );
+
+        return {
+          size: size.label,
+          stock: previousSize?.stock ?? "",
+          price: previousSize?.price ?? "",
+          discount: previousSize?.discount ?? "",
+          sku: previousSize?.sku ?? "",
+        };
+      });
+
       return {
-        size: variant.size,
-        color: variant.color,
-        price: matched?.price ?? "",
-        stock: matched?.stock ?? "",
-        sku: matched?.sku ?? "",
-        image: matched?.image ?? null,
+        color: color.label,
+        hex: color.value,
+        swatchImage:
+          colorMeta[color.label]?.swatchImage ??
+          previousColor?.swatchImage ??
+          color.swatchImage ??
+          null,
+        imageGallery:
+          colorMeta[color.label]?.imageGallery ??
+          previousColor?.imageGallery ??
+          [],
+        sizes,
       };
     });
 
@@ -124,161 +179,246 @@ const Variations = ({ register, control, setValue, getValues, errors }) => {
       shouldValidate: false,
       shouldDirty: true,
     });
-  }, [setValue, getValues, variantRows]);
-
-  const showSize = selectedVariantLabels.includes("size");
-  const showColor = selectedVariantLabels.includes("color");
-  const showVariantDetails = variantRows.length > 0;
-
-  useEffect(() => {
-    if (!showSize) {
-      setValue("size", []);
-    }
-
-    if (!showColor) {
-      setValue("color", []);
-    }
-
-    if (!showSize || !showColor) {
-      setValue("variantDetails", []);
-    }
-  }, [setValue, showSize, showColor]);
+  }, [selectedColors, selectedSizesByColor, colorMeta, getValues, setValue]);
 
   return (
     <div className="fieldset bg-base-100 p-5 rounded-box mt-5">
       <h2 className="font-bold text-xl">Product Variants</h2>
 
-      <label htmlFor="variants" className="label">
-        Variants (Size, Color etc.)
+      <label htmlFor="colors" className="label">
+        Colors
       </label>
-      <Controller
-        name="variants"
-        control={control}
-        defaultValue={[]}
-        render={({ field }) => (
-          <Select
-            {...field}
-            options={variationOptions}
-            isMulti
-            isLoading={attributesLoading}
-          />
-        )}
+      <Select
+        value={selectedColors}
+        onChange={handleColorChange}
+        options={colorOptions}
+        isMulti
+        isLoading={variationsLoading}
       />
 
-      {showSize && (
-        <SelectField
-          label="Size"
-          name="size"
-          control={control}
-          options={sizeOptions}
-          isLoading={variationsLoading}
-        />
-      )}
-
-      {showColor && (
-        <SelectField
-          label="Color"
-          name="color"
-          control={control}
-          options={colorOptions}
-          isLoading={variationsLoading}
-        />
-      )}
-
-      {showVariantDetails && (
+      {selectedColors.length > 0 && (
         <div className="mt-6 bg-base-200 rounded-box p-4">
           <h3 className="font-semibold text-lg">Variant Details</h3>
           <p className="text-sm text-muted mb-4">
-            Add details for each selected size and/or color.
+            Set swatch and gallery images for each selected color, then add
+            sizes.
           </p>
 
-          <div className="space-y-4">
-            {variantRows.map((variant, index) => (
-              <div
-                key={`${variant.size || "none"}-${variant.color || "none"}-${index}`}
-                className="border border-base-300 rounded-box p-4"
-              >
-                <div className="mb-3 font-medium">
-                  Variant: {variant.size || "-"}
-                  {variant.color ? ` / ${variant.color}` : ""}
-                </div>
+          <div className="space-y-5">
+            {selectedColors.map((color, colorIndex) => {
+              const gallery = colorMeta[color.label]?.imageGallery ?? [];
+              const swatchImage = colorMeta[color.label]?.swatchImage ?? null;
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="label">Price</label>
-                    <input
-                      type="number"
-                      className="input w-full"
-                      placeholder="1000"
-                      {...register(`variantDetails.${index}.price`, {
-                        required: "Price is required",
-                      })}
-                    />
-                    {errors.variantDetails?.[index]?.price && (
-                      <p className="text-red-600 text-sm">
-                        {errors.variantDetails[index].price.message}
-                      </p>
-                    )}
+              return (
+                <div
+                  key={color.label}
+                  className="border border-base-300 rounded-box p-4"
+                >
+                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="font-medium">{color.label}</div>
+                      <div className="text-sm text-muted">{color.value}</div>
+                    </div>
+                    <div
+                      className="size-10 rounded-full"
+                      style={{ backgroundColor: color.value }}
+                    ></div>
                   </div>
 
-                  <div>
-                    <label className="label">Stock</label>
-                    <input
-                      type="number"
-                      className="input w-full"
-                      placeholder="10"
-                      {...register(`variantDetails.${index}.stock`, {
-                        setValueAs: (value) =>
-                          value === "" || value === undefined ? "" : Number(value),
-                      })}
-                    />
-                  </div>
+                  <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+                    <div className="space-y-4">
+                      <div>
+                        <p className="label">Swatch Image</p>
+                        {swatchImage ? (
+                          <div className="relative w-28 h-28 rounded-box overflow-hidden border border-base-content/10">
+                            <img
+                              src={swatchImage}
+                              alt={`${color.label}-swatch`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeSwatchImage(color.label)}
+                              className="absolute right-1 top-1 btn-circle btn btn-error btn-xs"
+                            >
+                              <LuX />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="group flex h-28 w-full cursor-pointer flex-col items-center justify-center rounded-box border border-dashed border-base-content/40 bg-base-100 text-center text-sm text-base-content/60 transition hover:border-main hover:text-main">
+                            <span className="text-3xl">
+                              <LuPlus />
+                            </span>
+                            <span>Add swatch</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleSwatchUpload(color.label, file);
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
 
-                  <div>
-                    <label className="label">SKU</label>
-                    <input
-                      type="text"
-                      className="input w-full"
-                      placeholder="OPTIONAL SKU"
-                      {...register(`variantDetails.${index}.sku`)}
-                    />
-                  </div>
+                      <div>
+                        <label className="label">Image Gallery</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {gallery.map((src, imageIndex) => (
+                            <div
+                              key={`${color.label}-gallery-${imageIndex}`}
+                              className="relative overflow-hidden rounded-box border border-base-content/10"
+                            >
+                              <img
+                                src={src}
+                                alt={`${color.label}-gallery-${imageIndex}`}
+                                className="h-28 w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeGalleryImage(color.label, imageIndex)
+                                }
+                                className="absolute right-1 top-1 btn-circle btn btn-error btn-xs"
+                              >
+                                <LuX />
+                              </button>
+                            </div>
+                          ))}
 
-                  <div>
-                    <label className="label">Variant Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="file-input w-full"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (event) => {
-                            setValue(
-                              `variantDetails.${index}.image`,
-                              event.target.result,
-                            );
-                          };
-                          reader.readAsDataURL(file);
+                          <label className="group flex cursor-pointer h-28 min-h-28 flex-col items-center justify-center rounded-box border border-dashed border-base-content/40 bg-base-100 text-center text-sm text-base-content/60 transition hover:border-main hover:text-main">
+                            <span className="text-3xl">
+                              <LuPlus />
+                            </span>
+                            <span>Add images</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                handleGalleryUpload(
+                                  color.label,
+                                  e.target.files,
+                                );
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="label">Sizes</label>
+                      <Select
+                        value={selectedSizesByColor[color.label] ?? []}
+                        onChange={(value) =>
+                          handleSizeChange(color.label, value)
                         }
-                      }}
-                    />
+                        options={sizeOptions}
+                        isMulti
+                        isLoading={variationsLoading}
+                      />
+
+                      {(selectedSizesByColor[color.label] ?? []).length > 0 && (
+                        <div className="space-y-4">
+                          {selectedSizesByColor[color.label].map(
+                            (size, sizeIndex) => (
+                              <div
+                                key={size.label}
+                                className="rounded-box border border-base-300 p-4"
+                              >
+                                <div className="mb-2 font-medium">
+                                  {size.label}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                  <div>
+                                    <label className="label">Price</label>
+                                    <input
+                                      type="number"
+                                      className="input w-full"
+                                      placeholder="1000"
+                                      {...register(
+                                        `variantDetails.${colorIndex}.sizes.${sizeIndex}.price`,
+                                        {
+                                          required: "Price is required",
+                                        },
+                                      )}
+                                    />
+                                    {errors.variantDetails?.[colorIndex]
+                                      ?.sizes?.[sizeIndex]?.price && (
+                                      <p className="text-red-600 text-sm">
+                                        {
+                                          errors.variantDetails[colorIndex]
+                                            .sizes[sizeIndex].price.message
+                                        }
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <label className="label">Discount</label>
+                                    <input
+                                      type="number"
+                                      className="input w-full"
+                                      placeholder="1000"
+                                      {...register(
+                                        `variantDetails.${colorIndex}.sizes.${sizeIndex}.discount`,
+                                      )}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="label">Stock</label>
+                                    <input
+                                      type="number"
+                                      className="input w-full"
+                                      placeholder="10"
+                                      {...register(
+                                        `variantDetails.${colorIndex}.sizes.${sizeIndex}.stock`,
+                                        {
+                                          setValueAs: (value) =>
+                                            value === "" || value === undefined
+                                              ? ""
+                                              : Number(value),
+                                        },
+                                      )}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="label">SKU</label>
+                                    <input
+                                      type="text"
+                                      className="input w-full"
+                                      placeholder="OPTIONAL SKU"
+                                      {...register(
+                                        `variantDetails.${colorIndex}.sizes.${sizeIndex}.sku`,
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+
+                                <input
+                                  type="hidden"
+                                  value={size.label}
+                                  {...register(
+                                    `variantDetails.${colorIndex}.sizes.${sizeIndex}.size`,
+                                  )}
+                                />
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <input
-                  type="hidden"
-                  value={variant.size}
-                  {...register(`variantDetails.${index}.size`)}
-                />
-                <input
-                  type="hidden"
-                  value={variant.color}
-                  {...register(`variantDetails.${index}.color`)}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

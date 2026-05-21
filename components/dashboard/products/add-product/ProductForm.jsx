@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuCloudUpload, LuX } from "react-icons/lu";
-import ReactQuill from "react-quill-new";
 import Variations from "./Variations";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProduct } from "@/api/productApi";
@@ -40,7 +39,7 @@ const ProductForm = ({ ref }) => {
 
   const onSubmit = (data) => {
     console.log(data);
-    //mutation.mutate(data);
+    mutation.mutate(data);
   };
 
   const [images, setImages] = useState([]);

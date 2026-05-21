@@ -7,7 +7,9 @@ const ProductCard = ({ product }) => {
         <figure className="relative">
           <div className="badge badge-success absolute top-3 left-3">New</div>
           <img
-            src={product.productImages[0]}
+            src={
+              product.productImages[0] || product.variantDetails[0].swatchImage
+            }
             alt={product.productName}
             className="aspect-square object-cover"
           />

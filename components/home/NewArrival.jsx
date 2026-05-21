@@ -2,12 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "../ui/ProductCard";
-import { getAllProducts } from "@/api/productApi";
+import { getNewArrivals } from "@/api/productApi";
+import ProductCardSkeleton from "../ui/skeleton/ProductCardSkeleton";
 
 const NewArrival = () => {
-  const { data: products, isLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: getAllProducts,
+  const { data: newProducts, isLoading } = useQuery({
+    queryKey: ["newProducts"],
+    queryFn: getNewArrivals,
   });
 
   return (
@@ -17,15 +18,13 @@ const NewArrival = () => {
           New Arrivals
         </h2>
         <div className="mt-5 grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-6 gap-5">
-          {isLoading ? (
-            <div className="col-span-full text-center">Loading...</div>
-          ) : (
-            products
-              ?.slice(0, 6)
-              .map((product) => (
-                <ProductCard key={product.slug} product={product} />
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
               ))
-          )}
+            : newProducts?.map((product) => (
+                <ProductCard key={product.slug} product={product} />
+              ))}
         </div>
       </div>
     </section>

@@ -3,8 +3,12 @@
 import { getAllProducts } from "@/api/productApi";
 import { useQuery } from "@tanstack/react-query";
 import { LuStar, LuTrash2 } from "react-icons/lu";
+import ProductDeleteModal from "./ProductDeleteModal";
+import { useRef } from "react";
 
 const ProductData = () => {
+  const productRef = useRef();
+
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
@@ -53,10 +57,14 @@ const ProductData = () => {
                 </th>
                 <td>
                   <div className="flex items-center gap-3">
+                    <ProductDeleteModal ref={productRef} id={product._id} />
                     <div className="avatar">
                       <div className="mask mask-squircle h-12 w-12">
                         <img
-                          src={product.productImages[0]}
+                          src={
+                            product.productImages[0] ||
+                            product.variantDetails[0].swatchImage
+                          }
                           alt={product.productName}
                         />
                       </div>
@@ -80,7 +88,10 @@ const ProductData = () => {
                   </span>
                 </td>
                 <td>
-                  <button className="btn btn-soft btn-error btn-circle">
+                  <button
+                    className="btn btn-soft btn-error btn-circle"
+                    onClick={() => productRef.current?.showModal()}
+                  >
                     <LuTrash2 />
                   </button>
                 </td>

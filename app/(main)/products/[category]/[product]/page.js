@@ -1,4 +1,5 @@
 import ProductInfo from "@/components/product/ProductInfo";
+import ProductTabs from "@/components/product/ProductTabs";
 import ShopNav from "@/components/product/ShopNav";
 
 const page = async ({ params }) => {
@@ -23,6 +24,7 @@ const page = async ({ params }) => {
     <>
       <ShopNav category={productData?.category} product={productData} />
       <ProductInfo product={productData} />
+      <ProductTabs product={productData} />
     </>
   );
 };

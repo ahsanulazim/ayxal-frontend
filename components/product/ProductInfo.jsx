@@ -67,6 +67,18 @@ const ProductInfo = ({ product }) => {
                   ))}
                 </div>
               </div>
+              <div className="my-3">
+                <h3 className="font-bold text-sm">Color:</h3>
+                <div className="flex items-center gap-3 mt-2">
+                  {product?.color?.map((colors) => (
+                    <div
+                      key={colors.value}
+                      className="size-10"
+                      style={{ backgroundColor: colors.value }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
               <h3 className="text-sm">
                 Stock: <span className="font-bold">{product?.stock}</span>
               </h3>

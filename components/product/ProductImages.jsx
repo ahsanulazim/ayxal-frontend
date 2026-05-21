@@ -7,7 +7,8 @@ import Slider from "react-slick";
 const ProductImages = ({ product }) => {
   const settings = {
     customPaging: function (i) {
-      const img = product?.productImages[i];
+      const img =
+        product?.productImages[i] || product?.variantDetails[i].swatchImage;
 
       return (
         <a>
@@ -28,11 +29,17 @@ const ProductImages = ({ product }) => {
   return (
     <div className="slider-container">
       <Slider {...settings}>
-        {product?.productImages?.map((image, i) => (
-          <div key={i}>
-            <img src={image} className="rounded-box w-full" />
-          </div>
-        ))}
+        {product?.productImages.length > 0
+          ? product.productImages.map((image, i) => (
+              <div key={i}>
+                <img src={image} className="rounded-box w-full" />
+              </div>
+            ))
+          : product?.variantDetails.map((image, i) => {
+              <div key={i}>
+                <img src={image.swatchImage} className="rounded-box w-full" />
+              </div>;
+            })}
       </Slider>
     </div>
   );
