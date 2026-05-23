@@ -1,18 +1,19 @@
 "use client";
 
+import ActiveLink from "@/components/dashboard/ActiveLink";
 import DashNav from "@/components/dashboard/DashNav";
 import { MyContext } from "@/context/MyProvider";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import {
   LuBox,
+  LuFileBox,
   LuLayoutDashboard,
-  LuSettings2,
   LuSwatchBook,
+  LuTruck,
 } from "react-icons/lu";
 
-const layout = ({ children }) => {
+const Layout = ({ children }) => {
   const { newUser, loading } = useContext(MyContext);
   const router = useRouter();
 
@@ -45,40 +46,65 @@ const layout = ({ children }) => {
           <ul className="menu w-full grow">
             {/* List item */}
             <li>
-              <Link
+              <ActiveLink
                 href="/dashboard"
+                exact={true}
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Dashboard"
+                dataTip="Dashboard"
               >
                 {/* Home icon */}
                 <LuLayoutDashboard className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Dashboard</span>
-              </Link>
+              </ActiveLink>
             </li>
 
             <li>
-              <Link
+              <ActiveLink
+                href="/dashboard/orders"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="Orders"
+              >
+                {/* Home icon */}
+                <LuFileBox className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Orders</span>
+              </ActiveLink>
+            </li>
+
+            <li>
+              <ActiveLink
                 href="/dashboard/products"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Products"
+                dataTip="Products"
               >
                 {/* Home icon */}
                 <LuBox className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Products</span>
-              </Link>
+              </ActiveLink>
             </li>
 
             {/* List item */}
             <li>
-              <Link
+              <ActiveLink
                 href="/dashboard/attributes"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Attributes"
+                dataTip="Attributes"
               >
                 {/* Settings icon */}
                 <LuSwatchBook className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Attributes</span>
-              </Link>
+              </ActiveLink>
+            </li>
+
+            <li>
+              <ActiveLink
+                href="/dashboard/shipping"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="Shipping"
+              >
+                {/* Home icon */}
+                <LuTruck className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Shipping</span>
+              </ActiveLink>
             </li>
           </ul>
         </div>
@@ -87,4 +113,4 @@ const layout = ({ children }) => {
   );
 };
 
-export default layout;
+export default Layout;

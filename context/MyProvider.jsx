@@ -1,5 +1,7 @@
 "use client";
+import { getAllLocations } from "@/api/locationApi";
 import { getAllProducts } from "@/api/productApi";
+import { getAllShippingRates } from "@/api/shippingApi";
 import { auth } from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
 import { onAuthStateChanged } from "firebase/auth";
@@ -158,6 +160,18 @@ const MyProvider = ({ children }) => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
+  //fetch location data
+  const { data: locations, isLoading: locationsLoading } = useQuery({
+    queryKey: ["locations"],
+    queryFn: getAllLocations,
+  });
+
+  //fetch shipping data
+  const { data: shippingRates, isLoading: shippingRatesLoading } = useQuery({
+    queryKey: ["shippingRates"],
+    queryFn: getAllShippingRates,
+  });
+
   const data = {
     newUser,
     setNewUser,
@@ -170,6 +184,10 @@ const MyProvider = ({ children }) => {
     updateCartItemQuantity,
     calculateTotalPrice,
     calculateTotalItem,
+    locations,
+    locationsLoading,
+    shippingRates,
+    shippingRatesLoading,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

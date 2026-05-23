@@ -46,7 +46,6 @@ const ProductForm = ({ ref, setIsPending }) => {
   }, [mutation.isPending, setIsPending]);
 
   const onSubmit = (data) => {
-    console.log(data);
     mutation.mutate(data);
   };
 
