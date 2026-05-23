@@ -142,7 +142,7 @@ const ProductInteractiveLayer = ({ product }) => {
             </h3>
             <div className="flex flex-wrap items-center gap-2 mt-2">
               {activeVariant?.sizes?.map((item) => {
-                const isOutOfStock = item.stock === 0;
+                const isOutOfStock = item.stock <= 0;
                 return (
                   <button
                     key={item.size}
@@ -210,13 +210,16 @@ const ProductInteractiveLayer = ({ product }) => {
             <button
               disabled={currentStock === 0}
               onClick={handleAddToCart}
-              className="btn btn-neutral flex-1"
+              className={`btn ${currentStock === 0 ? "btn-disabled" : "btn-neutral"} flex-1`}
             >
               Add to Cart
             </button>
             <button
               disabled={currentStock === 0}
-              className="btn btn-main flex-1"
+              className={`btn ${currentStock === 0 ? "" : "btn-main"} flex-1`}
+              onClick={() =>
+                addToCart(product, activeVariant, selectedSize, quantity, true)
+              }
             >
               Buy Now
             </button>

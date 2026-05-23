@@ -3,9 +3,14 @@
 import { getAllOrderData } from "@/api/orderApi";
 import TakaSymbol from "@/components/ui/TakaSymbol";
 import { useQuery } from "@tanstack/react-query";
+import moment from "moment/moment";
 import { LuEye, LuSearch, LuTrash2 } from "react-icons/lu";
+import OrderDeleteModal from "./OrderDeleteModal";
+import { useRef } from "react";
 
 const OrderData = () => {
+  const orderRef = useRef(null);
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["orders"],
     queryFn: getAllOrderData,
@@ -42,15 +47,14 @@ const OrderData = () => {
             <thead>
               <tr className="bg-base-200">
                 <th>
-                  {" "}
                   <label>
                     <input type="checkbox" className="checkbox" />
                   </label>
                 </th>
-                <th>Order</th>
                 <th>Date</th>
                 <th>Customer</th>
-                <th>Payment</th>
+                <th>Payment Method</th>
+                <th>Payment Status</th>
                 <th>Total</th>
                 <th>Item</th>
                 <th>Fulfillment</th>
@@ -86,9 +90,11 @@ const OrderData = () => {
                         <input type="checkbox" className="checkbox" />
                       </label>
                     </th>
-                    <td>#1001</td>
-                    <td>23th May, 2025</td>
-                    <td>Cy Ganderton</td>
+                    <td>{moment(order.createdAt).format("MMMM Do, YY")}</td>
+                    <td>
+                      {order.customer.firstName} {order.customer.lastName}
+                    </td>
+                    <td>{order.paymentMethod === "cod" ? "COD" : "Zinipay"}</td>
                     <td>
                       <div className="badge badge-warning badge-soft border-warning">
                         <div className="status status-warning"></div> Pending
@@ -96,20 +102,25 @@ const OrderData = () => {
                     </td>
                     <td>
                       <TakaSymbol />
-                      3300
+                      {order.totalPrice}
                     </td>
-                    <td>2</td>
+                    <td>{order.products.length}</td>
                     <td>
                       <div className="badge badge-info badge-soft border-info">
-                        <div className="status status-info"></div> In Transit
+                        <div className="status status-info"></div>{" "}
+                        {order.status === "pending" && "Pending"}
                       </div>
                     </td>
                     <td>
-                      <div className="flex gap-5">
-                        <button className="btn btn-circle btn-soft btn-success">
+                      <div className="flex">
+                        <OrderDeleteModal id={order._id} ref={orderRef} />
+                        <button className="btn btn-circle btn-ghost btn-success">
                           <LuEye />
                         </button>
-                        <button className="btn btn-circle btn-soft btn-error">
+                        <button
+                          className="btn btn-circle btn-ghost btn-error"
+                          onClick={() => orderRef.current.showModal()}
+                        >
                           <LuTrash2 />
                         </button>
                       </div>

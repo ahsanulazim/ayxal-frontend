@@ -1,6 +1,6 @@
 const ProductCardSkeleton = () => {
   return (
-    <div className="card shadow-sm overflow-clip">
+    <div className="card bg-base-100 shadow-sm overflow-clip">
       <div className="skeleton aspect-square w-full"></div>
       <div className="card-body p-3">
         <div className="skeleton w-full h-4 xs:h-6"></div>

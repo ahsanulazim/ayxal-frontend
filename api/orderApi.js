@@ -23,3 +23,17 @@ export const getAllOrderData = async () => {
   }
   return data;
 };
+
+export const deleteOrder = async (id) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/orders/deleteOrder?id=${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+  return data;
+};

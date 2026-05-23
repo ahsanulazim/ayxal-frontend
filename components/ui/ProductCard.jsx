@@ -26,7 +26,9 @@ const ProductCard = ({ product }) => {
         </Link>
         <p className="font-bold text-sm xs:text-lg">
           <TakaSymbol />
-          {product.price}
+          {product.variantDetails?.[0].sizes[0].discount
+            ? product.variantDetails?.[0].sizes[0].discount
+            : product.variantDetails?.[0].sizes[0].price}
         </p>
         <div className="card-actions justify-end">
           <Link

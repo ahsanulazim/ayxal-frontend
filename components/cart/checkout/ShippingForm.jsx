@@ -49,7 +49,7 @@ const ShippingForm = ({ ref, setIsPending, paymentMethod }) => {
         if (data?.paymentUrl) {
           window.location.href = data.paymentUrl;
         } else {
-          toast.error("Payment session creation failed");
+          toast.error("Payment URL not found");
         }
       }
     },
