@@ -12,10 +12,12 @@ const ShopNav = ({ category, product }) => {
                 <LuHouse />
               </Link>
             </li>
-            <li>
-              <Link href={`/products/${category}`}>{category}</Link>
-            </li>
-            <li>{product?.productName}</li>
+            {category && (
+              <li>
+                <Link href={`/products/${category}`}>{category}</Link>
+              </li>
+            )}
+            {product?.productName && <li>{product?.productName}</li>}
           </ul>
         </div>
       </div>

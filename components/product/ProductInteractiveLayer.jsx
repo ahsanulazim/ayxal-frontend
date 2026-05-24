@@ -19,8 +19,9 @@ const ProductInteractiveLayer = ({ product }) => {
   }, [product, selectedColor]);
 
   // Active color based context standard sizes setup schema tracking filter
+  // Stock ache emon prothom size default select hobe
   const [selectedSize, setSelectedSize] = useState(
-    activeVariant?.sizes?.[0]?.size || "",
+    activeVariant?.sizes?.find((s) => s.stock > 0)?.size || "",
   );
 
   // Active size node tracking er madhhome deterministic individual item stock extract
@@ -30,6 +31,8 @@ const ProductInteractiveLayer = ({ product }) => {
 
   const [quantity, setQuantity] = useState(1);
   const currentStock = activeSizeDetail ? activeSizeDetail.stock : 0;
+  // Price display er jonno fallback — kono size selected na hole prothom size er price show korbe
+  const priceRef = activeSizeDetail || activeVariant?.sizes?.[0];
 
   // Quantity count controller with logical guards
   const handleQtyChange = (val) => {
@@ -79,21 +82,21 @@ const ProductInteractiveLayer = ({ product }) => {
         </h1>
         {/* PRICE DISPLAY BLOCK (Dynamic Discount Check) */}
         <div className="">
-          {activeSizeDetail?.discount ? (
+          {priceRef?.discount ? (
             <div className="flex items-baseline gap-3">
               <span className="font-bold text-2xl lg:text-3xl text-main">
                 <span className="font-hind-siliguri">৳</span>
-                {activeSizeDetail?.discount}
+                {priceRef?.discount}
               </span>
               <span className="line-through text-sm opacity-50">
                 <span className="font-hind-siliguri">৳</span>
-                {activeSizeDetail?.price}
+                {priceRef?.price}
               </span>
             </div>
           ) : (
             <span className="font-bold text-2xl lg:text-3xl text-main">
               <span className="font-hind-siliguri">৳</span>
-              {activeSizeDetail?.price}
+              {priceRef?.price}
             </span>
           )}
         </div>
@@ -113,7 +116,10 @@ const ProductInteractiveLayer = ({ product }) => {
                   key={variant.color}
                   onClick={() => {
                     setSelectedColor(variant.color);
-                    setSelectedSize(variant?.sizes?.[0]?.size || "");
+                    // Notun color er stock ache emon prothom size select korbo
+                    setSelectedSize(
+                      variant?.sizes?.find((s) => s.stock > 0)?.size || "",
+                    );
                     setQuantity(1);
                   }}
                   className="cursor-pointer"
