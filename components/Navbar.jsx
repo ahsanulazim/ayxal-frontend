@@ -13,7 +13,7 @@ import Cart from "./Cart";
 
 const Navbar = () => {
   return (
-    <header className="bg-base-100 border-b border-b-base-300 sticky top-0 z-30">
+    <header className="bg-base-100 border-b border-b-base-300 sticky top-0 z-20">
       <div className="navbar max-w-360 mx-auto gap-20">
         <div className="navbar-start lg:w-auto">
           <label

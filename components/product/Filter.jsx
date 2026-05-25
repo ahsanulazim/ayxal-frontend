@@ -1,43 +1,22 @@
-import Link from "next/link";
-import { LuChevronDown, LuLayoutGrid } from "react-icons/lu";
+"use client";
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import CategoryNav from "./CategoryNav";
+import TakaSymbol from "../ui/TakaSymbol";
 
-const Filter = () => {
-  const categoryFilters = [
-    "All Categories",
-    "Clothing",
-    "Shoes",
-    "Bags",
-    "Accessories",
-    "Jewelry",
-    "Home & Living",
-    "Beauty & Personal Care",
-    "Kids",
-  ];
+const Range = dynamic(() => import("react-range").then((mod) => mod.Range), {
+  ssr: false,
+});
 
-  const sizeFilters = [
-    { id: "all", label: "All Sizes" },
-    { id: "small", label: "Small (S)" },
-    { id: "medium", label: "Medium (M)" },
-    { id: "large", label: "Large (L)" },
-    { id: "xlarge", label: "X-Large (XL)" },
-    { id: "xxlarge", label: "XX-Large (XXL)" },
-  ];
-
-  const priceFilters = [
-    { id: "all", label: "All Prices" },
-    { id: "under-500", label: "Under ৳500" },
-    { id: "500-1000", label: "৳500 - ৳1000" },
-    { id: "1000-2000", label: "৳1000 - ৳2000" },
-    { id: "2000-5000", label: "৳2000 - ৳5000" },
-    { id: "over-5000", label: "Over ৳5000" },
-  ];
+const Filter = ({ category }) => {
+  const [price, setPrice] = useState([1, 100000]);
 
   return (
     <section className="px-5">
       <div className="max-w-360 mx-auto w-full">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           <div className="col-span-1">
-            <div className="drawer drawer-open auto-cols-auto">
+            <div className="drawer lg:drawer-open lg:auto-cols-auto">
               <input
                 id="my-drawer-3"
                 type="checkbox"
@@ -45,32 +24,136 @@ const Filter = () => {
               />
               <div className="drawer-content col-start-1 flex flex-col items-center justify-center">
                 {/* Page content here */}
-                <label
-                  htmlFor="my-drawer-3"
-                  className="btn drawer-button lg:hidden"
-                >
-                  Open drawer
-                </label>
               </div>
-              <div className="drawer-side">
+              <div className="drawer-side z-40">
                 <label
                   htmlFor="my-drawer-3"
                   aria-label="close sidebar"
                   className="drawer-overlay"
                 ></label>
-                <ul className="menu bg-base-200 w-full p-4">
+                <div className="bg-base-100 w-80 min-h-full lg:min-h-auto lg:w-full p-4 shadow-sm lg:rounded-box">
                   {/* Sidebar content here */}
-                  <li>
-                    <a>Sidebar Item 1</a>
-                  </li>
-                  <li>
-                    <a>Sidebar Item 2</a>
-                  </li>
-                </ul>
+                  <div>
+                    <h4 className="text-lg font-bold">Price</h4>
+                    <div className="divider mt-0"></div>
+                    <div>
+                      <Range
+                        step={1}
+                        min={1}
+                        max={100000}
+                        values={price}
+                        onChange={(values) => setPrice(values)}
+                        renderTrack={({ props, children }) => (
+                          <div
+                            {...props}
+                            className="h-[6px] bg-neutral rounded-full w-full"
+                          >
+                            {children}
+                          </div>
+                        )}
+                        renderThumb={({ props }) => (
+                          <div
+                            {...props}
+                            key={props.key}
+                            className="size-5 rounded-full bg-main"
+                          />
+                        )}
+                      />
+                      <div className="flex items-center justify-between mt-5 gap-10">
+                        <span>
+                          <TakaSymbol />
+                          {price[0]}
+                        </span>
+                        <span>
+                          <TakaSymbol />
+                          {price[1]}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-10">
+                    <h4 className="text-lg font-bold">Availability</h4>
+                    <div className="divider mt-0"></div>
+                    <div className="fieldset">
+                      <label className="label text-base-content">
+                        <input
+                          type="radio"
+                          name="stock"
+                          className="radio radio-sm"
+                        />
+                        In Stock
+                      </label>
+                      <label className="label text-base-content">
+                        <input
+                          type="radio"
+                          name="stock"
+                          className="radio radio-sm"
+                        />
+                        Out of Stock
+                      </label>
+                    </div>
+                  </div>
+                  <div className="mt-10">
+                    <h4 className="text-lg font-bold">Size</h4>
+                    <div className="divider mt-0"></div>
+                    <div className="fieldset">
+                      <label className="label text-base-content">
+                        <input
+                          type="checkbox"
+                          name="size"
+                          className="checkbox checkbox-sm"
+                        />
+                        XS
+                      </label>
+                      <label className="label text-base-content">
+                        <input
+                          type="checkbox"
+                          name="size"
+                          className="checkbox checkbox-sm"
+                        />
+                        SM
+                      </label>
+                      <label className="label text-base-content">
+                        <input
+                          type="checkbox"
+                          name="size"
+                          className="checkbox checkbox-sm"
+                        />
+                        M
+                      </label>
+                      <label className="label text-base-content">
+                        <input
+                          type="checkbox"
+                          name="size"
+                          className="checkbox checkbox-sm"
+                        />
+                        LG
+                      </label>
+                      <label className="label text-base-content">
+                        <input
+                          type="checkbox"
+                          name="size"
+                          className="checkbox checkbox-sm"
+                        />
+                        XL
+                      </label>
+                      <label className="label text-base-content">
+                        <input
+                          type="checkbox"
+                          name="size"
+                          className="checkbox checkbox-sm"
+                        />
+                        XXL
+                      </label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div className="col-span-4"></div>
+          <div className="col-span-4">
+            <CategoryNav category={category} />
+          </div>
         </div>
       </div>
     </section>

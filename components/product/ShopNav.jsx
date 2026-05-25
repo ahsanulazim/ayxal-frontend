@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LuHouse } from "react-icons/lu";
 
 const ShopNav = ({ category, product }) => {
+  const cleanCategory = category.replace(/-/g, " ");
   return (
     <section className="px-5">
       <div className="max-w-360 mx-auto">
@@ -12,12 +13,16 @@ const ShopNav = ({ category, product }) => {
                 <LuHouse />
               </Link>
             </li>
-            {category && (
-              <li>
-                <Link href={`/products/${category}`}>{category}</Link>
-              </li>
+            {category && product?.productName ? (
+              <>
+                <li>
+                  <Link href={`/products/${category}`}>{cleanCategory}</Link>
+                </li>
+                <li>{product?.productName}</li>
+              </>
+            ) : (
+              category && <li>{cleanCategory}</li>
             )}
-            {product?.productName && <li>{product?.productName}</li>}
           </ul>
         </div>
       </div>

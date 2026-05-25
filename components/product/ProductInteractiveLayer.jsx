@@ -101,7 +101,7 @@ const ProductInteractiveLayer = ({ product }) => {
           )}
         </div>
 
-        <div className="bg-base-200 p-4 xs:p-5 rounded-box shadow-xs h-fit my-5">
+        <div className="bg-base-100 p-4 xs:p-5 rounded-box shadow-xs h-fit my-5">
           {/* 1. COLOR VARIANT SELECTOR */}
           <div>
             <h3 className="font-bold text-sm flex items-center gap-1">

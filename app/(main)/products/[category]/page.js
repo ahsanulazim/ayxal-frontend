@@ -7,7 +7,7 @@ const page = async ({ params }) => {
   return (
     <>
       <ShopNav category={category} />
-      <Filter />
+      <Filter category={category} />
     </>
   );
 };

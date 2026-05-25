@@ -13,7 +13,7 @@ const Sidebar = ({ children }) => {
         {/* Navbar */}
         <Navbar />
         {/* Page content here */}
-        <main className="bg-base-300">{children}</main>
+        <main className="bg-base-200">{children}</main>
         <Footer />
         <Dock />
       </div>
