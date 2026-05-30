@@ -55,3 +55,21 @@ export const deleteProduct = async (id) => {
 
   return res.json();
 };
+
+// lib/api/filters.js
+export async function fetchFilters(category) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/getCategoryFilters/?category=${category}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store", // ✅ Next.js এ fresh data নিশ্চিত করতে
+    },
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch filters");
+  }
+
+  return res.json();
+}

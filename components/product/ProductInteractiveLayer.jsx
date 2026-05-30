@@ -8,9 +8,17 @@ import { MyContext } from "@/context/MyProvider";
 import { toast } from "react-toastify";
 
 const ProductInteractiveLayer = ({ product }) => {
-  // 1. Initial State Definition (Prothom variant row default hit korbe)
+  // 1. Initial State Definition
+  // Stock ache emon prothom color select hobe; kono color e stock na thakle first color
+  const initialVariant = useMemo(() => {
+    const withStock = product?.variantDetails?.find((v) =>
+      v.sizes?.some((s) => s.stock > 0)
+    );
+    return withStock || product?.variantDetails?.[0];
+  }, [product]);
+
   const [selectedColor, setSelectedColor] = useState(
-    product?.variantDetails?.[0]?.color || "",
+    initialVariant?.color || "",
   );
 
   // Active color variants er filtering optimization memoize kora holo
@@ -19,9 +27,11 @@ const ProductInteractiveLayer = ({ product }) => {
   }, [product, selectedColor]);
 
   // Active color based context standard sizes setup schema tracking filter
-  // Stock ache emon prothom size default select hobe
+  // Stock ache emon prothom size default select hobe; na thakle first size
   const [selectedSize, setSelectedSize] = useState(
-    activeVariant?.sizes?.find((s) => s.stock > 0)?.size || "",
+    initialVariant?.sizes?.find((s) => s.stock > 0)?.size ||
+      initialVariant?.sizes?.[0]?.size ||
+      "",
   );
 
   // Active size node tracking er madhhome deterministic individual item stock extract

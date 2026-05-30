@@ -4,36 +4,53 @@ import { getAllOrderData } from "@/api/orderApi";
 import TakaSymbol from "@/components/ui/TakaSymbol";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment/moment";
-import { LuEye, LuSearch, LuTrash2 } from "react-icons/lu";
+import { LuEye, LuSearch, LuSquarePen, LuTrash2 } from "react-icons/lu";
 import OrderDeleteModal from "./OrderDeleteModal";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "unpaid", label: "Unpaid" },
+  { key: "pending", label: "Pending" },
+  { key: "completed", label: "Completed" },
+];
 
 const OrderData = () => {
   const orderRef = useRef(null);
+  const [activeTab, setActiveTab] = useState("all");
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["orders"],
     queryFn: getAllOrderData,
   });
 
-  console.log(data);
+  // Tab filtering logic
+  const filteredOrders = data?.orders?.filter((order) => {
+    if (activeTab === "all") return true;
+    // Unpaid: payment status akno paid hoyni (cod = pending payment)
+    if (activeTab === "unpaid")
+      return order.paymentStatus !== "paid" || order.paymentMethod === "cod";
+    // Pending: fulfillment akno pending
+    if (activeTab === "pending") return order.status === "pending";
+    // Completed: fulfillment delivered
+    if (activeTab === "completed") return order.status === "delivered";
+    return true;
+  });
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <div role="tablist" className="tabs tabs-box">
-          <a role="tab" className="tab tab-active">
-            All
-          </a>
-          <a role="tab" className="tab ">
-            Unpaid
-          </a>
-          <a role="tab" className="tab ">
-            Pending
-          </a>
-          <a role="tab" className="tab">
-            Completed
-          </a>
+          {TABS.map((tab) => (
+            <a
+              key={tab.key}
+              role="tab"
+              onClick={() => setActiveTab(tab.key)}
+              className={`tab ${activeTab === tab.key ? "tab-active" : ""}`}
+            >
+              {tab.label}
+            </a>
+          ))}
         </div>
         <label className="input rounded-full">
           <input type="search" required placeholder="Search" />
@@ -75,14 +92,14 @@ const OrderData = () => {
                     <span className="text-error">Error</span>
                   </td>
                 </tr>
-              ) : data?.orders?.length === 0 ? (
+              ) : filteredOrders?.length === 0 ? (
                 <tr>
                   <td className="text-center" colSpan={9}>
                     <span>No Order</span>
                   </td>
                 </tr>
               ) : (
-                data?.orders?.map((order) => (
+                filteredOrders?.map((order) => (
                   <tr key={order._id}>
                     <th>
                       {" "}
@@ -96,8 +113,21 @@ const OrderData = () => {
                     </td>
                     <td>{order.paymentMethod === "cod" ? "COD" : "Zinipay"}</td>
                     <td>
-                      <div className="badge badge-warning badge-soft border-warning">
-                        <div className="status status-warning"></div> Pending
+                      <div
+                        className={`badge ${
+                          order.paymentMethod === "cod"
+                            ? "badge-warning"
+                            : "badge-success"
+                        } badge-soft `}
+                      >
+                        <div
+                          className={`status ${
+                            order.paymentMethod === "cod"
+                              ? "status-warning"
+                              : "status-success"
+                          }`}
+                        ></div>{" "}
+                        {order.paymentMethod === "cod" ? "Pending" : "Paid"}
                       </div>
                     </td>
                     <td>
@@ -106,9 +136,45 @@ const OrderData = () => {
                     </td>
                     <td>{order.products.length}</td>
                     <td>
-                      <div className="badge badge-info badge-soft border-info">
-                        <div className="status status-info"></div>{" "}
-                        {order.status === "pending" && "Pending"}
+                      <div
+                        className={`badge ${
+                          order.status === "pending"
+                            ? "badge-warning"
+                            : order.status === "processing"
+                              ? "badge-info"
+                              : order.status === "delivered"
+                                ? "badge-success"
+                                : "badge-error"
+                        } badge-soft ${
+                          order.status === "pending"
+                            ? "border-warning"
+                            : order.status === "processing"
+                              ? "border-info"
+                              : order.status === "delivered"
+                                ? "border-success"
+                                : "border-error"
+                        }`}
+                      >
+                        <div
+                          className={`status ${
+                            order.status === "pending"
+                              ? "status-warning"
+                              : order.status === "processing"
+                                ? "status-info"
+                                : order.status === "delivered"
+                                  ? "status-success"
+                                  : "status-error"
+                          }`}
+                        ></div>{" "}
+                        {order.status === "pending"
+                          ? "Pending"
+                          : order.status === "processing"
+                            ? "Processing"
+                            : order.status === "delivered"
+                              ? "Delivered"
+                              : order.status === "hold"
+                                ? "Hold"
+                                : "Cancelled"}
                       </div>
                     </td>
                     <td>
@@ -116,6 +182,9 @@ const OrderData = () => {
                         <OrderDeleteModal id={order._id} ref={orderRef} />
                         <button className="btn btn-circle btn-ghost btn-success">
                           <LuEye />
+                        </button>
+                        <button className="btn btn-circle btn-ghost btn-info">
+                          <LuSquarePen />
                         </button>
                         <button
                           className="btn btn-circle btn-ghost btn-error"

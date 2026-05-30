@@ -3,12 +3,31 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import CategoryNav from "./CategoryNav";
 import TakaSymbol from "../ui/TakaSymbol";
+import { useQuery } from "@tanstack/react-query";
+import { fetchFilters } from "@/api/productApi";
 
 const Range = dynamic(() => import("react-range").then((mod) => mod.Range), {
   ssr: false,
 });
 
 const Filter = ({ category }) => {
+  const {
+    data: filters,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["filters", category],
+    queryFn: () => fetchFilters(category),
+  });
+
+  if (isLoading) {
+    console.log("filter loading");
+  } else if (error) {
+    console.error("filter Error");
+  } else {
+    console.log(filters);
+  }
+
   const [price, setPrice] = useState([1, 100000]);
 
   return (
