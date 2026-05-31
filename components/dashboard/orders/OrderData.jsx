@@ -135,7 +135,12 @@ const OrderData = () => {
                       <TakaSymbol />
                       {order.totalPrice}
                     </td>
-                    <td>{order.products.length}</td>
+                    <td>
+                      {order.products.reduce(
+                        (sum, item) => sum + item.quantity,
+                        0,
+                      )}
+                    </td>
                     <td>
                       <div
                         className={`badge ${

@@ -1,5 +1,6 @@
 import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
-import OrderDataAccordion from "@/components/dashboard/orders/OrderDataAccordion";
+import OrderItems from "@/components/dashboard/orders/order/OrderItems";
+import OrderSummary from "@/components/dashboard/orders/order/OrderSummary";
 import OrderDataCard from "@/components/dashboard/orders/OrderDataCard";
 import moment from "moment";
 import Link from "next/link";
@@ -53,13 +54,9 @@ const page = async ({ params }) => {
       </section>
       <section>
         <div className="grid grid-cols-5 gap-5">
-          <div className="col-span-4">
-            <OrderDataAccordion title={"Order Items"}>
-              <div className="collapse-content text-sm">
-                Click the "Sign Up" button in the top right corner and follow
-                the registration process.
-              </div>
-            </OrderDataAccordion>
+          <div className="col-span-4 flex flex-col gap-5">
+            <OrderItems order={orderData.order} />
+            <OrderSummary order={orderData.order} />
           </div>
           <div className="col-span-1 flex flex-col gap-5">
             <OrderDataCard>
@@ -69,10 +66,7 @@ const page = async ({ params }) => {
                   <div>
                     <LuUser />
                   </div>
-                  <div>
-                    {orderData.order?.customer.firstName}{" "}
-                    {orderData.order?.customer.lastName}
-                  </div>
+                  <div>{orderData.order?.customer.name}</div>
                 </li>
                 <li className="flex items-center gap-2">
                   <div>
@@ -114,7 +108,7 @@ const page = async ({ params }) => {
                   <div>
                     <LuTruck />
                   </div>
-                  <div>Dio Lupa</div>
+                  <div>{orderData.order?.customer.address}</div>
                 </li>
               </ul>
             </OrderDataCard>
