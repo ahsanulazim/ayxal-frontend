@@ -13,7 +13,11 @@ const Breadcrumbs = ({ title, subtitle }) => {
         {subtitle ? (
           <>
             <li>
-              <Link href={`/dashboard/${title.toLowerCase()}`}>{title}</Link>
+              <Link
+                href={`/dashboard/${title.trim().toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                {title}
+              </Link>
             </li>
             <li>{subtitle}</li>
           </>

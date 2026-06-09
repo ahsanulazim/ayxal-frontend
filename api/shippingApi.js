@@ -1,3 +1,5 @@
+import api from "@/axios/axiosInstance";
+
 export const getAllShippingRates = async () => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/shippingRates/getAllShippingRates`,
@@ -58,4 +60,18 @@ export const deleteShippingRate = async (id) => {
   );
   const data = await res.json();
   return data;
+};
+
+//cj product search
+export const searchCjProducts = async ({ queryKey }) => {
+  try {
+    const [_key, keyword] = queryKey;
+    const res = await api.get(`/products/cj/search?keyWord=${keyword}`);
+    // Extract productList from the first content item
+    const products = res.data.products.content[0]?.productList || [];
+    return products;
+  } catch (error) {
+    console.error("Search Error:", error);
+    throw error;
+  }
 };

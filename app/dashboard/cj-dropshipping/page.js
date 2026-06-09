@@ -1,3 +1,4 @@
+import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
 import CjTable from "@/components/dashboard/cj-dropshipping/CjTable";
 import Link from "next/link";
 import { LuPlus } from "react-icons/lu";
@@ -5,6 +6,7 @@ import { LuPlus } from "react-icons/lu";
 const page = () => {
   return (
     <>
+      <Breadcrumbs title="CJ Dropshipping" />
       <section className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Products in the Store</h1>

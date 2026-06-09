@@ -1,6 +1,6 @@
 "use client";
 
-import api from "@/axios/axiosInstance";
+import { searchCjProducts } from "@/api/shippingApi";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { LuSearch } from "react-icons/lu";
@@ -9,17 +9,24 @@ import { toast } from "react-toastify";
 const CjSearch = ({ setProducts }) => {
   const [keyword, setKeyword] = useState("");
 
-  const { refetch } = useQuery({
+  const { refetch, isFetching } = useQuery({
     queryKey: ["searchProducts", keyword],
-    queryFn: async () => {
-      const res = await api.get(`/products/cj/search?keyword=${keyword}`);
-      return res.data.products;
-    },
-    enabled: false,
-    onSuccess: (data) => setProducts(data),
+    queryFn: searchCjProducts,
+    enabled: false, // Disable automatic query on mount
     onError: (err) =>
       toast.error("❌ Error searching products: " + err.message),
   });
+
+  const handleSearch = async () => {
+    if (!keyword.trim()) {
+      toast.error("Please enter a search keyword.");
+      return;
+    }
+    const result = await refetch();
+    if (result.data) {
+      setProducts(result.data);
+    }
+  };
 
   return (
     <div className="text-center">
@@ -35,8 +42,12 @@ const CjSearch = ({ setProducts }) => {
             placeholder="Search for products"
           />
         </label>
-        <button className="btn btn-main join-item" onClick={() => refetch()}>
-          Search
+        <button
+          className={`btn ${isFetching ? "" : "btn-main"} join-item`}
+          onClick={handleSearch}
+          disabled={isFetching}
+        >
+          {isFetching ? "Searching..." : "Search"}
         </button>
       </div>
     </div>

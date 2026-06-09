@@ -1,3 +1,5 @@
+import api from "@/axios/axiosInstance";
+
 export const createProduct = async (productData) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/products/createProduct`,
@@ -86,4 +88,16 @@ export const getProductsByCategory = async (category, page, limit) => {
     },
   );
   return res.json();
+};
+
+//cj add to store product
+export const addProductToStore = async (productId) => {
+  try {
+    const res = await api.post("/products/add", { productId });
+    const data = res.data;
+    return data;
+  } catch (error) {
+    console.error("❌ Cannot add Product", error);
+    throw new Error(error.response?.data?.message || error.message);
+  }
 };
