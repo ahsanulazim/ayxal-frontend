@@ -25,10 +25,10 @@ const Navbar = () => {
           </label>
           <Link href="/" className="hidden lg:block">
             <Image
-              src="/assets/oiki-logo.svg"
-              alt="oiki logo"
-              width={65}
-              height={30}
+              src="/assets/pretypet-logo.svg"
+              alt="prety pet logo"
+              width={130}
+              height={100}
               className=""
             />
           </Link>
@@ -37,8 +37,8 @@ const Navbar = () => {
           <Search />
           <Link href="/" className="block lg:hidden">
             <Image
-              src="/assets/oiki-logo.svg"
-              alt="oiki logo"
+              src="/assets/pretypet-logo.svg"
+              alt="prety pet logo"
               width={100}
               height={100}
               className="min-w-12"

@@ -110,8 +110,8 @@ const UserForm = ({ isLogin }) => {
     >
       <Image
         className="mx-auto"
-        src="/assets/oiki-logo-tag.svg"
-        alt="Oiki Logo"
+        src="/assets/pretypet-logo-short.svg"
+        alt="Prety Pet Logo"
         width={80}
         height={20}
       />

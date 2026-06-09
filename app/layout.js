@@ -17,10 +17,10 @@ const hind_siliguri = Hind_Siliguri({
 });
 
 export const metadata = {
-  title: "Oiki",
-  description: "Muslim Fashion",
+  title: "Prety Pet",
+  description: "Pet Accessories and Gadgets",
   icons: {
-    icon: "/assets/oiki-icon.svg",
+    icon: "/assets/pretypet-logo-short.svg",
   },
 };
 

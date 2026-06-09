@@ -29,10 +29,10 @@ const DashNav = () => {
         </label>
         <Link href="/dashboard">
           <Image
-            src="/assets/oiki-logo.svg"
-            alt="oiki logo"
-            width={60}
-            height={28}
+            src="/assets/pretypet-logo.svg"
+            alt="pretypet logo"
+            width={100}
+            height={40}
             className=""
           />
         </Link>

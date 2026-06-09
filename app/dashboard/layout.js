@@ -10,6 +10,7 @@ import {
   LuFileBox,
   LuLayoutDashboard,
   LuNotebook,
+  LuPackageSearch,
   LuSwatchBook,
   LuTruck,
 } from "react-icons/lu";
@@ -107,6 +108,17 @@ const Layout = ({ children }) => {
               </ActiveLink>
             </li>
 
+            <li>
+              <ActiveLink
+                href="/dashboard/cj-dropshipping"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="CJ Dropshipping"
+              >
+                {/* Home icon */}
+                <LuPackageSearch className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">CJ Dropshipping</span>
+              </ActiveLink>
+            </li>
             <li>
               <ActiveLink
                 href="/dashboard/shipping"
