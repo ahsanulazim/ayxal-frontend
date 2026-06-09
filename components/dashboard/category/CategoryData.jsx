@@ -5,8 +5,8 @@ import { useContext } from "react";
 import { LuSquarePen, LuTrash2 } from "react-icons/lu";
 
 const CategoryData = () => {
-  const { categories, categoriesLoading, categoriesError } =
-    useContext(MyContext);
+  //const { categories, categoriesLoading, categoriesError } =
+  useContext(MyContext);
 
   return (
     <div className="my-5">

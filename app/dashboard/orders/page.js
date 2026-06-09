@@ -1,7 +1,7 @@
 import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
 import OrderData from "@/components/dashboard/orders/OrderData";
 import Link from "next/link";
-import { LuPlus, LuSearch } from "react-icons/lu";
+import { LuPlus } from "react-icons/lu";
 
 const page = () => {
   return (

@@ -1,6 +1,6 @@
 const CjTable = () => {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto bg-base-100 rounded-md">
       <table className="table">
         {/* head */}
         <thead className="bg-base-200">
