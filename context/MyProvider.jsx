@@ -50,7 +50,11 @@ const MyProvider = ({ children }) => {
   }, []);
 
   //products fetching
-  const { data: products, isLoading: productsLoading } = useQuery({
+  const {
+    data: products,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
   });
@@ -205,6 +209,7 @@ const MyProvider = ({ children }) => {
     loading,
     products,
     productsLoading,
+    productsError,
     cartItems,
     isHydrated,
     addToCart,

@@ -65,10 +65,16 @@ export const deleteShippingRate = async (id) => {
 //cj product search
 export const searchCjProducts = async ({ queryKey }) => {
   try {
-    const [_key, keyword] = queryKey;
-    const res = await api.get(`/products/cj/search?keyWord=${keyword}`);
+    const [_key, keyWord, page, size] = queryKey;
+    const res = await api.get(`/products/cj/search`, {
+      params: {
+        keyWord,
+        page,
+        size,
+      },
+    });
     // Extract productList from the first content item
-    const products = res.data.products.content[0]?.productList || [];
+    const products = res.data;
     return products;
   } catch (error) {
     console.error("Search Error:", error);

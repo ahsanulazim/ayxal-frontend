@@ -7,7 +7,7 @@ import { MyContext } from "@/context/MyProvider";
 
 const ProductData = () => {
   const productRef = useRef();
-  const { products, productsLoading } = useContext(MyContext);
+  const { products, productsLoading, productsError } = useContext(MyContext);
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
@@ -34,6 +34,12 @@ const ProductData = () => {
             <tr>
               <td colSpan="8" className="text-center">
                 Loading...
+              </td>
+            </tr>
+          ) : productsError ? (
+            <tr>
+              <td colSpan="8" className="text-center">
+                Failed to fetch products
               </td>
             </tr>
           ) : products.length <= 0 ? (
