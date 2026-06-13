@@ -1,32 +1,29 @@
 import { createCategory } from "@/api/categoryApi";
+import { useForm } from "@tanstack/react-form-nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { LuPlus } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const CategoryModal = ({ ref }) => {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    trigger,
-    reset,
-    formState: { errors, isDirty },
-  } = useForm({
+  const { handleSubmit, reset, Field, Subscribe } = useForm({
     defaultValues: {
       name: "",
       slug: "",
       thumbnail: "",
     },
+    onSubmit: ({ value }) => {
+      //mutate(value);
+      console.log(value);
+    },
   });
 
-  const convertBase24 = (e) => {
+  const convertBase24 = (e, field) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      setValue("thumbnail", reader.result, { shouldValidate: true });
-      trigger("thumbnail");
+      field.handleChange(reader.result);
+      field.treigger();
     };
     reader.readAsDataURL(file);
   };
@@ -40,55 +37,95 @@ const CategoryModal = ({ ref }) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Category created successfully");
       reset();
-      ref.current.close();
     },
     onError: () => {
       toast.error("Failed to create category");
     },
   });
 
-  const onSubmit = (data) => {
-    mutate(data);
-  };
-
   return (
     <dialog ref={ref} className="modal">
       <div className="modal-box">
         <h3 className="font-bold text-lg">Add New Category</h3>
-        <form onSubmit={handleSubmit(onSubmit)} className="fieldset ">
-          <label className="label">Category Name</label>
-          <input
-            {...register("name", {
-              required: "Category Name is required",
-            })}
-            type="text"
-            className="input w-full"
-            placeholder="Three Piece"
-          />
-          {errors.name && <p className=" text-error">{errors.name.message}</p>}
-
-          <label className="label">Slug</label>
-          <input
-            {...register("slug", {
-              required: "Slug is required",
-              pattern: {
-                value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-                message: "Invalid slug format",
-              },
-            })}
-            type="text"
-            className="input w-full"
-            placeholder="three-piece"
-          />
-          {errors.slug && <p className=" text-error">{errors.slug.message}</p>}
-
-          <label className="label">Thumbnail</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="file-input w-full"
-            onChange={convertBase24}
-          />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSubmit();
+          }}
+          className="fieldset "
+        >
+          <Field name="name">
+            {(field) => {
+              const { errors } = field.state.meta;
+              return (
+                <>
+                  <label htmlFor={field.name} className="label">
+                    Category Name
+                  </label>
+                  <input
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    type="text"
+                    className="input w-full"
+                    placeholder="Dog Collar"
+                  />
+                  {errors.length && (
+                    <p className=" text-error">{errors[0]?.message}</p>
+                  )}
+                </>
+              );
+            }}
+          </Field>
+          <Field name="slug">
+            {(field) => {
+              const { errors } = field.state.meta;
+              return (
+                <>
+                  <label htmlFor={field.name} className="label">
+                    Slug
+                  </label>
+                  <input
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    type="text"
+                    className="input w-full"
+                    placeholder="dog-collar"
+                  />
+                  {errors.length && (
+                    <p className=" text-error">{errors[0]?.message}</p>
+                  )}
+                </>
+              );
+            }}
+          </Field>
+          <Field>
+            {(field) => {
+              const { errors } = field.state.meta;
+              return (
+                <>
+                  <label htmlFor={field.name} className="label">
+                    Thumbnail
+                  </label>
+                  <input
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(e) => {
+                      convertBase24(e, field);
+                    }}
+                    type="file"
+                    accept="image/*"
+                    className="file-input w-full"
+                  />
+                  {errors.length && (
+                    <p className=" text-error">{errors[0]?.message}</p>
+                  )}
+                </>
+              );
+            }}
+          </Field>
 
           <div className="mt-5 flex justify-end gap-5">
             <button
@@ -101,19 +138,23 @@ const CategoryModal = ({ ref }) => {
             >
               Close
             </button>
-            <button
-              type="submit"
-              disabled={isPending || !isDirty}
-              className="btn flex-1 btn-success"
-            >
-              {isPending ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                <>
-                  <LuPlus /> Create
-                </>
+            <Subscribe
+              children={({ canSubmit, isSubmitting }) => (
+                <button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                  className="btn flex-1 btn-success"
+                >
+                  {isPending ? (
+                    <span className="loading loading-spinner"></span>
+                  ) : (
+                    <>
+                      <LuPlus /> Create
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            />
           </div>
         </form>
       </div>

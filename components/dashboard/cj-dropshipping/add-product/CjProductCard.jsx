@@ -11,6 +11,7 @@ const CjProductCard = ({ product }) => {
   const { isPending, mutate } = useMutation({
     mutationFn: (id) => addProductToStore(id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cjStoreProducts"] });
       toast.success("Added product to Database");
     },
     onError: (error) => {

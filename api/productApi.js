@@ -101,3 +101,20 @@ export const addProductToStore = async (productId) => {
     throw new Error(error.response?.data?.message || error.message);
   }
 };
+
+export const getCjStoreProducts = async ({queryKey}) => {
+  try {
+    const [, page] = queryKey;
+    const res = await api.get(`/products/cj/getAllStoreProducts`, {
+      params: {
+        page,
+        },
+      });
+      // Extract productList from the first content item
+      const products = res.data;
+      return products;
+    } catch (error) {
+      console.error("Search Error:", error);
+      throw error;
+    }
+}

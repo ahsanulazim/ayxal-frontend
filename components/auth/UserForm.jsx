@@ -66,7 +66,8 @@ const UserForm = ({ isLogin }) => {
         toast.success("Login Successful");
         router.push("/dashboard");
       } catch (error) {
-        console.error(error);
+        setIsLoading(false);
+        toast.error("Login Failed");
       }
     } else {
       // Handle registration logic here

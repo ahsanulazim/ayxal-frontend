@@ -25,6 +25,7 @@ const CjSearch = () => {
     queryFn: searchCjProducts,
     // keyword থাকলে auto-fetch হবে — page/size পরিবর্তনেও
     enabled: !!keyword,
+    staleTime: 5 * 60 * 1000,
     onError: (err) =>
       toast.error("❌ Error searching products: " + err.message),
   });
@@ -35,7 +36,9 @@ const CjSearch = () => {
       return;
     }
     // keyword URL-এ সেট করো, page 1 থেকে শুরু
-    router.push(`?keyword=${encodeURIComponent(inputValue.trim())}&page=1&size=${size}`);
+    router.push(
+      `?keyword=${encodeURIComponent(inputValue.trim())}&page=1&size=${size}`,
+    );
   };
 
   const handleKeyDown = (e) => {

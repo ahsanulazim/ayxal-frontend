@@ -1,26 +1,15 @@
+import api from "@/axios/axiosInstance";
+
 export const createCategory = async (categoryData) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/category/createCategory`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(categoryData),
+  const res = await api.post("/categories/createCategory", categoryData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
-  );
-  return res.json();
+  });
+  return res.data;
 };
 
 export const getAllCategories = async () => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/category/getAllCategories`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  );
-  return res.json();
+  const res = await api.get("/categories/getAllCategories");
+  return res.data;
 };
