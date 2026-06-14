@@ -1,7 +1,7 @@
 "use client";
 import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
+import AddCategoryModal from "@/components/dashboard/category/AddCategoryModal";
 import CategoryData from "@/components/dashboard/category/CategoryData";
-import CategoryModal from "@/components/dashboard/category/CategoryModal";
 import { useRef } from "react";
 import { LuPlus } from "react-icons/lu";
 
@@ -11,7 +11,7 @@ const page = () => {
   return (
     <>
       <Breadcrumbs title="Categories" />
-      <CategoryModal ref={categoryRef} />
+      <AddCategoryModal ref={categoryRef} />
       <section className="mb-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-2xl">Categories</h2>

@@ -1,5 +1,5 @@
+"use client";
 import { MyContext } from "@/context/MyProvider";
-import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { useContext } from "react";
 import { LuSquarePen, LuTrash2 } from "react-icons/lu";
