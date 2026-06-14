@@ -7,10 +7,10 @@ const Footer = () => {
         <footer className="footer sm:footer-horizontal py-10 max-w-360 mx-auto">
           <aside>
             <Image
-              src="/assets/oiki-logo-tag.svg"
+              src="/assets/pretypet-logo.svg"
               alt="Oiki Logo"
-              width={120}
-              height={60}
+              width={150}
+              height={70}
             />
             <p className="max-w-sm text-balance">
               Oiki is dedicated to preserving Bengali craftsmanship. We bring

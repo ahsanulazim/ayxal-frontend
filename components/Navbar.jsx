@@ -41,7 +41,7 @@ const Navbar = () => {
               alt="prety pet logo"
               width={100}
               height={100}
-              className="min-w-12"
+              className="min-w-25"
             />
           </Link>
         </div>
