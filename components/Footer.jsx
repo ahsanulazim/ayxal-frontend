@@ -38,8 +38,8 @@ const Footer = () => {
         <aside>
           <p>
             Copyright © {new Date().getFullYear()} - All right reserved by{" "}
-            <a className="link" href="https://nexorosolution.com">
-              Nexoro Solutions
+            <a className="link" href="https://ayxal.com">
+              Ayxal LLC
             </a>
           </p>
         </aside>
