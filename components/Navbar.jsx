@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  LuHeart,
-  LuMenu,
-  LuSearch,
-  LuShoppingBag,
-  LuUser,
-} from "react-icons/lu";
+import { LuHeart, LuMenu, LuSearch, LuUser } from "react-icons/lu";
 import Search from "./Search";
 import { FaMoon } from "react-icons/fa6";
 import Cart from "./Cart";
@@ -21,7 +15,7 @@ const Navbar = () => {
             aria-label="open sidebar"
             className="cursor-pointer lg:hidden"
           >
-            <LuMenu className="inline-block h-6 w-6 stroke-current text-error" />
+            <LuMenu className="inline-block h-6 w-6 text-main" />
           </label>
           <Link href="/" className="hidden lg:block">
             <Image
