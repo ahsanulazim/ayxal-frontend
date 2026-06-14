@@ -67,6 +67,8 @@ const UserForm = ({ isLogin }) => {
         router.push("/dashboard");
       } catch (error) {
         setIsLoading(false);
+        console.log(error);
+
         toast.error("Login Failed");
       }
     } else {
