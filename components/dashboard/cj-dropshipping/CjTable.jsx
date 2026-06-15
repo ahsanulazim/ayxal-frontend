@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCjStoreProducts } from "@/api/productApi";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LuEye, LuTrash2 } from "react-icons/lu";
+import { LuEye, LuTrash2, LuUpload } from "react-icons/lu";
 import moment from "moment";
 import React from "react";
 
@@ -91,6 +91,9 @@ const CjTable = () => {
                     <div className="flex items-center gap-2">
                       <button className="btn btn-circle btn-info">
                         <LuEye />
+                      </button>
+                      <button className="btn btn-success btn-circle">
+                        <LuUpload />
                       </button>
                       <button className="btn btn-circle btn-error">
                         <LuTrash2 />

@@ -43,7 +43,7 @@ const ProductData = () => {
               </td>
             </tr>
           ) : products.length <= 0 ? (
-            <tr>
+            <tr className="h-96">
               <td colSpan="8" className="text-center">
                 No Products Found
               </td>

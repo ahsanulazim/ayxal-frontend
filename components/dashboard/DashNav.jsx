@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const DashNav = () => {
   return (
-    <header className="navbar bg-base-100 shadow-sm sticky top-0 z-30">
+    <header className="navbar bg-base-100 shadow-sm sticky top-0 z-10">
       <div className="flex-1 flex items-center">
         <label
           htmlFor="my-drawer-4"
