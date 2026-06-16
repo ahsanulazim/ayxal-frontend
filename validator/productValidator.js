@@ -5,17 +5,17 @@ export const productValidator = z.object({
     productName: z
       .string()
       .min(1, "Product is required")
-      .min(3, "Product name is required"),
+      .min(3, "Minimum 3 Characters are required"),
     category: z
       .string()
       .min(1, "Category is required")
-      .min(3, "Category is required"),
-    brand: z.string().min(1, "Brand is required").min(2, "Brand is required"),
+      .min(3, "Minimum 3 Characters are required"),
+    brand: z.string().min(2, "Minimum 2 Characters are required").optional(),
   }),
   step2: z.object({
     color: z.array(z.string()).optional(),
     size: z.array(z.string()).optional(),
-    price: z.number().min(0, "Price must be a non-negative number"),
+    price: z.number().min(0, "Price must be a positive number"),
   }),
   step3: z.object({
     productImages: z.array(z.string()).optional(),

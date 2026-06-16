@@ -159,18 +159,10 @@ const ProductForm = () => {
                 />
 
                 <Subscribe
-                  selector={(state) => {
-                    const isGroupValid =
-                      state.fieldMeta["step1"]?.isValid !== false;
-                    return {
-                      canSubmit: state.canSubmit && isGroupValid,
-                      isDirty: state.isDirty,
-                    };
-                  }}
-                  children={({ canSubmit, isDirty }) => (
+                  children={({ isValid, canSubmit, isPristine }) => (
                     <button
                       type="submit"
-                      disabled={!canSubmit || !isDirty}
+                      disabled={!isValid || !canSubmit || isPristine}
                       className="btn btn-success mt-4"
                     >
                       Next
