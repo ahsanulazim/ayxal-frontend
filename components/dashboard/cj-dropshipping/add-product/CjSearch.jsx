@@ -15,7 +15,7 @@ const CjSearch = () => {
   // keyword, page, size সব URL-এ রাখা হয়েছে
   const keyword = searchParams.get("keyword") || "";
   const page = Number(searchParams.get("page")) || 1;
-  const size = Number(searchParams.get("size")) || 24;
+  const size = 24;
 
   // Input state শুধু typing এর জন্য, URL keyword থেকে initialize
   const [inputValue, setInputValue] = useState(keyword);

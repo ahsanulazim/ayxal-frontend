@@ -6,12 +6,10 @@ const BasicInfo = ({ formGroup, Field, Subscribe }) => {
   const { categories, categoriesLoading, categoriesError } =
     useContext(MyContext);
 
-  console.log(formGroup);
-
   return (
     <div className="tab-content border-base-300 bg-base-100 p-5">
       <form
-        className="fieldset p-5 border-base-300 border rounded-box"
+        className="fieldset p-5 border-base-300 border rounded-box max-w-150 mx-auto"
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -30,7 +28,7 @@ const BasicInfo = ({ formGroup, Field, Subscribe }) => {
                 </label>
                 <input
                   type="text"
-                  className="input"
+                  className="input w-full"
                   placeholder="Dog Coller"
                   name={field.name}
                   value={field.state.value ?? ""}
@@ -58,7 +56,7 @@ const BasicInfo = ({ formGroup, Field, Subscribe }) => {
                   value={field.state.value ?? ""}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className="select"
+                  className="select w-full"
                 >
                   <option value="" disabled={true}>
                     Select Category
@@ -95,7 +93,7 @@ const BasicInfo = ({ formGroup, Field, Subscribe }) => {
                 </label>
                 <input
                   type="text"
-                  className="input"
+                  className="input w-full"
                   placeholder="Samsung"
                   name={field.name}
                   value={field.state.value ?? ""}
@@ -115,7 +113,7 @@ const BasicInfo = ({ formGroup, Field, Subscribe }) => {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="btn btn-success"
+              className="btn btn-success mt-4"
             >
               Next
             </button>

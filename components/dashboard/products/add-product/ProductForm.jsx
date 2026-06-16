@@ -3,6 +3,7 @@
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useState } from "react";
 import BasicInfo from "./forms/BasicInfo";
+import { productValidator } from "@/validator/productValidator";
 
 const ProductForm = () => {
   const [step, setStep] = useState(0);
@@ -26,6 +27,9 @@ const ProductForm = () => {
       step4: {
         shippingAndReturns: "",
       },
+    },
+    validators: {
+      onBlur: productValidator,
     },
     onSubmit: ({ value }) => console.log(value),
   });

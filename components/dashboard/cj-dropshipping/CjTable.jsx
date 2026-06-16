@@ -21,8 +21,6 @@ const CjTable = () => {
     router.push(`?page=${p}`);
   };
 
-  console.log("data", data);
-
   return (
     <>
       <div className="overflow-x-auto bg-base-100 rounded-md">

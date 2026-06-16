@@ -9,6 +9,7 @@ import {
   LuBox,
   LuFileBox,
   LuLayoutDashboard,
+  LuMapPin,
   LuNotebook,
   LuPackageSearch,
   LuSwatchBook,
@@ -118,6 +119,17 @@ const Layout = ({ children }) => {
                 {/* Home icon */}
                 <LuPackageSearch className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">CJ Dropshipping</span>
+              </ActiveLink>
+            </li>
+            <li>
+              <ActiveLink
+                href="/dashboard/location"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="Location"
+              >
+                {/* Home icon */}
+                <LuMapPin className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Location</span>
               </ActiveLink>
             </li>
             <li>
