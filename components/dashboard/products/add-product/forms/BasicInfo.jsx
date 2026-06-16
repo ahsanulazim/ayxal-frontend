@@ -110,11 +110,7 @@ const BasicInfo = ({ formGroup, Field, Subscribe }) => {
 
         <Subscribe
           children={({ canSubmit }) => (
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="btn btn-success mt-4"
-            >
+            <button type="submit" className="btn btn-success mt-4">
               Next
             </button>
           )}

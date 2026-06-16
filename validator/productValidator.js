@@ -2,9 +2,15 @@ import z from "zod";
 
 export const productValidator = z.object({
   step1: z.object({
-    productName: z.string().min(1, "Product name is required"),
-    category: z.string().min(1, "Category is required"),
-    brand: z.string().min(1, "Brand is required"),
+    productName: z
+      .string()
+      .min(1, "Product is required")
+      .min(3, "Product name is required"),
+    category: z
+      .string()
+      .min(1, "Category is required")
+      .min(3, "Category is required"),
+    brand: z.string().min(1, "Brand is required").min(2, "Brand is required"),
   }),
   step2: z.object({
     color: z.array(z.string()).optional(),
