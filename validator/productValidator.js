@@ -10,7 +10,7 @@ export const productValidator = z.object({
       .string()
       .min(1, "Category is required")
       .min(3, "Minimum 3 Characters are required"),
-    brand: z.string().min(2, "Minimum 2 Characters are required").optional(),
+    brand: z.string().nullable().optional(),
   }),
   step2: z.object({
     color: z.array(z.string()).optional(),

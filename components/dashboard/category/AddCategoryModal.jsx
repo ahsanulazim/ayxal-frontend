@@ -3,7 +3,7 @@ import api from "@/axios/axiosInstance";
 import { categoryValidator } from "@/validator/categoryValidator";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useQueryClient } from "@tanstack/react-query";
-import { LuPlus } from "react-icons/lu";
+import { LuLogOut, LuPlus } from "react-icons/lu";
 
 const AddCategoryModal = ({ ref }) => {
   const queryClient = useQueryClient();
@@ -121,9 +121,9 @@ const AddCategoryModal = ({ ref }) => {
               ref.current.close();
               reset();
             }}
-            className="btn"
+            className="btn btn-error"
           >
-            Close
+            <LuLogOut /> Close
           </button>
         </form>
       </div>

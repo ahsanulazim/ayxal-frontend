@@ -3,16 +3,17 @@ import { getAllAttribute } from "@/api/attributeApi";
 import { useQuery } from "@tanstack/react-query";
 import { LuEye, LuTrash2 } from "react-icons/lu";
 import AttributeDeleteModal from "./AttributeDeleteModal";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 
 const AttributeTable = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["attributes"],
     queryFn: getAllAttribute,
   });
 
   const attributeDeleteRef = useRef();
+  const [selectedSlug, setSelectedSlug] = useState(null);
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
@@ -34,15 +35,21 @@ const AttributeTable = () => {
                 Loading...
               </td>
             </tr>
-          ) : data.length <= 0 ? (
+          ) : error ? (
+            <tr>
+              <td colSpan="4" className="text-center">
+                No Data Found
+              </td>
+            </tr>
+          ) : data?.length === 0 ? (
             <tr>
               <td colSpan="4" className="text-center">
                 No Data Found
               </td>
             </tr>
           ) : (
-            data.map((attribute) => (
-              <tr key={attribute.name}>
+            data?.map((attribute) => (
+              <tr key={attribute.slug}>
                 <td>{attribute.name}</td>
                 <td>{attribute.slug}</td>
                 <td>
@@ -52,10 +59,6 @@ const AttributeTable = () => {
                 </td>
                 <td>
                   <div className="flex gap-3">
-                    <AttributeDeleteModal
-                      ref={attributeDeleteRef}
-                      id={attribute._id}
-                    />
                     <Link
                       href={`/dashboard/attributes/${attribute.slug}`}
                       className="btn btn-success btn-circle btn-soft"
@@ -64,7 +67,10 @@ const AttributeTable = () => {
                     </Link>
                     <button
                       className="btn btn-error btn-circle btn-soft"
-                      onClick={() => attributeDeleteRef.current.showModal()}
+                      onClick={() => {
+                        setSelectedSlug(attribute.slug);
+                        attributeDeleteRef.current.showModal();
+                      }}
                     >
                       <LuTrash2 />
                     </button>
@@ -75,6 +81,7 @@ const AttributeTable = () => {
           )}
         </tbody>
       </table>
+      <AttributeDeleteModal ref={attributeDeleteRef} slug={selectedSlug} />
     </div>
   );
 };

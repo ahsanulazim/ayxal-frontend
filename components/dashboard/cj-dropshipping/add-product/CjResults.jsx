@@ -1,19 +1,31 @@
 import React from "react";
 import CjProductCard from "./CjProductCard";
 
-const CjResults = ({ products, isFetching, isError, router, keyword, page, size }) => {
+const CjResults = ({
+  products,
+  isFetching,
+  isError,
+  router,
+  keyword,
+  page,
+  size,
+}) => {
   const productList = products?.products?.content?.[0]?.productList ?? [];
   const totalPages = products?.products?.totalPages ?? 0;
 
   // keyword সহ URL navigate করার helper
   const goToPage = (p) => {
-    router.push(`?keyword=${encodeURIComponent(keyword)}&page=${p}&size=${size}`);
+    router.push(
+      `?keyword=${encodeURIComponent(keyword)}&page=${p}&size=${size}`,
+    );
   };
 
   return (
     <>
       {!keyword ? (
-        <div className="text-center mt-10 text-gray-500">Please search for products</div>
+        <div className="text-center mt-10 text-gray-500">
+          Please search for products
+        </div>
       ) : isFetching ? (
         <section>
           <div className="">
