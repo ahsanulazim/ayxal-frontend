@@ -2,8 +2,10 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useState } from "react";
+import Select from "react-select";
 import BasicInfo from "./forms/BasicInfo";
 import { productValidator } from "@/validator/productValidator";
+import DateRangePicker from "./forms/DateRangePicker";
 
 const ProductForm = () => {
   const [step, setStep] = useState(0);
@@ -18,9 +20,12 @@ const ProductForm = () => {
         attributes: [],
       },
       step2: {
+        price: 0,
+        discount: 0,
+        stock: 0,
+        SKU: "",
         color: [],
         size: [],
-        price: 0,
       },
       step3: {
         productImages: [],
@@ -56,9 +61,240 @@ const ProductForm = () => {
         checked={step === 1}
         onChange={() => setStep(1)}
       />
-      <div className="tab-content border-base-300 bg-base-100 p-5">
-        Tab content 2
-      </div>
+      {step === 1 && (
+        <form.FormGroup
+          name="step2"
+          onGroupSubmit={() => setStep(step + 1)}
+          children={(group) => (
+            <div className="tab-content border-base-300 bg-base-100 p-5">
+              <form
+                className="fieldset p-5 border-base-300 border rounded-box"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  group.handleSubmit();
+                }}
+              >
+                <h2 className="text-xl font-bold">
+                  List all of your variants for the variation types below
+                </h2>
+                <div className="grid grid-cols-2 gap-5">
+                  <div className="fieldset">
+                    <h3 className="text-lg font-semibold">Variants</h3>
+                    <form.Field
+                      name="step2.size"
+                      children={(field) => {
+                        const { errors, isTouched } = field.state.meta;
+                        return (
+                          <>
+                            <label htmlFor={field.name} className="label">
+                              Size
+                            </label>
+                            <Select
+                              isMulti
+                              className="w-full"
+                              classNamePrefix="select"
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e)}
+                              value={field.state.value ?? ""}
+                              options={[
+                                { value: "", label: "Select Size" },
+                                { value: "small", label: "Small" },
+                                { value: "medium", label: "Medium" },
+                                { value: "large", label: "Large" },
+                                { value: "xl", label: "XL" },
+                              ]}
+                            />
+                          </>
+                        );
+                      }}
+                    />
+                    <form.Field
+                      name="step2.color"
+                      children={(field) => {
+                        const { errors, isTouched } = field.state.meta;
+                        return (
+                          <>
+                            <label htmlFor={field.name} className="label">
+                              Color
+                            </label>
+                            <Select
+                              isMulti
+                              className="w-full"
+                              classNamePrefix="select"
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e)}
+                              value={field.state.value ?? ""}
+                              options={[
+                                { value: "", label: "Select Color" },
+                                { value: "red", label: "Red" },
+                                { value: "green", label: "Green" },
+                                { value: "blue", label: "Blue" },
+                                { value: "black", label: "Black" },
+                                { value: "white", label: "White" },
+                              ]}
+                            />
+                          </>
+                        );
+                      }}
+                    />
+                  </div>
+
+                  <div className="fieldset p-5 bg-base-300 rounded-box">
+                    <h3 className="text-lg font-semibold">Stock & Pricing</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <form.Field
+                          name="step2.stock"
+                          children={(field) => {
+                            const { errors, isTouched } = field.state.meta;
+                            return (
+                              <>
+                                <label htmlFor={field.name} className="label">
+                                  Stock
+                                </label>
+                                <input
+                                  type="number"
+                                  placeholder="100"
+                                  name={field.name}
+                                  value={field.state.value ?? ""}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                  }
+                                  className="input w-full"
+                                />
+                                {isTouched && errors?.length > 0 && (
+                                  <p className="text-error">
+                                    {errors[0].message}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <form.Field
+                          name="step2.sku"
+                          children={(field) => {
+                            const { errors, isTouched } = field.state.meta;
+                            return (
+                              <>
+                                <label htmlFor={field.name} className="label">
+                                  SKU
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="AYX-0000"
+                                  name={field.name}
+                                  value={field.state.value ?? ""}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                  }
+                                  className="input w-full"
+                                />
+                                {isTouched && errors?.length > 0 && (
+                                  <p className="text-error">
+                                    {errors[0].message}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <form.Field
+                      name="step2.price"
+                      children={(field) => {
+                        const { errors, isTouched } = field.state.meta;
+                        return (
+                          <>
+                            <label htmlFor={field.name} className="label">
+                              Price
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="1000"
+                              name={field.name}
+                              value={field.state.value ?? ""}
+                              onBlur={field.handleBlur}
+                              onChange={(e) =>
+                                field.handleChange(e.target.value)
+                              }
+                              className="input w-full"
+                            />
+                            {isTouched && errors?.length > 0 && (
+                              <p className="text-error">{errors[0].message}</p>
+                            )}
+                          </>
+                        );
+                      }}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <form.Field
+                          name="step2.discount"
+                          children={(field) => {
+                            const { errors, isTouched } = field.state.meta;
+                            return (
+                              <>
+                                <label htmlFor={field.name} className="label">
+                                  Discount
+                                </label>
+                                <input
+                                  type="number"
+                                  placeholder="1000"
+                                  name={field.name}
+                                  value={field.state.value ?? ""}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                  }
+                                  className="input w-full"
+                                />
+                                {isTouched && errors?.length > 0 && (
+                                  <p className="text-error">
+                                    {errors[0].message}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <DateRangePicker />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5">
+                  <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                    <table className="table">
+                      {/* head */}
+                      <thead>
+                        <tr className="bg-base-200">
+                          <th>Color</th>
+                          <th>Size</th>
+                          <th>Stock</th>
+                          <th>Price</th>
+                          <th>Discount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </form>
+            </div>
+          )}
+        />
+      )}
       <input
         type="radio"
         name="my_tabs_2"

@@ -1,16 +1,14 @@
 "use client";
-import { getAllAttribute } from "@/api/attributeApi";
-import { useQuery } from "@tanstack/react-query";
+
 import { LuEye, LuTrash2 } from "react-icons/lu";
 import AttributeDeleteModal from "./AttributeDeleteModal";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import Link from "next/link";
+import { MyContext } from "@/context/MyProvider";
 
 const AttributeTable = () => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["attributes"],
-    queryFn: getAllAttribute,
-  });
+  const { attributes, attributesLoading, attributesError } =
+    useContext(MyContext);
 
   const attributeDeleteRef = useRef();
   const [selectedSlug, setSelectedSlug] = useState(null);
@@ -29,26 +27,26 @@ const AttributeTable = () => {
         </thead>
         <tbody>
           {/* row 1 */}
-          {isLoading ? (
+          {attributesLoading ? (
             <tr>
               <td colSpan="4" className="text-center">
                 Loading...
               </td>
             </tr>
-          ) : error ? (
+          ) : attributesError ? (
             <tr>
               <td colSpan="4" className="text-center">
                 No Data Found
               </td>
             </tr>
-          ) : data?.length === 0 ? (
+          ) : attributes?.length === 0 ? (
             <tr>
               <td colSpan="4" className="text-center">
                 No Data Found
               </td>
             </tr>
           ) : (
-            data?.map((attribute) => (
+            attributes?.map((attribute) => (
               <tr key={attribute.slug}>
                 <td>{attribute.name}</td>
                 <td>{attribute.slug}</td>

@@ -19,3 +19,11 @@ export const deleteAttribute = async (slug) => {
 
   return res.data;
 };
+
+export const getAttribute = async (slug) => {
+  const res = await api.get("/attributes/getAttribute", {
+    params: { slug },
+  });
+
+  return res.data;
+};

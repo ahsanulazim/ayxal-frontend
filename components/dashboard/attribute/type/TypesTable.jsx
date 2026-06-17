@@ -1,20 +1,25 @@
 "use client";
-import { getAllVariationsAsType } from "@/api/typeApi";
-import { useQuery } from "@tanstack/react-query";
+
 import { LuTrash2 } from "react-icons/lu";
 import TypeDeleteModal from "./TypeDeleteModal";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/axios/axiosInstance";
+import { getAllVariations } from "@/api/typeApi";
 
-const TypesTable = ({ type }) => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["variations"],
-    queryFn: () => getAllVariationsAsType(type),
+const TypesTable = ({ attributeSlug, attribute }) => {
+  const [selectedSlug, setSelectedSlug] = useState(null);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["variations", attributeSlug],
+    queryFn: getAllVariations,
   });
 
   const typeDeleteRef = useRef();
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+      <TypeDeleteModal ref={typeDeleteRef} slug={selectedSlug} />
       <table className="table">
         {/* head */}
         <thead>
@@ -28,11 +33,13 @@ const TypesTable = ({ type }) => {
         <tbody>
           {/* row 1 */}
           {isLoading ? (
-            <tr>
-              <td colSpan="4" className="text-center">
-                Loading...
-              </td>
-            </tr>
+            <div className="flex items-center justify-center">
+              <span className="loading loading-spinner"></span>
+            </div>
+          ) : isError ? (
+            <div className="flex items-center justify-center">
+              <h1 className="text-error">Something went wrong</h1>
+            </div>
           ) : data.length <= 0 ? (
             <tr>
               <td colSpan="4" className="text-center">
@@ -45,7 +52,7 @@ const TypesTable = ({ type }) => {
                 <td>{variation.name}</td>
                 <td>{variation.slug}</td>
                 <td>
-                  {type === "color" ? (
+                  {variation.attributeType === "swatch" ? (
                     <div
                       className="size-8 rounded-full border border-base-content/5"
                       style={{ backgroundColor: variation.value }}
@@ -58,10 +65,12 @@ const TypesTable = ({ type }) => {
                 </td>
                 <td>
                   <div className="">
-                    <TypeDeleteModal ref={typeDeleteRef} id={variation._id} />
                     <button
                       className="btn btn-error btn-square"
-                      onClick={() => typeDeleteRef.current?.showModal()}
+                      onClick={() => {
+                        setSelectedSlug(variation.slug);
+                        typeDeleteRef.current?.showModal();
+                      }}
                     >
                       <LuTrash2 />
                     </button>

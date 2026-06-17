@@ -1,4 +1,5 @@
 "use client";
+import { getAllAttribute } from "@/api/attributeApi";
 import { getAllCategories } from "@/api/categoryApi";
 import { getAllLocations } from "@/api/locationApi";
 import { getAllProducts } from "@/api/productApi";
@@ -203,6 +204,17 @@ const MyProvider = ({ children }) => {
     queryFn: getAllCategories,
   });
 
+  //attributes
+
+  const {
+    data: attributes,
+    isLoading: attributesLoading,
+    error: attributesError,
+  } = useQuery({
+    queryKey: ["attributes"],
+    queryFn: getAllAttribute,
+  });
+
   const data = {
     newUser,
     setNewUser,
@@ -227,6 +239,9 @@ const MyProvider = ({ children }) => {
     categories,
     categoriesLoading,
     categoriesError,
+    attributes,
+    attributesError,
+    attributesLoading,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

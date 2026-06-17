@@ -4,8 +4,14 @@ import { productValidator } from "@/validator/productValidator";
 import { useContext } from "react";
 
 const BasicInfo = ({ form, step, setStep }) => {
-  const { categories, categoriesLoading, categoriesError } =
-    useContext(MyContext);
+  const {
+    categories,
+    categoriesLoading,
+    categoriesError,
+    attributes,
+    attributesError,
+    attributesLoading,
+  } = useContext(MyContext);
 
   return (
     <form.FormGroup
@@ -22,7 +28,7 @@ const BasicInfo = ({ form, step, setStep }) => {
               group.handleSubmit();
             }}
           >
-            <h2 className="text-xl font-bold">Basic Information</h2>
+            <h2 className="text-xl font-bold">Add New Product</h2>
             <form.Field
               name="step1.productName"
               children={(field) => {
@@ -119,7 +125,7 @@ const BasicInfo = ({ form, step, setStep }) => {
             <form.Field
               name="step1.hasVariations"
               children={(field) => {
-                const { errors } = field.state.meta;
+                const { errors, isTouched } = field.state.meta;
                 return (
                   <>
                     <label htmlFor={field.name} className="label">
@@ -152,7 +158,7 @@ const BasicInfo = ({ form, step, setStep }) => {
                         <p>No</p>
                       </div>
                     </div>
-                    {errors?.length > 0 && (
+                    {isTouched && errors?.length > 0 && (
                       <p className="text-error">{errors[0].message}</p>
                     )}
                   </>
@@ -177,7 +183,7 @@ const BasicInfo = ({ form, step, setStep }) => {
                 },
               }}
               children={(field) => {
-                const { errors } = field.state.meta;
+                const { errors, isTouched } = field.state.meta;
                 const hasVariations = field.form.getFieldValue(
                   "step1.hasVariations",
                 );
@@ -201,29 +207,35 @@ const BasicInfo = ({ form, step, setStep }) => {
                       Attributes
                     </label>
                     <div className="flex items-center gap-5">
-                      <div>
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm"
-                          checked={currentValue.includes("color")}
-                          onChange={(e) =>
-                            handleCheckboxChange("color", e.target.checked)
-                          }
-                        />{" "}
-                        Color
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm"
-                          checked={currentValue.includes("size")}
-                          onChange={(e) =>
-                            handleCheckboxChange("size", e.target.checked)
-                          }
-                        />{" "}
-                        Size
-                      </div>
+                      {attributesLoading ? (
+                        <div>Loading...</div>
+                      ) : attributesError ? (
+                        <div>Error loading attributes</div>
+                      ) : attributes?.length === 0 ? (
+                        <div>No attributes found</div>
+                      ) : (
+                        attributes?.map((attribute) => (
+                          <div key={attribute.slug}>
+                            <input
+                              type="checkbox"
+                              name={field.name}
+                              className="checkbox checkbox-sm"
+                              checked={currentValue.includes(attribute.slug)}
+                              onChange={(e) =>
+                                handleCheckboxChange(
+                                  attribute.slug,
+                                  e.target.checked,
+                                )
+                              }
+                            />{" "}
+                            {attribute.name}
+                          </div>
+                        ))
+                      )}
                     </div>
+                    {isTouched && errors?.length > 0 && (
+                      <p className="text-error">{errors[0].message}</p>
+                    )}
                   </>
                 );
               }}

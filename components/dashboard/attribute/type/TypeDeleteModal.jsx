@@ -3,7 +3,7 @@ import { deleteVariation } from "@/api/typeApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-const TypeDeleteModal = ({ ref, id }) => {
+const TypeDeleteModal = ({ ref, slug }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -29,7 +29,7 @@ const TypeDeleteModal = ({ ref, id }) => {
               type="button"
               className="btn btn-error flex-1"
               disabled={mutation.isPending}
-              onClick={() => mutation.mutate(id)}
+              onClick={() => mutation.mutate(slug)}
             >
               {mutation.isPending ? (
                 <span className="loading loading-spinner"></span>
