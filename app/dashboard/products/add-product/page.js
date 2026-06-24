@@ -1,5 +1,5 @@
 import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
-import ProductForm from "@/components/dashboard/products/add-product/ProductForm";
+import ProductAddForm from "@/components/dashboard/products/add-product/ProductAddForm";
 
 const page = () => {
   return (
@@ -10,7 +10,7 @@ const page = () => {
       </section>
       <section>
         <div className="">
-          <ProductForm />
+          <ProductAddForm />
         </div>
       </section>
     </>

@@ -33,3 +33,7 @@
 .ql-editor {
   @apply min-h-50;
 }
+
+.thumb {
+  @apply inline-flex rounded-sm border border-[#eaeaea] mb-2 mr-2 p-1 box-border;
+}
