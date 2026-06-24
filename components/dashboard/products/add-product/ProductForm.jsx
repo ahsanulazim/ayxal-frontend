@@ -1,13 +1,11 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form-nextjs";
-import { useContext, useState } from "react";
-import Select from "react-select";
+import { useState } from "react";
 import BasicInfo from "./forms/BasicInfo";
 import { productValidator } from "@/validator/productValidator";
-import DateRangePicker from "./forms/DateRangePicker";
-import { MyContext } from "@/context/MyProvider";
-import { generateCombinations } from "@/utils/generateCombinations";
+import PricingInfo from "./forms/PricingInfo";
+import { fileToBase64 } from "@/utils/base24Converter";
 
 const ProductForm = () => {
   const [step, setStep] = useState(0);
@@ -25,9 +23,8 @@ const ProductForm = () => {
         price: 0,
         discount: 0,
         stock: 0,
-        SKU: "",
-        color: [],
-        size: [],
+        sku: "",
+        variantMatrix: [],
       },
       step3: {
         productImages: [],
@@ -42,9 +39,6 @@ const ProductForm = () => {
     },
     onSubmit: ({ value }) => console.log(value),
   });
-
-  const { attributes, attributesLoading, attributesError } =
-    useContext(MyContext);
 
   return (
     <div className="tabs tabs-border">
@@ -66,283 +60,7 @@ const ProductForm = () => {
         checked={step === 1}
         onChange={() => setStep(1)}
       />
-      {step === 1 && (
-        <form.FormGroup
-          name="step2"
-          onGroupSubmit={() => setStep(step + 1)}
-          children={(group) => {
-            const hasVariations = form.getFieldValue("step1.hasVariations");
-            const pickedAttributeSlugs =
-              form.getFieldValue("step1.attributes") || [];
-
-            const displayAttributes =
-              attributes?.filter((attr) =>
-                pickedAttributeSlugs.includes(attr.slug),
-              ) || [];
-
-            const currentFormValues = group.state.value || {};
-
-            const activeArraysForCombination = pickedAttributeSlugs
-              .map((slug) => ({
-                slug: slug,
-                array: currentFormValues[slug] || [],
-              }))
-              .filter((item) => item.array.length > 0);
-
-            const tableRows =
-              activeArraysForCombination.length > 0
-                ? generateCombinations(activeArraysForCombination)
-                : [];
-
-            console.log(displayAttributes);
-
-            return (
-              <div className="tab-content border-base-300 bg-base-100 p-5">
-                <form
-                  className="fieldset p-5 border-base-300 border rounded-box"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    group.handleSubmit();
-                  }}
-                >
-                  <h2 className="text-xl font-bold">
-                    List all of your variants for the variation types below
-                  </h2>
-                  <div>
-                    {hasVariations ? (
-                      <div className="fieldset">
-                        <h3 className="text-lg font-semibold">Variants</h3>
-                        <form.Field
-                          name="step2.size"
-                          children={(field) => {
-                            const { errors, isTouched } = field.state.meta;
-                            return (
-                              <>
-                                <label htmlFor={field.name} className="label">
-                                  Size
-                                </label>
-                                <Select
-                                  isMulti
-                                  className="w-full"
-                                  classNamePrefix="select"
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e)}
-                                  value={field.state.value ?? ""}
-                                  options={[
-                                    { value: "", label: "Select Size" },
-                                    { value: "small", label: "Small" },
-                                    { value: "medium", label: "Medium" },
-                                    { value: "large", label: "Large" },
-                                    { value: "xl", label: "XL" },
-                                  ]}
-                                />
-                              </>
-                            );
-                          }}
-                        />
-                        <form.Field
-                          name="step2.color"
-                          children={(field) => {
-                            const { errors, isTouched } = field.state.meta;
-                            return (
-                              <>
-                                <label htmlFor={field.name} className="label">
-                                  Color
-                                </label>
-                                <Select
-                                  isMulti
-                                  className="w-full"
-                                  classNamePrefix="select"
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e)}
-                                  value={field.state.value ?? ""}
-                                  options={[
-                                    { value: "", label: "Select Color" },
-                                    { value: "red", label: "Red" },
-                                    { value: "green", label: "Green" },
-                                    { value: "blue", label: "Blue" },
-                                    { value: "black", label: "Black" },
-                                    { value: "white", label: "White" },
-                                  ]}
-                                />
-                              </>
-                            );
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="fieldset p-5 bg-base-300 rounded-box">
-                        <h3 className="text-lg font-semibold">
-                          Stock & Pricing
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <form.Field
-                              name="step2.stock"
-                              children={(field) => {
-                                const { errors, isTouched } = field.state.meta;
-                                return (
-                                  <>
-                                    <label
-                                      htmlFor={field.name}
-                                      className="label"
-                                    >
-                                      Stock
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="100"
-                                      name={field.name}
-                                      value={field.state.value ?? ""}
-                                      onBlur={field.handleBlur}
-                                      onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                      }
-                                      className="input w-full"
-                                    />
-                                    {isTouched && errors?.length > 0 && (
-                                      <p className="text-error">
-                                        {errors[0].message}
-                                      </p>
-                                    )}
-                                  </>
-                                );
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <form.Field
-                              name="step2.sku"
-                              children={(field) => {
-                                const { errors, isTouched } = field.state.meta;
-                                return (
-                                  <>
-                                    <label
-                                      htmlFor={field.name}
-                                      className="label"
-                                    >
-                                      SKU
-                                    </label>
-                                    <input
-                                      type="text"
-                                      placeholder="AYX-0000"
-                                      name={field.name}
-                                      value={field.state.value ?? ""}
-                                      onBlur={field.handleBlur}
-                                      onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                      }
-                                      className="input w-full"
-                                    />
-                                    {isTouched && errors?.length > 0 && (
-                                      <p className="text-error">
-                                        {errors[0].message}
-                                      </p>
-                                    )}
-                                  </>
-                                );
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <form.Field
-                          name="step2.price"
-                          children={(field) => {
-                            const { errors, isTouched } = field.state.meta;
-                            return (
-                              <>
-                                <label htmlFor={field.name} className="label">
-                                  Price
-                                </label>
-                                <input
-                                  type="number"
-                                  placeholder="1000"
-                                  name={field.name}
-                                  value={field.state.value ?? ""}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) =>
-                                    field.handleChange(e.target.value)
-                                  }
-                                  className="input w-full"
-                                />
-                                {isTouched && errors?.length > 0 && (
-                                  <p className="text-error">
-                                    {errors[0].message}
-                                  </p>
-                                )}
-                              </>
-                            );
-                          }}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <form.Field
-                              name="step2.discount"
-                              children={(field) => {
-                                const { errors, isTouched } = field.state.meta;
-                                return (
-                                  <>
-                                    <label
-                                      htmlFor={field.name}
-                                      className="label"
-                                    >
-                                      Discount
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="1000"
-                                      name={field.name}
-                                      value={field.state.value ?? ""}
-                                      onBlur={field.handleBlur}
-                                      onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                      }
-                                      className="input w-full"
-                                    />
-                                    {isTouched && errors?.length > 0 && (
-                                      <p className="text-error">
-                                        {errors[0].message}
-                                      </p>
-                                    )}
-                                  </>
-                                );
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <DateRangePicker />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-5">
-                    <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                      <table className="table">
-                        {/* head */}
-                        <thead>
-                          <tr className="bg-base-200">
-                            <th>Color</th>
-                            <th>Size</th>
-                            <th>Stock</th>
-                            <th>Price</th>
-                            <th>Discount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr></tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            );
-          }}
-        />
-      )}
+      {step === 1 && <PricingInfo form={form} step={step} setStep={setStep} />}
       <input
         type="radio"
         name="my_tabs_2"
@@ -351,9 +69,121 @@ const ProductForm = () => {
         checked={step === 2}
         onChange={() => setStep(2)}
       />
-      <div className="tab-content border-base-300 bg-base-100 p-5">
-        Tab content 3
-      </div>
+      <form.FormGroup
+        name="step3"
+        onGroupSubmit={() => setStep(step + 1)}
+        children={(group) => {
+          return (
+            <div className="tab-content border-base-300 bg-base-100 p-5">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  group.handleSubmit();
+                }}
+                className="fieldset p-5 border-base-300 border rounded-box max-w-xl mx-auto gap-4"
+              >
+                <h3 className="text-lg font-bold">Upload Product Images</h3>
+
+                <form.Field
+                  name="step3.productImages"
+                  children={(field) => {
+                    const currentImages = field.state.value || [];
+
+                    const handleFileChange = async (e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        const filesArray = Array.from(e.target.files);
+
+                        try {
+                          // 🌟 Reusable ফাংশনটি লুপের ভেতর ম্যাপ করে সব ফাইল প্রমিস একসাথে হ্যান্ডেল করা হচ্ছে
+                          const base64Promises = filesArray.map((file) =>
+                            fileToBase64(file),
+                          );
+                          const newBase64Images =
+                            await Promise.all(base64Promises);
+
+                          // স্টেট আপডেট
+                          field.handleChange([
+                            ...currentImages,
+                            ...newBase64Images,
+                          ]);
+                        } catch (error) {
+                          console.error(
+                            "Error converting images to Base64:",
+                            error,
+                          );
+                        }
+
+                        e.target.value = ""; // ইনপুট রিসেট
+                      }
+                    };
+
+                    const handleRemoveImage = (indexToRemove) => {
+                      field.handleChange(
+                        currentImages.filter((_, i) => i !== indexToRemove),
+                      );
+                    };
+
+                    return (
+                      <>
+                        <label className="label">Product Images</label>
+                        <div className="flex items-center gap-5">
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="file-input"
+                          />
+
+                          {/* ইমেজ প্রিভিউ গ্রিড */}
+                          {currentImages.length > 0 && (
+                            <div className="grid grid-rows-2 grid-cols-3 grid-flow-col! gap-3">
+                              {currentImages.map((base64String, index) => (
+                                <div
+                                  key={index}
+                                  className="relative aspect-square rounded-box overflow-hidden border border-base-300"
+                                >
+                                  <img
+                                    src={base64String}
+                                    alt={`preview-${index}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveImage(index)}
+                                    className="absolute top-1 right-1 bg-error/90 hover:bg-error text-white btn btn-xs btn-circle border-none"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  }}
+                />
+
+                {/* নেভিগেশন বাটনসমূহ */}
+                <div className="flex gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="btn flex-1"
+                  >
+                    Previous
+                  </button>
+                  <button type="submit" className="btn btn-success flex-1">
+                    Next
+                  </button>
+                </div>
+              </form>
+            </div>
+          );
+        }}
+      />
       <input
         type="radio"
         name="my_tabs_2"

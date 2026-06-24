@@ -14,6 +14,10 @@ export const getAllVariations = async ({ queryKey }) => {
   });
   return res.data;
 };
+export const getAllAttributesVariations = async () => {
+  const res = await api.get("/variants/getAllAttributesVariants");
+  return res.data;
+};
 
 export const deleteVariation = async (slug) => {
   const res = await api.delete("/variants/deleteVariation", {

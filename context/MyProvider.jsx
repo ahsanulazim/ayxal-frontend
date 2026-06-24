@@ -4,6 +4,7 @@ import { getAllCategories } from "@/api/categoryApi";
 import { getAllLocations } from "@/api/locationApi";
 import { getAllProducts } from "@/api/productApi";
 import { getAllShippingRates } from "@/api/shippingApi";
+import { getAllAttributesVariations } from "@/api/typeApi";
 import { auth } from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
 import { onAuthStateChanged } from "firebase/auth";
@@ -215,6 +216,17 @@ const MyProvider = ({ children }) => {
     queryFn: getAllAttribute,
   });
 
+  //allVariants
+
+  const {
+    data: allVariants,
+    isLoading: allVariantsLoading,
+    error: allVariantsError,
+  } = useQuery({
+    queryKey: ["allVariants"],
+    queryFn: getAllAttributesVariations,
+  });
+
   const data = {
     newUser,
     setNewUser,
@@ -242,6 +254,9 @@ const MyProvider = ({ children }) => {
     attributes,
     attributesError,
     attributesLoading,
+    allVariants,
+    allVariantsLoading,
+    allVariantsError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

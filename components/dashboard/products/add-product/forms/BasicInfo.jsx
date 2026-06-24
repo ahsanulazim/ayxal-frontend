@@ -242,10 +242,23 @@ const BasicInfo = ({ form, step, setStep }) => {
             />
 
             <form.Subscribe
-              children={({ isValid, canSubmit, isPristine }) => (
+              selector={(state) => {
+                const { isSubmitting, isValid, values } = state;
+                const { productName, category, hasVariations, attributes } =
+                  values.step1 || {};
+                const isStep1Filled =
+                  productName &&
+                  productName.length >= 3 &&
+                  category &&
+                  category.length > 0 &&
+                  (hasVariations ? attributes && attributes.length > 0 : true);
+
+                return [isSubmitting, isValid, isStep1Filled];
+              }}
+              children={([isSubmitting, isValid, isStep1Filled]) => (
                 <button
                   type="submit"
-                  disabled={!isValid || !canSubmit || isPristine}
+                  disabled={isSubmitting || !isValid || !isStep1Filled}
                   className="btn btn-success mt-4"
                 >
                   Next

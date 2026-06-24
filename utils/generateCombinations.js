@@ -6,7 +6,6 @@ export const generateCombinations = (arrays) => {
         current.array.forEach((b) => {
           result.push({
             ...a,
-            // combinations অবজেক্ট তৈরি করছি যা মঙ্গোডিবির জন্য সুবিধা দেবে
             combinations: {
               ...(a.combinations || {}),
               [current.slug]: b.label,
