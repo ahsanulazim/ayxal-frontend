@@ -1,87 +1,61 @@
 "use client";
 
-import { LuEye, LuTrash2 } from "react-icons/lu";
-import AttributeDeleteModal from "./AttributeDeleteModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { LuPlus, LuSlidersHorizontal, LuTrash2 } from "react-icons/lu";
 import { useContext, useRef, useState } from "react";
-import Link from "next/link";
+import AttributeCard from "./AttributeCard";
 import { MyContext } from "@/context/MyProvider";
+import AttributeDeleteModal from "./AttributeDeleteModal";
 
-const AttributeTable = () => {
-  const { attributes, attributesLoading, attributesError } =
+export default function AttributeTable() {
+  const queryClient = useQueryClient();
+  const deleteAttributeModalRef = useRef(null);
+  const [attributeSlug, setAttributeSlug] = useState(null);
+
+  const { attributes, attributesError, attributesLoading } =
     useContext(MyContext);
 
-  const attributeDeleteRef = useRef();
-  const [selectedSlug, setSelectedSlug] = useState(null);
+  const deleteAttributeMutation = useMutation({
+    mutationFn: () => console.log("delete"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attributes"] });
+      toast.warn("Catalog attribute definition has been removed.");
+    },
+  });
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-      <table className="table">
-        {/* head */}
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Slug</th>
-            <th>Type</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* row 1 */}
-          {attributesLoading ? (
-            <tr>
-              <td colSpan="4" className="text-center">
-                Loading...
-              </td>
-            </tr>
-          ) : attributesError ? (
-            <tr>
-              <td colSpan="4" className="text-center">
-                No Data Found
-              </td>
-            </tr>
-          ) : attributes?.length === 0 ? (
-            <tr>
-              <td colSpan="4" className="text-center">
-                No Data Found
-              </td>
-            </tr>
-          ) : (
-            attributes?.map((attribute) => (
-              <tr key={attribute.slug}>
-                <td>{attribute.name}</td>
-                <td>{attribute.slug}</td>
-                <td>
-                  <span className="badge badge-info badge-soft border-info">
-                    {attribute.attributeType}
-                  </span>
-                </td>
-                <td>
-                  <div className="flex gap-3">
-                    <Link
-                      href={`/dashboard/attributes/${attribute.slug}`}
-                      className="btn btn-success btn-circle btn-soft"
-                    >
-                      <LuEye />
-                    </Link>
-                    <button
-                      className="btn btn-error btn-circle btn-soft"
-                      onClick={() => {
-                        setSelectedSlug(attribute.slug);
-                        attributeDeleteRef.current.showModal();
-                      }}
-                    >
-                      <LuTrash2 />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      <AttributeDeleteModal ref={attributeDeleteRef} slug={selectedSlug} />
+    <div className="space-y-6" id="admin-attributes-tab">
+      {/* List rendering */}
+      {attributesLoading ? (
+        <div className="flex justify-center p-12">
+          <span className="loading loading-spinner text-indigo-600"></span>
+        </div>
+      ) : attributesError ? (
+        <div>Error fetching</div>
+      ) : attributes?.length === 0 ? (
+        <div className="p-8 text-center bg-base-100 rounded-2x">
+          <LuSlidersHorizontal className="size-8 text-main mx-auto" />
+          <p className="text-xs text-slate-500 mt-2">
+            No product variation attributes found.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {attributes.map((attr) => (
+            <AttributeCard
+              key={attr.slug}
+              attribute={attr}
+              setAttributeSlug={setAttributeSlug}
+              ref={deleteAttributeModalRef}
+            />
+          ))}
+        </div>
+      )}
+      <AttributeDeleteModal
+        ref={deleteAttributeModalRef}
+        slug={attributeSlug}
+      />
     </div>
   );
-};
-
-export default AttributeTable;
+}

@@ -7,15 +7,13 @@ const AttributeDeleteModal = ({ ref, slug }) => {
 
   const mutation = useMutation({
     mutationFn: deleteAttribute,
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attributes"] });
-      toast.success(data?.message);
+      toast.success("Attribute Deleted");
       ref.current.close();
     },
-    onError: (error) => {
-      toast.error(
-        error?.response?.data?.message || "Attribute Cannot be Deleted",
-      );
+    onError: () => {
+      toast.error("Attribute Cannot be Deleted");
     },
   });
 
@@ -25,7 +23,7 @@ const AttributeDeleteModal = ({ ref, slug }) => {
         <h3 className="font-bold text-lg">Delete Attribute?</h3>
         <p className="py-4">This will permanently delete this attribute.</p>
         <div className="modal-action">
-          <div className="w-full gap-3 flex">
+          <form method="dialog" className="w-full gap-3 flex">
             {/* if there is a button in form, it will close the modal */}
             <button
               type="button"
@@ -39,14 +37,8 @@ const AttributeDeleteModal = ({ ref, slug }) => {
                 "Delete"
               )}
             </button>
-            <button
-              type="button"
-              className="btn flex-1"
-              onClick={() => ref.current.close()}
-            >
-              Close
-            </button>
-          </div>
+            <button className="btn flex-1">Close</button>
+          </form>
         </div>
       </div>
     </dialog>

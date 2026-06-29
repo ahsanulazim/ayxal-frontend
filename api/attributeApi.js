@@ -6,6 +6,13 @@ export const createAttribute = async (attributeData) => {
   return res.data;
 };
 
+export const updateAttribute = async ({ attributeData, id }) => {
+  const res = await api.patch("/attributes/updateAttribute", attributeData, {
+    params: { id },
+  });
+  return res.data;
+};
+
 export const getAllAttribute = async () => {
   const res = await api.get("/attributes/getAllAttributes");
 

@@ -1,10 +1,12 @@
 import z from "zod";
 
-export const attributeSchema = z.object({
-  name: z.string().min(1, "Name is Required"),
-  slug: z
+export const attributeValidator = z.object({
+  name: z
     .string()
-    .min(1, "Slug is Required")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug"),
-  attributeType: z.string().min(1, "Attribute Type is Required"),
+    .min(1, "Attribute name is required")
+    .min(3, "Attribute name must be at least 3 characters long"),
+  slug: z.string().min(1, "Attribute slug is required"),
+  variations: z
+    .array(z.string().min(1, "Variation value is required"))
+    .min(1, "Attribute variations are required"),
 });
