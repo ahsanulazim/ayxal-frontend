@@ -28,16 +28,8 @@ export const getAllProducts = async () => {
 };
 
 export const getNewArrivals = async () => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/getNewArrivals`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  );
-  return res.json();
+  const res = await api.get("/products/getNewArrivals");
+  return res.data;
 };
 
 export const deleteProduct = async (id) => {
@@ -102,19 +94,19 @@ export const addProductToStore = async (productId) => {
   }
 };
 
-export const getCjStoreProducts = async ({queryKey}) => {
+export const getCjStoreProducts = async ({ queryKey }) => {
   try {
     const [, page] = queryKey;
     const res = await api.get(`/products/cj/getAllStoreProducts`, {
       params: {
         page,
-        },
-      });
-      // Extract productList from the first content item
-      const products = res.data;
-      return products;
-    } catch (error) {
-      console.error("Search Error:", error);
-      throw error;
-    }
-}
+      },
+    });
+    // Extract productList from the first content item
+    const products = res.data;
+    return products;
+  } catch (error) {
+    console.error("Search Error:", error);
+    throw error;
+  }
+};

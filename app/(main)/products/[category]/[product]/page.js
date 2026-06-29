@@ -1,3 +1,4 @@
+import api from "@/axios/axiosInstance";
 import ProductInfo from "@/components/product/ProductInfo";
 import ProductTabs from "@/components/product/ProductTabs";
 import ShopNav from "@/components/product/ShopNav";
@@ -5,22 +6,24 @@ import ShopNav from "@/components/product/ShopNav";
 export const generateMetaData = async ({ params }) => {
   const { product } = await params;
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/getProductBySlug/?slug=${product}`,
-  );
+  const res = await api.get("/products/getProductByPid", {
+    params: { pid: product },
+  });
 
-  if (!res.ok) return { title: "Product Not Found" };
-  const productData = await res.json();
+  if (!res.data) return { title: "Product Not Found" };
+  const productData = res.data;
+
+  console.log(productData);
 
   // Search Engine Meta Headers setup Injection
   return {
-    title: `${productData?.productName} | Oiki Lifestyle`,
+    title: `${productData?.product.productNameEn} | Oiki Lifestyle`,
     description:
-      productData?.description ||
-      `Buy ${productData?.productName} at the best price online.`,
+      productData?.product.description ||
+      `Buy ${productData?.product.productNameEn} at the best price online.`,
     openGraph: {
-      title: productData?.productName,
-      description: productData?.description,
+      title: productData?.product.productNameEn,
+      description: productData?.product.description,
       images: [
         {
           url:
@@ -37,24 +40,22 @@ export const generateMetaData = async ({ params }) => {
 const page = async ({ params }) => {
   const { product } = await params;
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/getProductBySlug/?slug=${product}`,
-    {
-      method: "GET",
-    },
-  );
+  const res = await api.get("/products/getProductByPid", {
+    params: { pid: product },
+  });
 
-  const productData = await res.json();
+  const productData = res.data;
 
   if (!productData) {
     return <div>Product not found</div>;
   }
+  console.log(productData.product);
 
   return (
     <>
-      <ShopNav category={productData?.category} product={productData} />
-      <ProductInfo product={productData} />
-      <ProductTabs product={productData} />
+      {/* <ShopNav category={productData?.category} product={productData} /> */}
+      <ProductInfo product={productData.product} />
+      {/* <ProductTabs product={productData} /> */}
     </>
   );
 };

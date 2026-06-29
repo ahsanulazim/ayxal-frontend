@@ -10,20 +10,15 @@ import { toast } from "react-toastify";
 const ProductInteractiveLayer = ({ product }) => {
   // 1. Initial State Definition
   // Stock ache emon prothom color select hobe; kono color e stock na thakle first color
-  const initialVariant = useMemo(() => {
-    const withStock = product?.variantDetails?.find((v) =>
-      v.sizes?.some((s) => s.stock > 0)
-    );
-    return withStock || product?.variantDetails?.[0];
-  }, [product]);
+  const initialVariant = product?.variants?.[0];
 
   const [selectedColor, setSelectedColor] = useState(
-    initialVariant?.color || "",
+    initialVariant?.variantKey || "",
   );
 
   // Active color variants er filtering optimization memoize kora holo
   const activeVariant = useMemo(() => {
-    return product?.variantDetails?.find((v) => v.color === selectedColor);
+    return product?.variants?.find((v) => v.variantKey === selectedColor);
   }, [product, selectedColor]);
 
   // Active color based context standard sizes setup schema tracking filter
@@ -88,27 +83,13 @@ const ProductInteractiveLayer = ({ product }) => {
           <FaStar /> Best Seller
         </div>
         <h1 className="font-bold text-2xl lg:text-4xl">
-          {product?.productName}
+          {product?.productNameEn}
         </h1>
         {/* PRICE DISPLAY BLOCK (Dynamic Discount Check) */}
         <div className="">
-          {priceRef?.discount ? (
-            <div className="flex items-baseline gap-3">
-              <span className="font-bold text-2xl lg:text-3xl text-main">
-                <span className="font-hind-siliguri">৳</span>
-                {priceRef?.discount}
-              </span>
-              <span className="line-through text-sm opacity-50">
-                <span className="font-hind-siliguri">৳</span>
-                {priceRef?.price}
-              </span>
-            </div>
-          ) : (
-            <span className="font-bold text-2xl lg:text-3xl text-main">
-              <span className="font-hind-siliguri">৳</span>
-              {priceRef?.price}
-            </span>
-          )}
+          <span className="font-bold text-2xl lg:text-3xl text-main">
+            ${Number(product.sellPrice.split("-")[0]) + 15}
+          </span>
         </div>
 
         <div className="bg-base-100 p-4 xs:p-5 rounded-box shadow-xs h-fit my-5">
@@ -121,11 +102,11 @@ const ProductInteractiveLayer = ({ product }) => {
               </span>
             </h3>
             <div className="flex flex-wrap items-center gap-3 mt-2">
-              {product?.variantDetails?.map((variant) => (
+              {product?.variants?.map((variant) => (
                 <button
-                  key={variant.color}
+                  key={variant.variantKey}
                   onClick={() => {
-                    setSelectedColor(variant.color);
+                    setSelectedColor(variant.variantKey);
                     // Notun color er stock ache emon prothom size select korbo
                     setSelectedSize(
                       variant?.sizes?.find((s) => s.stock > 0)?.size || "",
@@ -135,11 +116,11 @@ const ProductInteractiveLayer = ({ product }) => {
                   className="cursor-pointer"
                 >
                   <div
-                    className={`size-12 rounded-lg overflow-hidden border ${selectedColor === variant.color ? "border-main" : "border-base-300"}`}
+                    className={`size-12 rounded-lg overflow-hidden border ${selectedColor === variant.variantKey ? "border-main" : "border-base-300"}`}
                   >
                     <img
-                      src={variant?.swatchImage}
-                      alt={variant.color}
+                      src={variant?.variantImage}
+                      alt={variant.variantKey}
                       className="w-full h-full object-cover"
                     />
                   </div>

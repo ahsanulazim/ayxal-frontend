@@ -23,7 +23,7 @@ const NewArrival = () => {
                 <ProductCardSkeleton key={i} />
               ))
             : newProducts?.map((product) => (
-                <ProductCard key={product.slug} product={product} />
+                <ProductCard key={product.pid} product={product} />
               ))}
         </div>
       </div>

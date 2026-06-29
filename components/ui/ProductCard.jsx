@@ -1,5 +1,4 @@
 import Link from "next/link";
-import TakaSymbol from "./TakaSymbol";
 
 const ProductCard = ({ product }) => {
   // Sob variant er moddhe prothom j variant e kono in-stock size ache, seta nebo
@@ -16,7 +15,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="card bg-base-100 shadow-sm overflow-clip">
-      <Link href={`/products/${product.category}/${product.slug}`}>
+      <Link href={`/products/${product.categoryId}/${product.pid}`}>
         <figure className="relative">
           {!isOutOfStock && (
             <div className="badge badge-success max-md:badge-sm absolute top-3 left-3">
@@ -24,43 +23,28 @@ const ProductCard = ({ product }) => {
             </div>
           )}
           <img
-            src={firstVariant?.swatchImage || product.productImages?.[0]}
+            src={firstVariant?.swatchImage || product.bigImage}
             alt={product.productName}
             className="aspect-square object-cover"
           />
         </figure>
       </Link>
       <div className="card-body p-3">
-        <Link href={`/products/${product.category}/${product.slug}`}>
-          <h2 className="card-title text-xs xs:text-sm font-normal">
-            {product.productName}
+        <Link href={`/products/${product.categoryId}/${product.pid}`}>
+          <h2 className="card-title text-xs xs:text-sm font-normal line-clamp-2">
+            {product.productNameEn}
           </h2>
         </Link>
-        {displaySize?.discount ? (
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold text-sm xs:text-lg text-main">
-              <TakaSymbol />
-              {displaySize.discount}
-            </span>
-            <span className="line-through text-xs opacity-50">
-              <TakaSymbol />
-              {displaySize.price}
-            </span>
-          </div>
-        ) : (
-          <p className="font-bold text-sm xs:text-lg">
-            <TakaSymbol />
-            {displaySize?.price}
-          </p>
-        )}
+
+        <p className="font-bold text-sm xs:text-lg">
+          ${Number(product.sellPrice.split("-")[0]) + 15}
+        </p>
         <div className="card-actions justify-end">
           <Link
-            href={`/products/${product.category}/${product.slug}`}
-            className={`btn btn-sm w-full ${
-              isOutOfStock ? "btn-disabled" : "btn-main"
-            }`}
+            href={`/products/${product.categoryId}/${product.pid}`}
+            className={`btn btn-sm w-full btn-main`}
           >
-            {isOutOfStock ? "Out of Stock" : "Buy Now"}
+            Buy Now
           </Link>
         </div>
       </div>
