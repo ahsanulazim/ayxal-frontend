@@ -9,12 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
     "@ckeditor/ckeditor5-react": "^11.2.0",
     "@ckeditor/ckeditor5-upload": "^48.2.0",
     "@tanstack/react-form-nextjs": "^1.33.0",
     "@tanstack/react-query": "^5.100.9",
     "axios": "^1.17.0",
+    "ckeditor5": "^48.2.0",
     "firebase": "^12.13.0",
     "html-react-parser": "^6.1.1",
     "moment": "^2.30.1",

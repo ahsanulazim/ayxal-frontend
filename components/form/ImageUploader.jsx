@@ -78,7 +78,7 @@ const ImageUploader = ({ label }) => {
         )}
       </div>
       {images.length > 0 && (
-        <aside className="grid grid-cols-8 gap-4 mt-5 items-center">
+        <aside className="grid grid-cols-6 gap-4 mt-5 items-center">
           {images.map((image, i) => (
             <div
               className="rounded-sm border border-[#eaeaea] box-border p-1"

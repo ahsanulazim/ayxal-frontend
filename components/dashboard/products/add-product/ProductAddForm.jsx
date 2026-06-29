@@ -3,7 +3,7 @@
 import { useAppForm } from "@/components/form/CustomFormHook";
 import { MyContext } from "@/context/MyProvider";
 import { useContext } from "react";
-import z from "zod";
+import z, { nullable } from "zod";
 
 const ProductAddForm = () => {
   const { handleSubmit, SubmitButton, reset, AppField, AppForm } = useAppForm({
@@ -18,7 +18,7 @@ const ProductAddForm = () => {
         sku: "",
         stock: "",
         price: "",
-        salePrice: "",
+        discount: "",
       },
     },
     onSubmit: ({ value }) => console.log(value),
@@ -26,12 +26,19 @@ const ProductAddForm = () => {
       onSubmit: z.object({
         name: z.string().min(1, "Name is required"),
         category: z.string().min(1, "Category is required"),
-        brand: z.string().min(1, "Brand is required"),
+        brand: z.string().optional().nullable(),
         productImages: z
           .array(z.any())
           .min(1, "Product Images is required")
           .transform((value) => value.map((item) => item.file)),
         productDescription: z.string().min(1, "Description is required"),
+        productType: z.string(),
+        simpleProduct: z.object({
+          sku: z.string().min(1, "SKU is required"),
+          stock: z.string().min(1, "Stock is required"),
+          price: z.string().min(1, "Price is required"),
+          discount: z.string().optional().nullable(),
+        }),
       }),
     },
   });
