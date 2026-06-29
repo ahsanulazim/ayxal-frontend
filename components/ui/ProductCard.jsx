@@ -37,7 +37,7 @@ const ProductCard = ({ product }) => {
         </Link>
 
         <p className="font-bold text-sm xs:text-lg">
-          ${Number(product.sellPrice.split("-")[0]) + 15}
+          ${product?.sellPrice ? Number(product.sellPrice.split("-")[0]) + 15 : 0}
         </p>
         <div className="card-actions justify-end">
           <Link
