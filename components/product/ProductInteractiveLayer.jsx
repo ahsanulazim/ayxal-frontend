@@ -88,7 +88,7 @@ const ProductInteractiveLayer = ({ product }) => {
         {/* PRICE DISPLAY BLOCK (Dynamic Discount Check) */}
         <div className="">
           <span className="font-bold text-2xl lg:text-3xl text-main">
-            ${Number(product.sellPrice.split("-")[0]) + 15}
+            ${product?.sellPrice ? Number(product.sellPrice.split("-")[0]) + 15 : 0}
           </span>
         </div>
 

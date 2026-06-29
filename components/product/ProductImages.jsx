@@ -16,9 +16,11 @@ const ProductImages = ({ product, selectedColor }) => {
   //     : [];
   // }, [product, selectedColor]);
 
+  const images = product?.productImageSet || [];
+
   const settings = {
     customPaging: function (i) {
-      const img = product.productImageSet[i];
+      const img = images[i];
       return (
         <a className="block w-full h-full aspect-square">
           <img
@@ -32,14 +34,14 @@ const ProductImages = ({ product, selectedColor }) => {
     dots: true,
     dotsClass:
       "slick-dots slick-thumb flex gap-2 justify-center mt-4 static! *:w-14! *:h-14! *:rounded-lg! *:overflow-hidden! [&_.slick-active_img]:border-main! [&_.slick-active_img]:border-2!",
-    infinite: product.productImageSet.length > 1,
+    infinite: images.length > 1,
     speed: 400,
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: false,
   };
 
-  if (product.productImageSet.length === 0) {
+  if (images.length === 0) {
     return (
       <div className="w-full aspect-square bg-base-300 flex items-center justify-center rounded-box">
         <span className="text-sm opacity-40">No Image Found</span>
@@ -50,7 +52,7 @@ const ProductImages = ({ product, selectedColor }) => {
   return (
     <div className="slider-container w-full">
       <Slider {...settings}>
-        {product.productImageSet.map((image, i) => (
+        {images.map((image, i) => (
           <div
             key={i}
             className="outline-none aspect-square w-full bg-base-100 rounded-box overflow-hidden border border-base-300"
