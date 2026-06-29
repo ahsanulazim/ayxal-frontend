@@ -12,6 +12,7 @@ const ProductAddForm = () => {
       category: "",
       brand: "",
       productImages: [],
+      productDescription: "",
     },
     onSubmit: ({ value }) => console.log(value),
     validators: {
@@ -23,6 +24,7 @@ const ProductAddForm = () => {
           .array(z.any())
           .min(1, "Product Images is required")
           .transform((value) => value.map((item) => item.file)),
+        productDescription: z.string().min(1, "Description is required"),
       }),
     },
   });
@@ -79,6 +81,13 @@ const ProductAddForm = () => {
           name="productImages"
           children={(field) => (
             <field.ImageUploader label="Upload Product Images" />
+          )}
+        />
+
+        <AppField
+          name="productDescription"
+          children={(field) => (
+            <field.DescriptionField label="Product Description" />
           )}
         />
 

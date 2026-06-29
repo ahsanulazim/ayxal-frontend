@@ -8,6 +8,7 @@ import TextField from "./TextField";
 import SelectField from "./SelectField";
 import ImageUploader from "./ImageUploader";
 import SubmitButton from "./SubmitButton";
+import DescriptionField from "./DescriptionField";
 
 export const { useFieldContext, useFormContext, fieldContext, formContext } =
   createFormHookContexts();
@@ -17,6 +18,7 @@ export const { useAppForm } = createFormHook({
     TextField,
     SelectField,
     ImageUploader,
+    DescriptionField,
   },
   formComponents: {
     SubmitButton,
