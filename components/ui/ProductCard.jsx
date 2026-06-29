@@ -24,7 +24,7 @@ const ProductCard = ({ product }) => {
           )}
           <img
             src={firstVariant?.swatchImage || product.bigImage}
-            alt={product.productName}
+            alt={product.productNameEn}
             className="aspect-square object-cover"
           />
         </figure>
