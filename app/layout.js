@@ -10,12 +10,6 @@ const dm_sans = DM_Sans({
   subsets: ["latin"],
 });
 
-const hind_siliguri = Hind_Siliguri({
-  variable: "--font-hind-siliguri",
-  subsets: ["latin", "bengali"],
-  weight: ["400", "500", "600"],
-});
-
 export const metadata = {
   title: "Prety Pet",
   description: "Pet Accessories and Gadgets",
@@ -26,10 +20,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${dm_sans.variable} ${hind_siliguri.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${dm_sans.variable} h-full antialiased`}>
       <body className="min-h-full font-dm-sans">
         <QueryProvider>
           <MyProvider>

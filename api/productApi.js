@@ -97,7 +97,7 @@ export const addProductToStore = async (productId) => {
 export const getCjStoreProducts = async ({ queryKey }) => {
   try {
     const [, page] = queryKey;
-    const res = await api.get(`/products/cj/getAllStoreProducts`, {
+    const res = await api.get(`/products/cj/getListedProducts`, {
       params: {
         page,
       },

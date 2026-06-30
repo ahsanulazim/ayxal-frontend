@@ -21,6 +21,8 @@ const CjTable = () => {
     router.push(`?page=${p}`);
   };
 
+  console.log(data);
+
   return (
     <>
       <div className="overflow-x-auto bg-base-100 rounded-md">
@@ -43,20 +45,46 @@ const CjTable = () => {
           <tbody>
             {/* row 1 */}
             {isLoading ? (
-              <tr>
-                <td colSpan="4">loading...</td>
-              </tr>
+              Array.from({ length: 10 }).map((_, i) => (
+                <tr key={i}>
+                  <th>
+                    <div className="skeleton size-6"></div>
+                  </th>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="skeleton aspect-square size-10"></div>
+                      <div className="skeleton h-6 w-64 flex-1"></div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-6 w-28"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-6 w-28"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-6 w-26"></div>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <div className="skeleton size-8 rounded-full"></div>
+                      <div className="skeleton size-8 rounded-full"></div>
+                      <div className="skeleton size-8 rounded-full"></div>
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : isError ? (
               <tr>
                 <td colSpan="4">Something went wrong</td>
               </tr>
-            ) : data?.products?.length === 0 ? (
+            ) : data?.data?.content?.length === 0 ? (
               <tr>
                 <td colSpan="4">No products found</td>
               </tr>
             ) : (
-              data?.products?.map((product) => (
-                <tr key={product.pid}>
+              data?.data?.content?.map((product) => (
+                <tr key={product.productId}>
                   <th>
                     <label>
                       <input type="checkbox" className="checkbox" />
@@ -74,17 +102,14 @@ const CjTable = () => {
                       </div>
                       <div className="">
                         <h3 className="font-bold line-clamp-2">
-                          {product.productNameEn}
+                          {product.nameEn}
                         </h3>
-                        <div className="text-sm opacity-50">
-                          {product.categoryName}
-                        </div>
                       </div>
                     </div>
                   </td>
                   <td>${product.sellPrice}</td>
-                  <td>{product.packingWeight}g</td>
-                  <td>{moment(product.createdAt).format("MMMM Do, YYYY")}</td>
+                  <td>{product.packWeight}g</td>
+                  <td>{moment(product.createAt).format("MMMM Do, YYYY")}</td>
                   <th>
                     <div className="flex items-center gap-2">
                       <button className="btn btn-circle btn-info">
@@ -104,7 +129,7 @@ const CjTable = () => {
           </tbody>
         </table>
       </div>
-      {data?.totalPages > 1 && (
+      {data?.data.totalPages > 1 && (
         <div className="join mt-5 flex-wrap">
           <button
             disabled={page === 1}
@@ -113,11 +138,11 @@ const CjTable = () => {
           >
             «
           </button>
-          {Array.from({ length: data?.totalPages }, (_, i) => i + 1)
+          {Array.from({ length: data?.data.totalPages }, (_, i) => i + 1)
             .filter(
               (p) =>
                 p === 1 ||
-                p === data?.totalPages ||
+                p === data?.data.totalPages ||
                 (p >= page - 2 && p <= page + 2),
             )
             .map((p, idx, arr) => {
@@ -140,7 +165,7 @@ const CjTable = () => {
               );
             })}
           <button
-            disabled={page >= data?.totalPages}
+            disabled={page >= data?.data.totalPages}
             onClick={() => goToPage(page + 1)}
             className="join-item btn"
           >
