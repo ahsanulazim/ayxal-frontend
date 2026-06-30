@@ -21,50 +21,17 @@ const ProductInteractiveLayer = ({ product }) => {
     return product?.variants?.find((v) => v.variantKey === selectedColor);
   }, [product, selectedColor]);
 
-  // Active color based context standard sizes setup schema tracking filter
-  // Stock ache emon prothom size default select hobe; na thakle first size
-  const [selectedSize, setSelectedSize] = useState(
-    initialVariant?.sizes?.find((s) => s.stock > 0)?.size ||
-      initialVariant?.sizes?.[0]?.size ||
-      "",
-  );
-
-  // Active size node tracking er madhhome deterministic individual item stock extract
-  const activeSizeDetail = useMemo(() => {
-    return activeVariant?.sizes?.find((s) => s.size === selectedSize);
-  }, [activeVariant, selectedSize]);
-
-  const [quantity, setQuantity] = useState(1);
-  const currentStock = activeSizeDetail ? activeSizeDetail.stock : 0;
-  // Price display er jonno fallback — kono size selected na hole prothom size er price show korbe
-  const priceRef = activeSizeDetail || activeVariant?.sizes?.[0];
-
-  // Quantity count controller with logical guards
-  const handleQtyChange = (val) => {
-    if (val < 1) setQuantity(1);
-    else if (val > currentStock) setQuantity(currentStock);
-    else setQuantity(val);
-  };
-
   // add to cart
   const { addToCart } = useContext(MyContext);
+
+  const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = () => {
     if (!activeVariant) {
       toast.error("Please select a color");
       return;
     }
-
-    if (!selectedSize) {
-      toast.error("Please select a size");
-      return;
-    }
-
-    if (quantity > currentStock) {
-      toast.error("Out of stock");
-      return;
-    }
-    const result = addToCart(product, activeVariant, selectedSize, quantity);
+    const result = addToCart(product, activeVariant, quantity === 1);
     if (result) {
       toast.success("Added to cart");
     }
@@ -88,7 +55,10 @@ const ProductInteractiveLayer = ({ product }) => {
         {/* PRICE DISPLAY BLOCK (Dynamic Discount Check) */}
         <div className="">
           <span className="font-bold text-2xl lg:text-3xl text-main">
-            ${product?.sellPrice ? Number(product.sellPrice.split("-")[0]) + 15 : 0}
+            $
+            {product?.sellPrice
+              ? Number(product.sellPrice.split("-")[0]) + 15
+              : 0}
           </span>
         </div>
 
@@ -129,93 +99,32 @@ const ProductInteractiveLayer = ({ product }) => {
             </div>
           </div>
 
-          {/* 2. SIZE SELECTOR WITH STOCK CHECKS */}
-          <div className="my-4">
-            <h3 className="font-bold text-sm">
-              Size:{" "}
-              <span className="text-neutral-400 font-normal">
-                {selectedSize}
-              </span>
-            </h3>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              {activeVariant?.sizes?.map((item) => {
-                const isOutOfStock = item.stock <= 0;
-                return (
-                  <button
-                    key={item.size}
-                    disabled={isOutOfStock}
-                    onClick={() => {
-                      setSelectedSize(item.size);
-                      setQuantity(1);
-                    }}
-                    className={`btn btn-sm btn-square rounded-box transition-all ${
-                      isOutOfStock
-                        ? ""
-                        : selectedSize === item.size
-                          ? "btn-main"
-                          : "btn-outline"
-                    }`}
-                  >
-                    {item.size}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* 3. STOCK & QUANTITY CONTROLS */}
           <div className="my-4 pt-2 border-t border-base-300">
-            <p className="text-sm">
-              Availability:{" "}
-              {currentStock > 0 ? (
-                <span className="badge badge-success badge-sm font-bold text-white">
-                  {currentStock} Items In Stock
+            <div className="my-4 flex items-center gap-3">
+              <span className="text-sm font-bold">Quantity:</span>
+              <div className="join border border-base-300 rounded-box bg-base-100">
+                <button className="btn btn-sm btn-ghost join-item">-</button>
+                <span className="px-4 py-1 flex items-center font-semibold text-sm">
+                  1
                 </span>
-              ) : (
-                <span className="badge badge-error badge-sm font-bold text-white">
-                  Out of Stock
-                </span>
-              )}
-            </p>
-
-            {currentStock > 0 && (
-              <div className="my-4 flex items-center gap-3">
-                <span className="text-sm font-bold">Quantity:</span>
-                <div className="join border border-base-300 rounded-box bg-base-100">
-                  <button
-                    onClick={() => handleQtyChange(quantity - 1)}
-                    className="btn btn-sm btn-ghost join-item"
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-1 flex items-center font-semibold text-sm">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => handleQtyChange(quantity + 1)}
-                    className="btn btn-sm btn-ghost join-item"
-                  >
-                    +
-                  </button>
-                </div>
+                <button className="btn btn-sm btn-ghost join-item">+</button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* ACTION TRIGGER BUNDLES */}
           <div className="flex gap-3 mt-5">
             <button
-              disabled={currentStock === 0}
               onClick={handleAddToCart}
-              className={`btn ${currentStock === 0 ? "btn-disabled" : "btn-neutral"} flex-1`}
+              className={`btn btn-neutral flex-1`}
             >
               Add to Cart
             </button>
             <button
-              disabled={currentStock === 0}
-              className={`btn ${currentStock === 0 ? "" : "btn-main"} flex-1`}
+              className={`btn btn-main flex-1`}
               onClick={() =>
-                addToCart(product, activeVariant, selectedSize, quantity, true)
+                addToCart(product, activeVariant, quantity === 1, true)
               }
             >
               Buy Now

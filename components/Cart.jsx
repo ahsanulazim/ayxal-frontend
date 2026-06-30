@@ -9,6 +9,8 @@ const Cart = () => {
   const { cartItems, removeFromCart, calculateTotalItem, calculateTotalPrice } =
     useContext(MyContext);
 
+  console.log(cartItems);
+
   return (
     <div className="dropdown dropdown-end">
       <div tabIndex={0} role="button" className="btn btn-circle btn-ghost">
@@ -47,13 +49,9 @@ const Cart = () => {
                     alt={item.productName}
                   />
                   <div>
-                    <h3>
-                      {item.productName}-{item.size}
-                    </h3>
+                    <h3 className="line-clamp-2">{item.productName}</h3>
                     <p className="text-xs font-bold">
-                      {item.quantity}x <TakaSymbol />
-                      {item.price} = <TakaSymbol />
-                      {item.quantity * item.price}
+                      {1} x ${item.price} = ${1 * item.price}
                     </p>
                   </div>
                   <button

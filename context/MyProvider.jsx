@@ -86,50 +86,32 @@ const MyProvider = ({ children }) => {
   }, [cartItems, isHydrated]);
 
   // 3. Add function to update cart items
-  const addToCart = (product, variant, size, quantity) => {
-    const cartItemId = `${product._id}-${variant.color}-${size}`;
+  const addToCart = (product, variant, quantity) => {
+    const cartItemId = `${product.pid}-${variant}`;
 
     // Check if product variant already exists in cart
     const existingCartItem = cartItems.find((item) => item.id === cartItemId);
 
-    const activeSizeDetail = variant?.sizes?.find((s) => s.size === size);
-    const stock = activeSizeDetail ? activeSizeDetail.stock : 0;
-
     if (existingCartItem) {
       // If exists, update the quantity
       const newQuantiy = existingCartItem.quantity + quantity;
-
-      if (newQuantiy > stock) {
-        toast.error("Product is out of stock");
-        return false;
-      }
       setCartItems((prevCartItems) =>
         prevCartItems.map((item) =>
           item.id === cartItemId ? { ...item, quantity: newQuantiy } : item,
         ),
       );
     } else {
-      if (quantity > stock) {
-        toast.error("Product is out of stock");
-        return false;
-      }
       // If not exists, add new item to cart
       const newCartItem = {
         id: cartItemId,
-        productId: product._id,
-        productName: product.productName,
-        color: variant.color,
-        size: size,
+        productId: product.pid,
+        productName: product.productNameEn,
+        variantKey: variant,
         quantity: quantity,
-        price: activeSizeDetail?.discount
-          ? activeSizeDetail.discount
-          : activeSizeDetail?.price
-            ? activeSizeDetail.price
-            : product.discount
-              ? product.discount
-              : product.price,
-        image: variant?.imageGallery?.[0],
-        stock: stock,
+        price: product?.sellPrice
+          ? Number(product.sellPrice.split("-")[0]) + 15
+          : 0,
+        image: product.bigImage,
       };
       setCartItems((prevCartItems) => [...prevCartItems, newCartItem]);
     }

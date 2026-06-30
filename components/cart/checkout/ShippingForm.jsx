@@ -31,9 +31,9 @@ const ShippingForm = ({ ref, setIsPending, paymentMethod }) => {
 
   const districtOptions = locationsLoading
     ? [{ value: "", label: "Loading...", isDisabled: true }]
-    : locations?.map((location) => ({
-        value: location?.id,
-        label: location?.name?.en,
+    : locations?.locations[0]?.states.map((location) => ({
+        value: location?.abbreviation,
+        label: location?.name,
       }));
 
   const queryClient = useQueryClient();
@@ -132,18 +132,18 @@ const ShippingForm = ({ ref, setIsPending, paymentMethod }) => {
           )}
         </div>
         <div className="fieldset flex-1">
-          <label htmlFor="district" className="label">
-            District<span className="text-red-600">*</span>
+          <label htmlFor="state" className="label">
+            State<span className="text-red-600">*</span>
           </label>
           <Controller
-            name="district"
+            name="state"
             control={control}
-            rules={{ required: "District is required" }}
+            rules={{ required: "state is required" }}
             render={({ field }) => (
               <Select
                 {...field}
                 options={districtOptions}
-                placeholder="Select District"
+                placeholder="Select State"
                 // এখানে value কে option object বানাও
                 value={
                   districtOptions.find((opt) => opt.value === field.value) ||
