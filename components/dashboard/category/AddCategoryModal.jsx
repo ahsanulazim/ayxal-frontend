@@ -1,4 +1,5 @@
 "use client";
+import { useRef } from "react";
 import api from "@/axios/axiosInstance";
 import { categoryValidator } from "@/validator/categoryValidator";
 import { useForm } from "@tanstack/react-form-nextjs";
@@ -7,17 +8,30 @@ import { LuLogOut, LuPlus } from "react-icons/lu";
 
 const AddCategoryModal = ({ ref }) => {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef(null);
 
-  const { handleSubmit, Field, Subscribe, reset } = useForm({
+  const { handleSubmit, Field, Subscribe, reset, setFieldValue } = useForm({
     defaultValues: {
       name: "",
       slug: "",
+      thumbnail: null,
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
-      const res = await api.post("/categories/create", value);
+      const formData = new FormData();
+      formData.append("name", value.name);
+      formData.append("slug", value.slug);
+      formData.append("thumbnail", value.thumbnail);
+
+      const res = await api.post("/categories/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       if (res.data.success) {
         reset();
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
         ref.current.close();
         queryClient.invalidateQueries({ queryKey: ["categories"] });
       }
@@ -52,7 +66,13 @@ const AddCategoryModal = ({ ref }) => {
                     type="text"
                     name={field.name}
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value);
+                      setFieldValue(
+                        "slug",
+                        e.target.value.toLowerCase().replace(/\s+/g, "-"),
+                      );
+                    }}
                     onBlur={field.handleBlur}
                     className="input w-full"
                     placeholder="Dog Belts"
@@ -90,6 +110,35 @@ const AddCategoryModal = ({ ref }) => {
             }}
           />
 
+          <Field
+            name="thumbnail"
+            children={(field) => {
+              const { errors } = field.state.meta;
+              return (
+                <>
+                  <fieldset className="fieldset">
+                    <label htmlFor={field.name} className="label">
+                      Upload thumbnail
+                    </label>
+                    <input
+                      type="file"
+                      name={field.name}
+                      ref={fileInputRef}
+                      onChange={(e) => field.handleChange(e.target.files[0])}
+                      onBlur={field.handleBlur}
+                      className="file-input w-full"
+                      accept="image/*"
+                    />
+                    <label className="label">Max size 2MB</label>
+                  </fieldset>
+                  {errors.length > 0 && (
+                    <p className="text-error">{errors[0].message}</p>
+                  )}
+                </>
+              );
+            }}
+          />
+
           <Subscribe
             selector={(state) => [
               state.canSubmit,
@@ -100,7 +149,7 @@ const AddCategoryModal = ({ ref }) => {
               <button
                 type="submit"
                 disabled={!canSubmit || isSubmitting || !isDirty}
-                className="btn btn-main w-full"
+                className={`btn ${!canSubmit || isSubmitting || !isDirty ? "" : "btn-main"} w-full`}
               >
                 {isSubmitting ? (
                   <>
@@ -120,6 +169,9 @@ const AddCategoryModal = ({ ref }) => {
             onClick={() => {
               ref.current.close();
               reset();
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
             }}
             className="btn btn-error"
           >

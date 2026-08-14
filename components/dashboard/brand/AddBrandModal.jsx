@@ -15,7 +15,6 @@ const AddBrandModal = ({ ref }) => {
       logo: null,
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
       const formData = new FormData();
       formData.append("label", value.label);
       formData.append("value", value.value);
@@ -29,7 +28,7 @@ const AddBrandModal = ({ ref }) => {
       if (res.data.success) {
         reset();
         ref.current.close();
-        //queryClient.invalidateQueries({ queryKey: ["brands"] });
+        queryClient.invalidateQueries({ queryKey: ["brands"] });
       }
     },
     validators: {

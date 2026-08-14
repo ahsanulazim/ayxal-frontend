@@ -1,25 +1,26 @@
 "use client";
 import { MyContext } from "@/context/MyProvider";
 import moment from "moment";
-import { useContext } from "react";
+import { useContext, useRef, useState } from "react";
 import { LuSquarePen, LuTrash2 } from "react-icons/lu";
+import CategoryDeleteModal from "./CategoryDeleteModal";
 
 const CategoryData = () => {
   const { categories, categoriesLoading, categoriesError } =
     useContext(MyContext);
 
+  const [categoryId, setCategoryId] = useState("");
+  const categoryDelRef = useRef(null);
+
   return (
     <div className="my-5">
       <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+        <CategoryDeleteModal ref={categoryDelRef} id={categoryId} />
         <table className="table">
           {/* head */}
           <thead>
             <tr className="bg-base-200">
-              <th>
-                <label>
-                  <input type="checkbox" className="checkbox" />
-                </label>
-              </th>
+              <th>Thumbnail</th>
               <th>Category</th>
               <th>Slug</th>
               <th>Items</th>
@@ -59,9 +60,24 @@ const CategoryData = () => {
               categories?.map((category) => (
                 <tr key={category._id}>
                   <td>
-                    <label>
-                      <input type="checkbox" className="checkbox" />
-                    </label>
+                    {category.thumbnail ? (
+                      <div className="avatar">
+                        <div className="mask mask-squircle h-12 w-12">
+                          <img
+                            src={category.thumbnail.url}
+                            alt={category.name}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="avatar avatar-placeholder">
+                        <div className="bg-neutral text-neutral-content w-12 rounded-full">
+                          <span className="text-xl">
+                            {category.name.slice(0, 1).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </td>
                   <td>{category.name}</td>
                   <td>{category.slug}</td>
@@ -72,7 +88,13 @@ const CategoryData = () => {
                       <button className="btn btn-circle btn-soft btn-info">
                         <LuSquarePen />
                       </button>
-                      <button className="btn btn-circle btn-soft btn-error">
+                      <button
+                        className="btn btn-circle btn-soft btn-error"
+                        onClick={() => {
+                          setCategoryId(category._id);
+                          categoryDelRef.current.showModal();
+                        }}
+                      >
                         <LuTrash2 />
                       </button>
                     </div>
