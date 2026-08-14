@@ -6,7 +6,18 @@ export const attributeValidator = z.object({
     .min(1, "Attribute name is required")
     .min(3, "Attribute name must be at least 3 characters long"),
   slug: z.string().min(1, "Attribute slug is required"),
-  variations: z
-    .array(z.string().min(1, "Variation value is required"))
-    .min(1, "Attribute variations are required"),
+  variations: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        return val
+          .split(",")
+          .map((v) => v.trim())
+          .filter((v) => v.length > 0);
+      }
+      return val;
+    },
+    z
+      .array(z.string().min(1, "Variation value is required"))
+      .min(1, "Attribute variations are required"),
+  ),
 });

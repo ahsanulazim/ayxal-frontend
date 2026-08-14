@@ -6,36 +6,38 @@ const AttributeCard = ({ attribute, setAttributeSlug, ref }) => {
   const attributeEditRef = useRef(null);
 
   return (
-    <div className="card bg-base-100">
+    <div className="card bg-base-200">
       <AddAttributeModal
         isEditing={true}
         ref={attributeEditRef}
         attribute={attribute}
       />
-      <div className="card-body">
-        <div className="flex items-center justify-between">
-          <h2 className="card-title">{attribute.name}</h2>
-          <span className="badge badge-primary badge-soft badge-sm">
-            {attribute.slug}
-          </span>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {attribute.variations.length > 5
-            ? attribute.variations.slice(0, 4).map((value, index) => (
-                <span key={index} className="badge badge-soft">
-                  {value}
-                </span>
-              ))
-            : attribute.variations.map((value, index) => (
-                <span key={index} className="badge badge-soft">
-                  {value}
-                </span>
-              ))}
-          {attribute.variations.length > 4 && (
-            <span className="badge badge-soft">
-              +{attribute.variations.length - 4} more
+      <div className="card-body justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="card-title">{attribute.name}</h2>
+            <span className="badge badge-primary badge-soft badge-sm">
+              {attribute.slug}
             </span>
-          )}
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {attribute.options.length > 5
+              ? attribute.options.slice(0, 4).map((option) => (
+                  <span key={option.value} className="badge badge-soft">
+                    {option.label}
+                  </span>
+                ))
+              : attribute.options.map((option) => (
+                  <span key={option.value} className="badge badge-soft">
+                    {option.label}
+                  </span>
+                ))}
+            {attribute.options.length > 4 && (
+              <span className="badge badge-soft">
+                +{attribute.options.length - 4} more
+              </span>
+            )}
+          </div>
         </div>
         <div className="card-actions justify-end mt-3">
           <button

@@ -3,9 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCjStoreProducts } from "@/api/productApi";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LuEye, LuTrash2, LuUpload } from "react-icons/lu";
+import { LuEye, LuUpload } from "react-icons/lu";
 import moment from "moment";
 import React from "react";
+import Link from "next/link";
 
 const CjTable = () => {
   const router = useRouter();
@@ -67,7 +68,6 @@ const CjTable = () => {
                     <div className="flex items-center gap-2">
                       <div className="skeleton size-8 rounded-full"></div>
                       <div className="skeleton size-8 rounded-full"></div>
-                      <div className="skeleton size-8 rounded-full"></div>
                     </div>
                   </td>
                 </tr>
@@ -113,12 +113,13 @@ const CjTable = () => {
                       <button className="btn btn-circle btn-info">
                         <LuEye />
                       </button>
-                      <button className="btn btn-success btn-circle">
-                        <LuUpload />
-                      </button>
-                      <button className="btn btn-circle btn-error">
-                        <LuTrash2 />
-                      </button>
+                      <Link
+                        href={`/dashboard/cj-dropshipping/${product.productId}`}
+                      >
+                        <button className="btn btn-success btn-circle">
+                          <LuUpload />
+                        </button>
+                      </Link>
                     </div>
                   </th>
                 </tr>

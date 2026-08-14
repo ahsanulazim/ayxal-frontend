@@ -1,5 +1,6 @@
 "use client";
 import { getAllAttribute } from "@/api/attributeApi";
+import { getAllBrands } from "@/api/brandApi";
 import { getAllCategories } from "@/api/categoryApi";
 import { getAllLocations } from "@/api/locationApi";
 import { getAllProducts } from "@/api/productApi";
@@ -9,7 +10,6 @@ import { auth } from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
 import { onAuthStateChanged } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 
 export const MyContext = createContext();
 
@@ -198,6 +198,17 @@ const MyProvider = ({ children }) => {
     queryFn: getAllAttribute,
   });
 
+  //brands
+
+  const {
+    data: brands,
+    isLoading: brandsLoading,
+    error: brandsError,
+  } = useQuery({
+    queryKey: ["brands"],
+    queryFn: getAllBrands,
+  });
+
   //allVariants
 
   const {
@@ -239,6 +250,9 @@ const MyProvider = ({ children }) => {
     allVariants,
     allVariantsLoading,
     allVariantsError,
+    brands,
+    brandsLoading,
+    brandsError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

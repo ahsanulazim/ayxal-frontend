@@ -1,17 +1,8 @@
 import api from "@/axios/axiosInstance";
 
 export const createProduct = async (productData) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/createProduct`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(productData),
-    },
-  );
-  return res.json();
+  const res = await api.post("/products/createProduct", productData);
+  return res.data;
 };
 
 export const getAllProducts = async () => {

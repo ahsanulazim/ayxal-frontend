@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import {
   LuBox,
+  LuBuilding2,
   LuFileBox,
   LuLayoutDashboard,
   LuMapPin,
@@ -34,9 +35,7 @@ const Layout = ({ children }) => {
         {/* Navbar */}
         <DashNav />
         {/* Page content here */}
-        <main className="p-4 bg-base-300 min-h-[calc(100dvh-64px)]">
-          {children}
-        </main>
+        <main className="p-4 min-h-[calc(100dvh-64px)]">{children}</main>
       </div>
 
       <div className="drawer-side is-drawer-close:overflow-visible">
@@ -45,7 +44,7 @@ const Layout = ({ children }) => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+        <div className="flex min-h-full flex-col items-start bg-base-300 is-drawer-close:w-14 is-drawer-open:w-64">
           {/* Sidebar content here */}
           <ul className="menu w-full grow">
             {/* List item */}
@@ -96,6 +95,18 @@ const Layout = ({ children }) => {
                 {/* Settings icon */}
                 <LuNotebook className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Categories</span>
+              </ActiveLink>
+            </li>
+
+            <li>
+              <ActiveLink
+                href="/dashboard/brand"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="Brands"
+              >
+                {/* Settings icon */}
+                <LuBuilding2 className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Brands</span>
               </ActiveLink>
             </li>
             <li>

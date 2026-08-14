@@ -11,12 +11,27 @@ const AddAttributeModalTwo = ({ ref, isEditing, attribute }) => {
     defaultValues: {
       name: isEditing ? attribute.name : "",
       slug: isEditing ? attribute.slug : "",
-      variations: isEditing ? attribute.variations : [],
+      variations: isEditing
+        ? attribute.options.map((opt) => opt.label || opt.value).join(", ")
+        : "",
     },
-    onSubmit: ({ value }) =>
-      isEditing
-        ? updateMutation.mutate({ attributeData: value, id: attribute._id })
-        : addMutation.mutate(value),
+    onSubmit: ({ value }) => {
+      const payload = {
+        ...value,
+        variations:
+          typeof value.variations === "string"
+            ? value.variations
+                .split(",")
+                .map((v) => v.trim())
+                .filter((v) => v.length > 0)
+            : value.variations,
+      };
+      console.log(payload);
+
+      return isEditing
+        ? updateMutation.mutate({ attributeData: payload, id: attribute._id })
+        : addMutation.mutate(payload);
+    },
     validators: {
       onSubmit: attributeValidator,
     },
@@ -156,7 +171,11 @@ const AddAttributeModalTwo = ({ ref, isEditing, attribute }) => {
                       );
                     }}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    value={field.state.value}
+                    value={
+                      Array.isArray(field.state.value)
+                        ? field.state.value.join(", ")
+                        : field.state.value
+                    }
                     placeholder="e.g. 128GB, 256GB, 512GB, 1TB"
                     className="input w-full"
                   />

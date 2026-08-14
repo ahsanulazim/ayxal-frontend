@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LuHeart, LuMenu, LuSearch, LuUser } from "react-icons/lu";
 import Search from "./Search";
-import { FaMoon } from "react-icons/fa6";
+import { FaGift, FaMoon } from "react-icons/fa6";
 import Cart from "./Cart";
 
 const Navbar = () => {
@@ -40,10 +40,12 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="navbar-end lg:w-auto">
-          <button className="btn btn-outline border-main rounded-full mr-4 max-lg:hidden hover:[&>svg]:text-white hover:bg-main hover:text-white">
-            <FaMoon className="h-5 w-5 animate-pulse text-main" />
-            EID 2K26
-          </button>
+          <Link href="/offers">
+            <button className="btn btn-outline border-main rounded-full mr-4 max-lg:hidden hover:[&>svg]:text-white hover:bg-main hover:text-white">
+              <FaGift className="h-5 w-5 animate-pulse text-main" />
+              Offers
+            </button>
+          </Link>
           <Link href="/login">
             <button className="hidden lg:inline-flex btn btn-main rounded-full">
               <LuUser className="size-[1.2rem]" />
