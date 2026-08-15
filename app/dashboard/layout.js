@@ -9,6 +9,7 @@ import {
   LuBox,
   LuBuilding2,
   LuFileBox,
+  LuGalleryThumbnails,
   LuLayoutDashboard,
   LuMapPin,
   LuNotebook,
@@ -86,6 +87,16 @@ const Layout = ({ children }) => {
             </li>
 
             {/* List item */}
+            <li>
+              <ActiveLink
+                href="/dashboard/carousel"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="Carousel"
+              >
+                <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Carousel</span>
+              </ActiveLink>
+            </li>
             <li>
               <ActiveLink
                 href="/dashboard/categories"

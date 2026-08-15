@@ -1,7 +1,13 @@
-import categories from "@/json/categories.json";
+"use client";
+
 import CategoryCard from "../ui/CategoryCard";
+import { useContext } from "react";
+import { MyContext } from "@/context/MyProvider";
 
 const Categories = () => {
+  const { categories, categoriesLoading, categoriesError } =
+    useContext(MyContext);
+
   return (
     <section className="px-5 mb-5">
       <div className="max-w-360 mx-auto">
@@ -9,9 +15,13 @@ const Categories = () => {
           Popular Categories
         </h2>
         <div className="flex justify-between gap-5 mt-5">
-          {categories.map((category) => (
-            <CategoryCard key={category.title} category={category} />
-          ))}
+          {categoriesLoading
+            ? "loading..."
+            : categoriesError
+              ? "Cannot get categories"
+              : categories.map((category) => (
+                  <CategoryCard key={category.slug} category={category} />
+                ))}
         </div>
       </div>
     </section>

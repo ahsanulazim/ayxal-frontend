@@ -3,17 +3,22 @@ import Link from "next/link";
 
 const CategoryCard = ({ category }) => {
   return (
-    <Link href={category.link}>
-      <Image
-        src={category.image}
-        alt={category.title}
-        width={600}
-        height={900}
-        className="rounded-box"
-      />
-      <h3 className=" text-xs xs:text-sm sm:text-lg text-center font-medium">
-        {category.title}
-      </h3>
+    <Link
+      href={category.slug}
+      className=" hover:shadow-xl aspect-square border border-gray-300 rounded-box p-5"
+    >
+      <div>
+        <Image
+          src={category.thumbnail.url}
+          alt={category.name}
+          width={300}
+          height={300}
+          className="rounded-box w-full"
+        />
+        <h3 className="text-xs xs:text-sm text-center font-medium">
+          {category.name}
+        </h3>
+      </div>
     </Link>
   );
 };

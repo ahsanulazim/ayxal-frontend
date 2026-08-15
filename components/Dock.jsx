@@ -10,10 +10,10 @@ const Dock = () => {
         <span className="dock-label">Home</span>
       </Link>
 
-      <button className="">
+      <Link href="/offers">
         <FaMoon className="size-[1.2em] animate-pulse" />
-        <span className="dock-label">EID 2K26</span>
-      </button>
+        <span className="dock-label">Offers</span>
+      </Link>
 
       <Link href="/cart">
         <LuShoppingBag className="size-[1.2em]" />

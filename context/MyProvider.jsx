@@ -1,6 +1,7 @@
 "use client";
 import { getAllAttribute } from "@/api/attributeApi";
 import { getAllBrands } from "@/api/brandApi";
+import { getCarousels } from "@/api/carouselApi";
 import { getAllCategories } from "@/api/categoryApi";
 import { getAllLocations } from "@/api/locationApi";
 import { getAllProducts } from "@/api/productApi";
@@ -220,6 +221,16 @@ const MyProvider = ({ children }) => {
     queryFn: getAllAttributesVariations,
   });
 
+  //all carousels
+  const {
+    data: carousels,
+    isLoading: carouselsLoading,
+    isError: carouselsError,
+  } = useQuery({
+    queryKey: ["carousels"],
+    queryFn: getCarousels,
+  });
+
   const data = {
     newUser,
     setNewUser,
@@ -253,6 +264,9 @@ const MyProvider = ({ children }) => {
     brands,
     brandsLoading,
     brandsError,
+    carousels,
+    carouselsLoading,
+    carouselsError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;
