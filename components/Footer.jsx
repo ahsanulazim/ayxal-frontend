@@ -13,9 +13,10 @@ const Footer = () => {
               height={70}
             />
             <p className="max-w-sm text-balance">
-              Oiki is dedicated to preserving Bengali craftsmanship. We bring
-              you ethically made, handcrafted apparel from elegant sarees to
-              trendy Kurtis, designed for the woman who celebrates her roots.
+              PrettyPet is your trusted destination for practical, stylish, and
+              pet-friendly essentials. We carefully select products that make
+              everyday life easier, healthier, and more enjoyable for both pets
+              and their people.
             </p>
           </aside>
           <nav>

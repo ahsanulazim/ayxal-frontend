@@ -7,34 +7,69 @@ import ProductInfo from "./ProductInfo";
 import ProductDescription from "./ProductDescription";
 import ProductSpecifications from "./ProductSpecifications";
 
-import { getDefaultVariationIndex, getImageUrl } from "./utils";
+import {
+  getImageUrl,
+  getInitialSelectedAttributes,
+  findSelectedVariation,
+} from "./utils";
 
 export default function ProductDetails({ product }) {
-  const [selectedVariationIndex, setSelectedVariationIndex] = useState(() =>
-    getDefaultVariationIndex(product?.variations),
+  const [selectedAttributes, setSelectedAttributes] = useState(() =>
+    getInitialSelectedAttributes(product),
   );
 
   const [quantity, setQuantity] = useState(1);
 
-  const selectedVariation =
-    product?.hasVariations && product?.variations?.length
-      ? product.variations[selectedVariationIndex]
-      : null;
+  /*
+  |--------------------------------------------------------------------------
+  | Exact selected variation
+  |--------------------------------------------------------------------------
+  */
+
+  const selectedVariation = useMemo(() => {
+    if (!product?.hasVariations) {
+      return null;
+    }
+
+    return findSelectedVariation(
+      product?.variations,
+      selectedAttributes,
+      product?.attributes,
+    );
+  }, [
+    product?.variations,
+    product?.attributes,
+    product?.hasVariations,
+    selectedAttributes,
+  ]);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Gallery
+  |--------------------------------------------------------------------------
+  */
 
   const galleryImages = useMemo(() => {
     const images = [];
 
     const addImage = (image) => {
       const url = getImageUrl(image);
+
       if (url && !images.includes(url)) {
         images.push(url);
       }
     };
 
+    /*
+     * Selected combination image first
+     */
     addImage(selectedVariation?.thumbnail);
 
     selectedVariation?.images?.forEach(addImage);
 
+    /*
+     * Generic product gallery
+     */
     addImage(product?.thumbnail);
 
     product?.images?.forEach(addImage);
@@ -42,16 +77,22 @@ export default function ProductDetails({ product }) {
     return images;
   }, [product, selectedVariation]);
 
-  const handleVariationChange = (index) => {
-    setSelectedVariationIndex(index);
+  /*
+  |--------------------------------------------------------------------------
+  | Attribute change
+  |--------------------------------------------------------------------------
+  */
+
+  const handleAttributesChange = (nextSelectedAttributes) => {
+    setSelectedAttributes(nextSelectedAttributes);
     setQuantity(1);
   };
 
   return (
     <main className="mx-auto max-w-360 p-5">
-      <section className="grid gap-10 lg:grid-cols-2 xl:gap-16">
+      <section className="grid gap-10 grid-cols-1 lg:grid-cols-2 xl:gap-16">
         <ProductGallery
-          key={selectedVariationIndex}
+          key={JSON.stringify(selectedAttributes)}
           images={galleryImages}
           title={product.title}
         />
@@ -59,14 +100,14 @@ export default function ProductDetails({ product }) {
         <ProductInfo
           product={product}
           selectedVariation={selectedVariation}
-          selectedVariationIndex={selectedVariationIndex}
+          selectedAttributes={selectedAttributes}
+          onAttributesChange={handleAttributesChange}
           quantity={quantity}
           setQuantity={setQuantity}
-          onVariationChange={handleVariationChange}
         />
       </section>
 
-      <section className="mt-16 grid gap-8 lg:grid-cols-[1.4fr_.6fr]">
+      <section className="mt-16 grid gap-8 lg:grid-cols-[1.4fr_.6fr] items-start">
         <ProductDescription description={product.description} />
 
         <ProductSpecifications product={product} />

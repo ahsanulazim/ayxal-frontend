@@ -37,7 +37,7 @@ export default function ProductSpecifications({ product }) {
         {specifications.map((item, index) => (
           <div
             key={`${item.label}-${index}`}
-            className="grid grid-cols-[120px_1fr] gap-4 py-4 text-sm"
+            className="grid grid-cols-[120px_1fr] gap-4 py-2 text-sm"
           >
             <span className="text-zinc-500">{item.label}</span>
 

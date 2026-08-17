@@ -8,10 +8,10 @@ import { LuCheck, LuStar } from "react-icons/lu";
 export default function ProductInfo({
   product,
   selectedVariation,
-  selectedVariationIndex,
+  selectedAttributes,
+  onAttributesChange,
   quantity,
   setQuantity,
-  onVariationChange,
 }) {
   const price = selectedVariation?.price ?? product.basePrice ?? 0;
 
@@ -24,17 +24,24 @@ export default function ProductInfo({
   const outOfStock = stock <= 0;
 
   const addToCart = () => {
+    if (!selectedVariation || outOfStock) {
+      return;
+    }
+
     console.log({
-      product,
+      productId: product._id,
       variation: selectedVariation,
+      selectedAttributes,
       quantity,
       price: finalPrice,
     });
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold leading-tight">{product.title}</h1>
+    <div className="relative">
+      <h1 className="text-xl md:text-3xl font-bold leading-tight">
+        {product.title}
+      </h1>
 
       <div className="mt-4 flex items-center gap-3">
         <div className="flex text-amber-400">
@@ -97,8 +104,8 @@ export default function ProductInfo({
 
       <ProductVariations
         product={product}
-        selectedVariationIndex={selectedVariationIndex}
-        onChange={onVariationChange}
+        selectedAttributes={selectedAttributes}
+        onChange={onAttributesChange}
       />
 
       <QuantitySelector

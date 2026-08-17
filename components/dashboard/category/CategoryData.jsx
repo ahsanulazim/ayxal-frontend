@@ -31,13 +31,33 @@ const CategoryData = () => {
           <tbody>
             {/* row 1 */}
             {categoriesLoading ? (
-              <tr>
-                <td colSpan={6}>
-                  <div className="flex items-center justify-center">
-                    <span className="loading loading-spinner"></span>
-                  </div>
-                </td>
-              </tr>
+              Array.from({ length: 10 }).map((_, i) => (
+                <tr key={i}>
+                  <td>
+                    <div className="mask mask-squircle">
+                      <div className="skeleton aspect-square size-12"></div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-6 w-34"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-6 w-28"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton size-10 rounded-full"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-6 w-28"></div>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <div className="skeleton size-8 rounded-full"></div>
+                      <div className="skeleton size-8 rounded-full"></div>
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : categoriesError ? (
               <tr>
                 <td colSpan={6}>

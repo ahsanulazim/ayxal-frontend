@@ -13,7 +13,7 @@ const Hero = () => {
             width={400}
             height={450}
             alt="carousel"
-            src="/assets/carousel/Squire-02.jpg"
+            src="/assets/carousel/pet mat.png"
             className="h-full w-full object-cover"
           />
         </div>

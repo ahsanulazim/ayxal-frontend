@@ -4,6 +4,7 @@ import { LuCloudUpload, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import api from "@/axios/axiosInstance";
+import Image from "next/image";
 
 const ImageUploadField = ({
   name,
@@ -127,9 +128,11 @@ const ImageUploadField = ({
 
                     return (
                       <div key={i} className="relative group aspect-square">
-                        <img
-                          src={img.url}
+                        <Image
+                          width={300}
+                          height={300}
                           alt="preview"
+                          src={img.url}
                           className={`w-full h-full object-cover rounded border border-gray-300 ${img.isLocal ? "opacity-60" : ""}`}
                         />
 

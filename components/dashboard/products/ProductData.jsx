@@ -33,20 +33,51 @@ const ProductData = ({ products, productsLoading, productsError }) => {
         </thead>
         <tbody>
           {productsLoading ? (
-            <tr>
-              <td colSpan="8" className="text-center">
-                Loading...
-              </td>
-            </tr>
+            Array.from({ length: 10 }).map((_, i) => (
+              <tr key={i}>
+                <th>
+                  <div className="skeleton size-6"></div>
+                </th>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div className="mask mask-squircle">
+                      <div className="skeleton aspect-square size-12"></div>
+                    </div>
+                    <div className="skeleton h-6 w-xl flex-1"></div>
+                  </div>
+                </td>
+                <td>
+                  <div className="skeleton h-6 w-34"></div>
+                </td>
+                <td>
+                  <div className="skeleton h-6 w-28"></div>
+                </td>
+                <td>
+                  <div className="skeleton size-10 rounded-full"></div>
+                </td>
+                <td>
+                  <div className="skeleton h-6 w-16"></div>
+                </td>
+                <td>
+                  <div className="skeleton h-6 w-28"></div>
+                </td>
+                <td>
+                  <div className="skeleton h-6 w-28"></div>
+                </td>
+                <td>
+                  <div className="skeleton size-10 rounded-full"></div>
+                </td>
+              </tr>
+            ))
           ) : productsError ? (
             <tr>
-              <td colSpan="8" className="text-center">
+              <td colSpan="9" className="text-center">
                 Failed to fetch products
               </td>
             </tr>
           ) : products?.products.length <= 0 ? (
             <tr className="h-96">
-              <td colSpan="8" className="text-center">
+              <td colSpan="9" className="text-center">
                 No Products Found
               </td>
             </tr>
@@ -88,7 +119,7 @@ const ProductData = ({ products, productsLoading, productsError }) => {
                 </td>
                 <td>
                   <span
-                    className={`${product.stock < 1 ? "badge  badge-error" : ""}`}
+                    className={`whitespace-nowrap ${product.stock < 1 ? "badge  badge-error" : ""}`}
                   >
                     {product.stock < 1 ? "Out of Stock" : product.stock}
                   </span>

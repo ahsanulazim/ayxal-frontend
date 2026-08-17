@@ -6,14 +6,16 @@ import ProductData from "@/components/dashboard/products/ProductData";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { LuPlus, LuSearch } from "react-icons/lu";
 
 const page = () => {
   const router = useRouter();
-  const params = useSearchParams();
-  const search = params.get("search") || "";
-  const page = Number(params.get("page")) || 1;
-  const limit = Number(params.get("limit")) || 10;
+  const searchParams = useSearchParams();
+
+  const search = searchParams.get("search") || "";
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 10;
 
   const {
     data: products,
@@ -24,10 +26,34 @@ const page = () => {
     queryFn: getAllProducts,
   });
 
-  console.log(products);
+  const [searchValue, setSearchValue] = useState(search);
 
-  const goToPage = (p) => {
-    router.push(`?page=${p}`);
+  // Search debounce
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (searchValue.trim()) {
+        params.set("search", searchValue.trim());
+      } else {
+        params.delete("search");
+      }
+
+      // New search হলে page 1 থেকে শুরু
+      params.set("page", "1");
+
+      router.replace(`?${params.toString()}`);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [searchValue]);
+
+  const goToPage = (newPage) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set("page", newPage.toString());
+
+    router.push(`?${params.toString()}`);
   };
 
   return (
@@ -38,7 +64,12 @@ const page = () => {
           <h2 className="font-bold text-2xl w-1/2">Products</h2>
           <div className="flex items-center gap-5 w-1/2">
             <label className="input rounded-full w-full">
-              <input type="search" required placeholder="Search" />
+              <input
+                type="search"
+                placeholder="Search products..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
               <LuSearch className="h-[1em] opacity-50" />
             </label>
             <select defaultValue="filter" className="select">
@@ -81,11 +112,11 @@ const page = () => {
               >
                 «
               </button>
-              {Array.from({ length: data?.data.totalPages }, (_, i) => i + 1)
+              {Array.from({ length: products?.totalPages }, (_, i) => i + 1)
                 .filter(
                   (p) =>
                     p === 1 ||
-                    p === data?.data.totalPages ||
+                    p === products?.totalPages ||
                     (p >= page - 2 && p <= page + 2),
                 )
                 .map((p, idx, arr) => {
@@ -108,7 +139,7 @@ const page = () => {
                   );
                 })}
               <button
-                disabled={page >= data?.data.totalPages}
+                disabled={page >= products?.totalPages}
                 onClick={() => goToPage(page + 1)}
                 className="join-item btn"
               >

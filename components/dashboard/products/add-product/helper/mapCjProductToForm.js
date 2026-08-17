@@ -1,3 +1,5 @@
+import { htmlToEditorJs } from "./htmlToEditorJs";
+
 export const mapCjProductToForm = (cjProduct) => {
   if (!cjProduct) return {};
 
@@ -74,7 +76,7 @@ export const mapCjProductToForm = (cjProduct) => {
     variations: variations,
     thumbnail: { url: cjProduct.bigImage || null, publicId: null },
     images: images.map((image) => ({ url: image, publicId: null })),
-    description: cjProduct.description || "",
+    description: htmlToEditorJs(cjProduct.description) || cjProduct.description || "",
     weight: weight,
     dimensions: dimensions,
     freeShipping: false,

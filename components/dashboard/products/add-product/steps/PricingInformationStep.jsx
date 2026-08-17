@@ -104,7 +104,9 @@ const PricingInformationStep = ({
                       .filter(Boolean);
 
                     const extraOptions = formattedFormValues
-                      .filter((val) => !dbOptions.some((opt) => opt.value === val))
+                      .filter(
+                        (val) => !dbOptions.some((opt) => opt.value === val),
+                      )
                       .map((val) => {
                         const originalObj = formValues.find(
                           (v) => (typeof v === "object" ? v?.value : v) === val,
@@ -112,7 +114,8 @@ const PricingInformationStep = ({
                         return {
                           value: val,
                           label:
-                            typeof originalObj === "object" && originalObj?.label
+                            typeof originalObj === "object" &&
+                            originalObj?.label
                               ? originalObj.label
                               : val.charAt(0).toUpperCase() + val.slice(1),
                         };
@@ -214,7 +217,7 @@ const PricingInformationStep = ({
                 {combinations.map((combo, index) => (
                   <tr key={index}>
                     {activeAttributesWithOptions.map((attr) => (
-                      <td key={attr.key} className="capitalize">
+                      <td key={attr.key} className="uppercase">
                         {combo[attr.key]}
                       </td>
                     ))}
