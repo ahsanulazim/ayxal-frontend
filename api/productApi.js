@@ -5,17 +5,16 @@ export const createProduct = async (productData) => {
   return res.data;
 };
 
-export const getAllProducts = async () => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/getAllProducts`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+export const getAllProducts = async ({ queryKey }) => {
+  const [, page, search, limit] = queryKey;
+  const res = await api.get("/products/getAllProducts", {
+    params: {
+      search,
+      page,
+      limit,
     },
-  );
-  return res.json();
+  });
+  return res.data;
 };
 
 export const getNewArrivals = async () => {
@@ -24,21 +23,12 @@ export const getNewArrivals = async () => {
 };
 
 export const deleteProduct = async (id) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/deleteProduct/?id=${id}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  const res = await api.delete("/products/delete", {
+    params: {
+      id,
     },
-  );
-
-  if (!res.ok) {
-    throw new Error("Deleting Failed");
-  }
-
-  return res.json();
+  });
+  return res.data;
 };
 
 // lib/api/filters.js

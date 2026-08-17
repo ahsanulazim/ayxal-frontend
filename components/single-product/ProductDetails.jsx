@@ -7,10 +7,12 @@ import ProductInfo from "./ProductInfo";
 import ProductDescription from "./ProductDescription";
 import ProductSpecifications from "./ProductSpecifications";
 
-import { getImageUrl } from "./utils";
+import { getDefaultVariationIndex, getImageUrl } from "./utils";
 
 export default function ProductDetails({ product }) {
-  const [selectedVariationIndex, setSelectedVariationIndex] = useState(0);
+  const [selectedVariationIndex, setSelectedVariationIndex] = useState(() =>
+    getDefaultVariationIndex(product?.variations),
+  );
 
   const [quantity, setQuantity] = useState(1);
 
@@ -24,7 +26,6 @@ export default function ProductDetails({ product }) {
 
     const addImage = (image) => {
       const url = getImageUrl(image);
-
       if (url && !images.includes(url)) {
         images.push(url);
       }

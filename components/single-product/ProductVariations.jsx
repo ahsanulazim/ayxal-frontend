@@ -43,13 +43,14 @@ export default function ProductVariations({
             <button
               key={`${rawValue}-${index}`}
               onClick={() => onChange(index)}
-              className={`relative flex items-center gap-3 rounded-xl border-2 p-2 pr-4 ${
+              disabled={variation?.stock < 1}
+              className={`relative flex items-center gap-3 rounded-xl border-2 p-2 pr-4  ${
                 active ? "border-emerald-600 bg-emerald-50" : "border-zinc-200"
-              }`}
+              } ${variation?.stock < 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:shadow-sm hover:shadow-accent"}`}
             >
-              {getImageUrl(variation.thumbnail) && (
+              {getImageUrl(variation?.thumbnail) && (
                 <img
-                  src={getImageUrl(variation.thumbnail)}
+                  src={getImageUrl(variation?.thumbnail)}
                   alt={label}
                   className="h-12 w-12 rounded-box object-cover"
                 />

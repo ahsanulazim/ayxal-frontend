@@ -1,4 +1,10 @@
-const ProductFormFooter = ({ isFirstStep, isLastStep, goBack, goNext }) => {
+const ProductFormFooter = ({
+  isFirstStep,
+  isLastStep,
+  goBack,
+  goNext,
+  submitting,
+}) => {
   return (
     <div className="flex justify-end gap-4 mt-6">
       {!isFirstStep && (
@@ -11,8 +17,17 @@ const ProductFormFooter = ({ isFirstStep, isLastStep, goBack, goNext }) => {
         type="button"
         onClick={goNext}
         className={`btn ${isLastStep ? "btn-error" : "btn-success"}`}
+        disabled={submitting}
       >
-        {isLastStep ? "Submit" : "Next"}
+        {submitting ? (
+          <>
+            <span className="loading loading-spinner"></span>Submitting
+          </>
+        ) : isLastStep ? (
+          "Submit"
+        ) : (
+          "Next"
+        )}
       </button>
     </div>
   );

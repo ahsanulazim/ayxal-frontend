@@ -31,3 +31,14 @@ export function formatLabel(value = "") {
     .replace(/_/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
+
+export const getDefaultVariationIndex = (variations = []) => {
+  if (!variations.length) return 0;
+
+  const inStockIndex = variations.findIndex(
+    (variation) => Number(variation.stock) > 0,
+  );
+
+  // সব variation out of stock হলে first variant
+  return inStockIndex !== -1 ? inStockIndex : 0;
+};

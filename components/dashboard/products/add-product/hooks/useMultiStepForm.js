@@ -11,6 +11,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProduct } from "@/api/productApi";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const stepSchemas = [
   basicInfoSchema,
@@ -98,6 +99,9 @@ const useMultiStepForm = (initialData = {}) => {
     setFormData((prev) => ({ ...prev, ...newData }));
   };
 
+  //routing
+  const router = useRouter();
+
   //handle final submission
 
   const queryClient = useQueryClient();
@@ -106,6 +110,7 @@ const useMultiStepForm = (initialData = {}) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product Created");
+      router.push("/dashboard/products");
     },
     onError: () => {
       toast.error("Product Cannot be Created");
@@ -129,6 +134,7 @@ const useMultiStepForm = (initialData = {}) => {
     updateFormData,
     formData,
     currentSchema,
+    submttingForm: mutation.isPending,
   };
 };
 

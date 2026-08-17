@@ -53,14 +53,14 @@ const MyProvider = ({ children }) => {
   }, []);
 
   //products fetching
-  const {
-    data: products,
-    isLoading: productsLoading,
-    isError: productsError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: getAllProducts,
-  });
+  // const {
+  //   data: products,
+  //   isLoading: productsLoading,
+  //   isError: productsError,
+  // } = useQuery({
+  //   queryKey: ["products", page, search, limit],
+  //   queryFn: getAllProducts,
+  // });
 
   //cart logic
   const [cartItems, setCartItems] = useState([]);
@@ -235,9 +235,9 @@ const MyProvider = ({ children }) => {
     newUser,
     setNewUser,
     loading,
-    products,
-    productsLoading,
-    productsError,
+    // products,
+    // productsLoading,
+    // productsError,
     cartItems,
     isHydrated,
     addToCart,

@@ -23,8 +23,8 @@ export const EDITOR_JS_TOOLS = {
     class: ImageTool,
     config: {
       endpoints: {
-        byFile: `${process.env.NEXT_PUBLIC_API_BASE}/upload/editorUpload`, // Your backend file uploader endpoint
-        byUrl: `${process.env.NEXT_PUBLIC_API_BASE}/upload/editorUploadExternal`, // Your endpoint that provides uploading by Url
+        byFile: `${process.env.NEXT_PUBLIC_SERVER_URL}/upload/editorUpload`, // Your backend file uploader endpoint
+        byUrl: `${process.env.NEXT_PUBLIC_SERVER_URL}/upload/editorUploadExternal`, // Your endpoint that provides uploading by Url
       },
     },
   },

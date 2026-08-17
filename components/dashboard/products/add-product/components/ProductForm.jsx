@@ -25,6 +25,7 @@ const ProductForm = ({ intitialData = {} }) => {
     currentSchema,
     formData,
     updateFormData,
+    submttingForm,
   } = useMultiStepForm(intitialData);
 
   const {
@@ -148,6 +149,7 @@ const ProductForm = ({ intitialData = {} }) => {
           isLastStep={isLastStep}
           goBack={onPrevious}
           goNext={handleSubmit(onNext)}
+          submitting={submttingForm}
         />
       </div>
     </>

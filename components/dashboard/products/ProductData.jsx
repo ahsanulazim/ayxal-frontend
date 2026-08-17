@@ -2,15 +2,16 @@
 
 import { LuStar, LuTrash2 } from "react-icons/lu";
 import ProductDeleteModal from "./ProductDeleteModal";
-import { useContext, useRef } from "react";
-import { MyContext } from "@/context/MyProvider";
+import { useRef, useState } from "react";
+import moment from "moment";
 
-const ProductData = () => {
+const ProductData = ({ products, productsLoading, productsError }) => {
   const productRef = useRef();
-  const { products, productsLoading, productsError } = useContext(MyContext);
+  const [productId, setProductId] = useState("");
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+      <ProductDeleteModal ref={productRef} id={productId} />
       <table className="table">
         {/* head */}
         <thead>
@@ -21,11 +22,12 @@ const ProductData = () => {
               </label>
             </th>
             <th>Name</th>
-            <th>SKU</th>
-            <th>Price</th>
             <th>Category</th>
+            <th>Price</th>
             <th>Featured</th>
             <th>Stock</th>
+            <th>Created</th>
+            <th>Last Update</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -42,15 +44,15 @@ const ProductData = () => {
                 Failed to fetch products
               </td>
             </tr>
-          ) : products.length <= 0 ? (
+          ) : products?.products.length <= 0 ? (
             <tr className="h-96">
               <td colSpan="8" className="text-center">
                 No Products Found
               </td>
             </tr>
           ) : (
-            products.map((product) => (
-              <tr key={product.slug}>
+            products?.products?.map((product) => (
+              <tr key={product._id}>
                 <th>
                   <label>
                     <input type="checkbox" className="checkbox" />
@@ -58,40 +60,52 @@ const ProductData = () => {
                 </th>
                 <td>
                   <div className="flex items-center gap-3">
-                    <ProductDeleteModal ref={productRef} id={product._id} />
                     <div className="avatar">
                       <div className="mask mask-squircle h-12 w-12">
                         <img
                           src={
-                            product.productImages[0] ||
-                            product.variantDetails[0].swatchImage
+                            product?.thumbnail?.url ||
+                            product?.thumbnail ||
+                            "/default-product.jpg"
                           }
-                          alt={product.productName}
+                          alt={product.title}
                         />
                       </div>
                     </div>
                     <div>
-                      <div className="font-bold">{product.productName}</div>
+                      <div className="font-bold line-clamp-1">
+                        {product.title}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td>{product.sku || "N/A"}</td>
-                <td>{product.price}</td>
-                <td>{product.category}</td>
+                <td className="whitespace-nowrap">{product.category}</td>
+                <td className="whitespace-nowrap">${product.price}</td>
                 <td>
                   <button className="btn btn-circle btn-soft btn-warning">
                     <LuStar />
                   </button>
                 </td>
                 <td>
-                  <span className="badge badge-success">
-                    {product.stock < 0 ? "Out of Stock" : "In Stock"}
+                  <span
+                    className={`${product.stock < 1 ? "badge  badge-error" : ""}`}
+                  >
+                    {product.stock < 1 ? "Out of Stock" : product.stock}
                   </span>
+                </td>
+                <td className="whitespace-nowrap">
+                  {moment(product.createdAt).format("MMM Do, YY")}
+                </td>
+                <td className="whitespace-nowrap">
+                  {moment(product.updatedAt).format("MMM Do, YY")}
                 </td>
                 <td>
                   <button
                     className="btn btn-soft btn-error btn-circle"
-                    onClick={() => productRef.current?.showModal()}
+                    onClick={() => {
+                      setProductId(product._id);
+                      productRef.current?.showModal();
+                    }}
                   >
                     <LuTrash2 />
                   </button>

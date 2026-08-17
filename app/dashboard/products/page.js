@@ -1,9 +1,35 @@
+"use client";
+
+import { getAllProducts } from "@/api/productApi";
 import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
 import ProductData from "@/components/dashboard/products/ProductData";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LuPlus, LuSearch } from "react-icons/lu";
 
 const page = () => {
+  const router = useRouter();
+  const params = useSearchParams();
+  const search = params.get("search") || "";
+  const page = Number(params.get("page")) || 1;
+  const limit = Number(params.get("limit")) || 10;
+
+  const {
+    data: products,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useQuery({
+    queryKey: ["products", page, search, limit],
+    queryFn: getAllProducts,
+  });
+
+  console.log(products);
+
+  const goToPage = (p) => {
+    router.push(`?page=${p}`);
+  };
+
   return (
     <>
       <Breadcrumbs title="Products" />
@@ -33,7 +59,64 @@ const page = () => {
         </div>
       </section>
       <section>
-        <ProductData />
+        <ProductData
+          products={products}
+          productsLoading={productsLoading}
+          productsError={productsError}
+        />
+      </section>
+      <section>
+        {productsLoading ? (
+          <span>Loading...</span>
+        ) : productsError ? (
+          <span>Error</span>
+        ) : (
+          products.products?.length > 0 &&
+          products.totalPages > 1 && (
+            <div className="join mt-5 flex-wrap">
+              <button
+                disabled={page === 1}
+                onClick={() => goToPage(page - 1)}
+                className="join-item btn"
+              >
+                «
+              </button>
+              {Array.from({ length: data?.data.totalPages }, (_, i) => i + 1)
+                .filter(
+                  (p) =>
+                    p === 1 ||
+                    p === data?.data.totalPages ||
+                    (p >= page - 2 && p <= page + 2),
+                )
+                .map((p, idx, arr) => {
+                  const prev = arr[idx - 1];
+                  return (
+                    <React.Fragment key={p}>
+                      {prev && p - prev > 1 && (
+                        <button className="join-item btn btn-disabled" disabled>
+                          ...
+                        </button>
+                      )}
+                      <button
+                        className={`join-item btn ${Number(page) === p ? "btn-main" : ""}`}
+                        disabled={Number(page) === p}
+                        onClick={() => goToPage(p)}
+                      >
+                        {p}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+              <button
+                disabled={page >= data?.data.totalPages}
+                onClick={() => goToPage(page + 1)}
+                className="join-item btn"
+              >
+                »
+              </button>
+            </div>
+          )
+        )}
       </section>
     </>
   );

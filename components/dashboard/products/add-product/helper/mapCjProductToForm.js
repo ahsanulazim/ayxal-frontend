@@ -48,7 +48,7 @@ export const mapCjProductToForm = (cjProduct) => {
           stock: v.inventoryNum || 0,
           price: v.variantSellPrice || 0,
           discount: 0,
-          thumbnail: v.variantImage || null,
+          thumbnail: { url: v.variantImage || null, publicId: null },
           images: [],
         };
 
@@ -72,8 +72,8 @@ export const mapCjProductToForm = (cjProduct) => {
     baseStock: 0,
     baseDiscount: 0,
     variations: variations,
-    thumbnail: cjProduct.bigImage || null,
-    images: images,
+    thumbnail: { url: cjProduct.bigImage || null, publicId: null },
+    images: images.map((image) => ({ url: image, publicId: null })),
     description: cjProduct.description || "",
     weight: weight,
     dimensions: dimensions,

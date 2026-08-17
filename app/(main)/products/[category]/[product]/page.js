@@ -27,7 +27,10 @@ export const generateMetaData = async ({ params }) => {
       description: productData?.product?.description,
       images: [
         {
-          url: productData?.product?.thumbnail || "/default-product.jpg",
+          url:
+            productData?.product?.thumbnail?.url ||
+            productData?.product?.thumbnail ||
+            "/default-product.jpg",
           width: 800,
           height: 600,
         },
