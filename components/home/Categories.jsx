@@ -14,7 +14,7 @@ const Categories = () => {
         <h2 className="text-xl sm:text-3xl font-bold text-main">
           Popular Categories
         </h2>
-        <div className="flex justify-between gap-5 mt-5">
+        <div className="grid grid-cols-4 lg:grid-cols-8 gap-3 lg:gap-5 mt-5">
           {categoriesLoading
             ? "loading..."
             : categoriesError

@@ -61,16 +61,14 @@ export async function fetchFilters(category) {
 
 //get products by category
 export const getProductsByCategory = async (category, page, limit) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products/getProductsByCategory/?category=${category}&page=${page}&limit=${limit}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  const res = await api.get("/products/getProductsByCategory", {
+    params: {
+      category,
+      page,
+      limit,
     },
-  );
-  return res.json();
+  });
+  return res.data;
 };
 
 //cj add to store product

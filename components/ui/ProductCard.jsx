@@ -15,7 +15,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="card bg-base-100 shadow-sm overflow-clip">
-      <Link href={`/products/${product.categoryId}/${product.pid}`}>
+      <Link href={`/products/${product.category}/${product.slug}`}>
         <figure className="relative">
           {!isOutOfStock && (
             <div className="badge badge-success max-md:badge-sm absolute top-3 left-3">
@@ -23,25 +23,28 @@ const ProductCard = ({ product }) => {
             </div>
           )}
           <img
-            src={firstVariant?.swatchImage || product.bigImage}
-            alt={product.productNameEn}
+            src={firstVariant?.swatchImage || product.thumbnail}
+            alt={product.title}
             className="aspect-square object-cover"
           />
         </figure>
       </Link>
       <div className="card-body p-3">
-        <Link href={`/products/${product.categoryId}/${product.pid}`}>
+        <Link href={`/products/${product.category}/${product.slug}`}>
           <h2 className="card-title text-xs xs:text-sm font-normal line-clamp-2">
-            {product.productNameEn}
+            {product.title}
           </h2>
         </Link>
 
         <p className="font-bold text-sm xs:text-lg">
-          ${product?.sellPrice ? Number(product.sellPrice.split("-")[0]) + 15 : 0}
+          $
+          {product.hasVariations
+            ? product.variations[0].price
+            : product.basePrice}
         </p>
         <div className="card-actions justify-end">
           <Link
-            href={`/products/${product.categoryId}/${product.pid}`}
+            href={`/products/${product.category}/${product.slug}`}
             className={`btn btn-sm w-full btn-main`}
           >
             Buy Now

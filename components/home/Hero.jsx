@@ -4,18 +4,11 @@ import Carousel from "./Carousel";
 const Hero = () => {
   return (
     <section className="p-5">
-      <div className="grid md:grid-cols-7 gap-5 max-w-360 mx-auto">
-        <div className="md:col-span-5 rounded-md overflow-clip">
-          {/* <Image
-            width={800}
-            height={450}
-            alt="carousel"
-            src="/assets/carousel/03.jpg.jpeg"
-            className="h-full w-full object-cover"
-          /> */}
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-5 max-w-360 mx-auto">
+        <div className="col-span-1 md:col-span-5 rounded-md overflow-clip">
           <Carousel />
         </div>
-        <div className="md:col-span-2 rounded-md overflow-clip">
+        <div className="col-span-1 md:col-span-2 rounded-md overflow-clip">
           <Image
             width={400}
             height={450}

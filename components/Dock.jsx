@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaMoon } from "react-icons/fa6";
+import { FaGift } from "react-icons/fa6";
 import { LuHouse, LuShoppingBag, LuUser } from "react-icons/lu";
 
 const Dock = () => {
@@ -11,7 +11,7 @@ const Dock = () => {
       </Link>
 
       <Link href="/offers">
-        <FaMoon className="size-[1.2em] animate-pulse" />
+        <FaGift className="size-[1.2em] animate-pulse" />
         <span className="dock-label">Offers</span>
       </Link>
 

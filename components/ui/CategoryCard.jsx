@@ -4,8 +4,8 @@ import Link from "next/link";
 const CategoryCard = ({ category }) => {
   return (
     <Link
-      href={category.slug}
-      className=" hover:shadow-xl aspect-square border border-gray-300 rounded-box p-5"
+      href={`/products/${category.slug}`}
+      className="hover:shadow-xl border border-gray-300 rounded-box p-2 sm:p-3 xl:p-5"
     >
       <div>
         <Image

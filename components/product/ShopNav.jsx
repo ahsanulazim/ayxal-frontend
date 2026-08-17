@@ -4,8 +4,8 @@ import { LuHouse } from "react-icons/lu";
 const ShopNav = ({ category, product }) => {
   const cleanCategory = category?.replace(/-/g, " ");
   return (
-    <section className="px-5">
-      <div className="max-w-360 mx-auto">
+    <section>
+      <div className="max-w-360 mx-auto px-5">
         <div className="breadcrumbs text-sm">
           <ul>
             <li>
@@ -13,12 +13,12 @@ const ShopNav = ({ category, product }) => {
                 <LuHouse />
               </Link>
             </li>
-            {category && product?.productName ? (
+            {category && product?.title ? (
               <>
                 <li>
                   <Link href={`/products/${category}`}>{cleanCategory}</Link>
                 </li>
-                <li>{product?.productName}</li>
+                <li>{product?.title}</li>
               </>
             ) : (
               category && <li>{cleanCategory}</li>

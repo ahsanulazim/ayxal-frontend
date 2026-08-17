@@ -72,7 +72,6 @@ const ProductForm = ({ intitialData = {} }) => {
     if (isLastStep) {
       try {
         submitForm(updatedData);
-        toast.success("Submission Success");
       } catch (error) {
         toast.error("Submission Failed", error);
       }

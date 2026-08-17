@@ -81,7 +81,7 @@ const CategoryData = () => {
                   </td>
                   <td>{category.name}</td>
                   <td>{category.slug}</td>
-                  <td>{category?.products?.length || 0}</td>
+                  <td>{category?.itemsCount || 0}</td>
                   <td>{moment(category.createdAt).format("MMMM Do, YYYY")}</td>
                   <td>
                     <div className="flex gap-3">

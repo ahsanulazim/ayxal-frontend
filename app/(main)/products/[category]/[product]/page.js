@@ -2,12 +2,13 @@ import api from "@/axios/axiosInstance";
 import ProductInfo from "@/components/product/ProductInfo";
 import ProductTabs from "@/components/product/ProductTabs";
 import ShopNav from "@/components/product/ShopNav";
+import ProductDetails from "@/components/single-product/ProductDetails";
 
 export const generateMetaData = async ({ params }) => {
   const { product } = await params;
 
-  const res = await api.get("/products/getProductByPid", {
-    params: { pid: product },
+  const res = await api.get("/products/getProductBySlug", {
+    params: { slug: product },
   });
 
   if (!res.data) return { title: "Product Not Found" };
@@ -17,18 +18,16 @@ export const generateMetaData = async ({ params }) => {
 
   // Search Engine Meta Headers setup Injection
   return {
-    title: `${productData?.product.productNameEn} | Oiki Lifestyle`,
+    title: `${productData?.product.title} | PretyPet`,
     description:
       productData?.product.description ||
-      `Buy ${productData?.product.productNameEn} at the best price online.`,
+      `Buy ${productData?.product.title} at the best price online.`,
     openGraph: {
-      title: productData?.product.productNameEn,
-      description: productData?.product.description,
+      title: productData?.product.title,
+      description: productData?.product?.description,
       images: [
         {
-          url:
-            productData?.variantDetails[0]?.imageGallery[0] ||
-            "/default-product.jpg",
+          url: productData?.product?.thumbnail || "/default-product.jpg",
           width: 800,
           height: 600,
         },
@@ -40,8 +39,8 @@ export const generateMetaData = async ({ params }) => {
 const page = async ({ params }) => {
   const { product } = await params;
 
-  const res = await api.get("/products/getProductByPid", {
-    params: { pid: product },
+  const res = await api.get("/products/getProductBySlug", {
+    params: { slug: product },
   });
 
   const productData = res.data;
@@ -54,7 +53,13 @@ const page = async ({ params }) => {
   return (
     <>
       {/* <ShopNav category={productData?.category} product={productData} /> */}
-      <ProductInfo product={productData.product} />
+      {/* <ProductInfo product={productData.product} /> */}
+
+      <ShopNav
+        category={productData?.product.category}
+        product={productData?.product}
+      />
+      <ProductDetails product={productData.product} />
       {/* <ProductTabs product={productData} /> */}
     </>
   );
