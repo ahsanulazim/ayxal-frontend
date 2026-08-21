@@ -3,6 +3,7 @@ import "./globals.css";
 import QueryProvider from "@/query/QueryProvider";
 import MyProvider from "@/context/MyProvider";
 import { ToastContainer } from "react-toastify";
+import { CartProvider } from "@/context/CartContext";
 
 const dm_sans = DM_Sans({
   variable: "--font-dm-sans",
@@ -23,8 +24,10 @@ export default function RootLayout({ children }) {
       <body className="min-h-full font-dm-sans">
         <QueryProvider>
           <MyProvider>
-            <ToastContainer />
-            {children}
+            <CartProvider>
+              <ToastContainer />
+              {children}
+            </CartProvider>
           </MyProvider>
         </QueryProvider>
       </body>

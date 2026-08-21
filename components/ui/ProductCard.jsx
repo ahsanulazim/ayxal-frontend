@@ -23,7 +23,11 @@ const ProductCard = ({ product }) => {
             </div>
           )}
           <img
-            src={product?.thumbnail?.url || product?.thumbnail || "/default-product.jpg"}
+            src={
+              product?.thumbnail?.url ||
+              product?.thumbnail ||
+              "/default-product.jpg"
+            }
             alt={product.title}
             className="aspect-square object-cover"
           />

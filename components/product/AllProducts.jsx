@@ -26,7 +26,7 @@ const AllProducts = ({ category }) => {
   console.log(products);
 
   return (
-    <div className="grid grid-cols-5 gap-5 mt-5">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 md:gap-5 mt-5">
       {productsLoading ? (
         Array.from({ length: 10 }).map((_, i) => (
           <ProductCardSkeleton key={i} />

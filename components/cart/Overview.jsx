@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext } from "react";
-import TakaSymbol from "../ui/TakaSymbol";
 import { MyContext } from "@/context/MyProvider";
 import Link from "next/link";
 
@@ -18,7 +17,7 @@ const Overview = ({ isCheckout, ref, isPending, paymentMethod }) => {
           <h3 className="flex justify-between">
             <span>Subtotal: </span>
             <span className="font-bold">
-              <TakaSymbol /> {calculateTotalPrice()}
+              $ {calculateTotalPrice().toFixed(2)}
             </span>
           </h3>
         </div>
@@ -28,9 +27,7 @@ const Overview = ({ isCheckout, ref, isPending, paymentMethod }) => {
             <div>
               <h3 className="flex justify-between">
                 <span>Shipping: </span>
-                <span className="font-bold">
-                  <TakaSymbol /> {shippingPrice?.baseCharge}
-                </span>
+                <span className="font-bold">$ {shippingPrice?.baseCharge}</span>
               </h3>
             </div>
           </>
@@ -40,8 +37,11 @@ const Overview = ({ isCheckout, ref, isPending, paymentMethod }) => {
           <h3 className="flex justify-between">
             <span>Total: </span>
             <span className="font-bold text-xl text-main">
-              <TakaSymbol />{" "}
-              {calculateTotalPrice() + (Number(shippingPrice?.baseCharge) || 0)}
+              ${" "}
+              {Number(
+                calculateTotalPrice() +
+                  (Number(shippingPrice?.baseCharge) || 0),
+              ).toFixed(2)}
             </span>
           </h3>
         </div>

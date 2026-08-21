@@ -4,6 +4,8 @@ import ProductActions from "./ProductActions";
 
 import { formatPrice, calculateFinalPrice } from "./utils";
 import { LuCheck, LuStar } from "react-icons/lu";
+import { useCart } from "@/context/CartContext";
+import { toast } from "react-toastify";
 
 export default function ProductInfo({
   product,
@@ -13,6 +15,8 @@ export default function ProductInfo({
   quantity,
   setQuantity,
 }) {
+  const { addToCart } = useCart();
+
   const price = selectedVariation?.price ?? product.basePrice ?? 0;
 
   const discount = selectedVariation?.discount ?? product.baseDiscount ?? 0;
@@ -23,18 +27,18 @@ export default function ProductInfo({
 
   const outOfStock = stock <= 0;
 
-  const addToCart = () => {
-    if (!selectedVariation || outOfStock) {
-      return;
-    }
-
-    console.log({
-      productId: product._id,
+  // Add to cart handler
+  const handleAddToCart = () => {
+    const res = addToCart({
+      product,
       variation: selectedVariation,
-      selectedAttributes,
       quantity,
-      price: finalPrice,
     });
+    if (res?.success) {
+      toast.success(res.message || "Added to cart");
+    } else {
+      toast.error(res?.message || "Failed to add to cart");
+    }
   };
 
   return (
@@ -114,7 +118,7 @@ export default function ProductInfo({
         onChange={setQuantity}
       />
 
-      <ProductActions outOfStock={outOfStock} onAddToCart={addToCart} />
+      <ProductActions outOfStock={outOfStock} onAddToCart={handleAddToCart} />
     </div>
   );
 }

@@ -2,13 +2,12 @@
 
 import CartedItems from "@/components/cart/CartedItems";
 import Overview from "@/components/cart/Overview";
-import { MyContext } from "@/context/MyProvider";
+import { useCart } from "@/context/CartContext";
 import Link from "next/link";
-import { useContext } from "react";
 import { LuHouse } from "react-icons/lu";
 
 const page = () => {
-  const { cartItems } = useContext(MyContext);
+  const { cart, cartSubtotal } = useCart();
 
   return (
     <>
@@ -28,9 +27,9 @@ const page = () => {
       </section>
       <section className="px-5 mb-5">
         <div
-          className={`max-w-360 mx-auto ${cartItems.length === 0 ? "min-h-[calc(100dvh-180px)] flex items-center justify-center" : "grid grid-cols-1 lg:grid-cols-3 gap-5"}`}
+          className={`max-w-360 mx-auto ${cart.length === 0 ? "min-h-[calc(100dvh-180px)] flex items-center justify-center" : "grid grid-cols-1 lg:grid-cols-3 gap-5"}`}
         >
-          {cartItems.length === 0 ? (
+          {cart.length === 0 ? (
             <div className="text-center">
               <h3 className="text-2xl font-bold text-main">Empty Cart</h3>
               <p className="my-2">Please Add Product to View</p>

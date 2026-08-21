@@ -21,18 +21,6 @@
   @apply btn-outline border-main text-main hover:bg-main hover:text-white;
 }
 
-.ql-container {
-  @apply border-none!;
-}
-
-.ql-toolbar {
-  @apply border-none!;
-}
-
-.ql-editor {
-  @apply min-h-50;
-}
-
 /* swiper css */
 .swiper {
   width: 100%;
@@ -55,3 +43,5 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* updated css file */

@@ -52,16 +52,6 @@ const MyProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  //products fetching
-  // const {
-  //   data: products,
-  //   isLoading: productsLoading,
-  //   isError: productsError,
-  // } = useQuery({
-  //   queryKey: ["products", page, search, limit],
-  //   queryFn: getAllProducts,
-  // });
-
   //cart logic
   const [cartItems, setCartItems] = useState([]);
   const [isHydrated, setIsHydrated] = useState(false);

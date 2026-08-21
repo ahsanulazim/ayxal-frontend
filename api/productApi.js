@@ -50,12 +50,12 @@ export async function fetchFilters(category) {
 }
 
 //get products by category
-export const getProductsByCategory = async (category, page, limit) => {
+export const getProductsByCategory = async ({ queryKey }) => {
+  const [, category, queryParams] = queryKey;
   const res = await api.get("/products/getProductsByCategory", {
     params: {
       category,
-      page,
-      limit,
+      ...queryParams,
     },
   });
   return res.data;

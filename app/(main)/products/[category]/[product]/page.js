@@ -51,17 +51,19 @@ const page = async ({ params }) => {
   if (!productData) {
     return <div>Product not found</div>;
   }
-  console.log(productData.product);
+  console.log(productData);
 
   return (
     <>
       {/* <ShopNav category={productData?.category} product={productData} /> */}
       {/* <ProductInfo product={productData.product} /> */}
-
-      <ShopNav
-        category={productData?.product.category}
-        product={productData?.product}
-      />
+      <section className="max-w-360 mx-auto px-5">
+        <ShopNav
+          category={productData?.category?.name}
+          slug={productData?.category?.slug}
+          product={productData?.product}
+        />
+      </section>
       <ProductDetails product={productData.product} />
       {/* <ProductTabs product={productData} /> */}
     </>
