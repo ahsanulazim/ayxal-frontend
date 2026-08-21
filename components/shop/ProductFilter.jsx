@@ -56,7 +56,7 @@ const ProductFilter = ({ brands = [] }) => {
   };
 
   return (
-    <div className="overflow-hidden rounded-box border border-gray-100 bg-white">
+    <div className="overflow-hidden rounded-box border border-gray-100 bg-white max-lg:min-h-full w-80">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
         <h2 className="font-semibold text-gray-900">Filters</h2>

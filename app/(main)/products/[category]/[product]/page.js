@@ -1,6 +1,4 @@
 import api from "@/axios/axiosInstance";
-import ProductInfo from "@/components/product/ProductInfo";
-import ProductTabs from "@/components/product/ProductTabs";
 import ShopNav from "@/components/product/ShopNav";
 import ProductDetails from "@/components/single-product/ProductDetails";
 

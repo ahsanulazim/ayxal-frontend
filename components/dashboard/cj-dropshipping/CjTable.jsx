@@ -22,6 +22,8 @@ const CjTable = () => {
     router.push(`?page=${p}`);
   };
 
+  console.log(data);
+
   return (
     <>
       <div className="overflow-x-auto bg-base-100 rounded-md">
@@ -110,9 +112,14 @@ const CjTable = () => {
                   <td>{moment(product.createAt).format("MMMM Do, YYYY")}</td>
                   <th>
                     <div className="flex items-center gap-2">
-                      <button className="btn btn-circle btn-info">
-                        <LuEye />
-                      </button>
+                      <a
+                        href={`https://cjdropshipping.com/product/-p-${product.productId}.html`}
+                        target="_blank"
+                      >
+                        <button className="btn btn-circle btn-info">
+                          <LuEye />
+                        </button>
+                      </a>
                       <Link
                         href={`/dashboard/cj-dropshipping/${product.productId}`}
                       >

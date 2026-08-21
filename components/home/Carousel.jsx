@@ -26,7 +26,9 @@ const Carousel = () => {
       className="mySwiper"
     >
       {carouselsLoading ? (
-        <SwiperSlide>Loading...</SwiperSlide>
+        <SwiperSlide>
+          <div className="skeleton w-full h-72 lg:h-96"></div>
+        </SwiperSlide>
       ) : carouselsError ? (
         <SwiperSlide>Something went wrong</SwiperSlide>
       ) : carousels.carousels.length > 0 ? (

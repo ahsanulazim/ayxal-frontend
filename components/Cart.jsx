@@ -50,10 +50,12 @@ const Cart = () => {
                       {item.quantity} x $
                       {item.hasVariations ? item.finalPrice : item.basePrice} =
                       $
-                      {item.quantity *
+                      {(
+                        item.quantity *
                         (item.hasVariations
                           ? item.finalPrice
-                          : item.product?.sellPrice)}
+                          : item.product?.sellPrice)
+                      ).toFixed(2)}
                     </p>
                   </div>
                   <button
@@ -71,7 +73,8 @@ const Cart = () => {
         {cart.length > 0 && (
           <div className="p-3 border-t border-base-300">
             <p className="mb-2">
-              Total: <span className="font-bold">${cartSubtotal}</span>
+              Total:{" "}
+              <span className="font-bold">${cartSubtotal.toFixed(2)}</span>
             </p>
             <div className="flex gap-3">
               <Link href="/cart" className="flex-1">

@@ -6,6 +6,7 @@ import { formatPrice, calculateFinalPrice } from "./utils";
 import { LuCheck, LuStar } from "react-icons/lu";
 import { useCart } from "@/context/CartContext";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function ProductInfo({
   product,
@@ -15,6 +16,8 @@ export default function ProductInfo({
   quantity,
   setQuantity,
 }) {
+  const router = useRouter();
+
   const { addToCart } = useCart();
 
   const price = selectedVariation?.price ?? product.basePrice ?? 0;
@@ -36,6 +39,21 @@ export default function ProductInfo({
     });
     if (res?.success) {
       toast.success(res.message || "Added to cart");
+    } else {
+      toast.error(res?.message || "Failed to add to cart");
+    }
+  };
+
+  //Buy Now handler
+  const handleBuyNow = () => {
+    const res = addToCart({
+      product,
+      variation: selectedVariation,
+      quantity,
+    });
+    if (res?.success) {
+      toast.success(res.message || "Added to cart");
+      router.push("/cart/checkout");
     } else {
       toast.error(res?.message || "Failed to add to cart");
     }
@@ -118,7 +136,11 @@ export default function ProductInfo({
         onChange={setQuantity}
       />
 
-      <ProductActions outOfStock={outOfStock} onAddToCart={handleAddToCart} />
+      <ProductActions
+        outOfStock={outOfStock}
+        onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
+      />
     </div>
   );
 }

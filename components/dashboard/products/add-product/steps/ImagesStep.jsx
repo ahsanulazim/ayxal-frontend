@@ -41,6 +41,7 @@ const ImagesStep = ({ control }) => {
               "discount",
               "thumbnail",
               "images",
+              "vid",
             ].includes(key),
         );
         const variantName = attributeKeys

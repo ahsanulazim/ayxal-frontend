@@ -14,7 +14,7 @@ import DescriptionStep from "../steps/DescriptionStep";
 import ShippingStep from "../steps/ShippingStep";
 import useMultiStepForm from "../hooks/useMultiStepForm";
 
-const ProductForm = ({ intitialData = {} }) => {
+const ProductForm = ({ initialData = {}, cjVariants = [] }) => {
   const {
     activeStep,
     isFirstStep,
@@ -25,8 +25,8 @@ const ProductForm = ({ intitialData = {} }) => {
     currentSchema,
     formData,
     updateFormData,
-    submttingForm,
-  } = useMultiStepForm(intitialData);
+    submittingForm,
+  } = useMultiStepForm(initialData);
 
   const {
     register,
@@ -57,15 +57,12 @@ const ProductForm = ({ intitialData = {} }) => {
 
   useEffect(() => {
     if (prevStepRef.current !== activeStep) {
-      reset(formData);
+      reset({ ...formData, ...getValues() });
       prevStepRef.current = activeStep;
     }
-  }, [activeStep, formData, reset]);
+  }, [activeStep, formData, reset, getValues]);
 
-  const onNext = async (data) => {
-    const isValid = await trigger();
-    if (!isValid) return;
-
+  const onNext = (data) => {
     const currentValues = getValues();
     const updatedData = { ...formData, ...currentValues, ...data };
     updateFormData(updatedData);
@@ -121,6 +118,8 @@ const ProductForm = ({ intitialData = {} }) => {
             setValue={setValue}
             watch={watch}
             trigger={trigger}
+            getValues={getValues}
+            cjVariants={cjVariants}
           />
         )}
         {activeStep === "images" && <ImagesStep control={control} />}
@@ -149,7 +148,7 @@ const ProductForm = ({ intitialData = {} }) => {
           isLastStep={isLastStep}
           goBack={onPrevious}
           goNext={handleSubmit(onNext)}
-          submitting={submttingForm}
+          submitting={submittingForm}
         />
       </div>
     </>

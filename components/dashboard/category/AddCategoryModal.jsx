@@ -14,12 +14,14 @@ const AddCategoryModal = ({ ref }) => {
     defaultValues: {
       name: "",
       slug: "",
+      description: "",
       thumbnail: null,
     },
     onSubmit: async ({ value }) => {
       const formData = new FormData();
       formData.append("name", value.name);
       formData.append("slug", value.slug);
+      formData.append("description", value.description);
       formData.append("thumbnail", value.thumbnail);
 
       const res = await api.post("/categories/create", formData, {
@@ -102,6 +104,30 @@ const AddCategoryModal = ({ ref }) => {
                     className="input w-full"
                     placeholder="dog-belts"
                   />
+                  {errors.length > 0 && (
+                    <p className="text-error">{errors[0].message}</p>
+                  )}
+                </>
+              );
+            }}
+          />
+          <Field
+            name="description"
+            children={(field) => {
+              const { errors } = field.state.meta;
+              return (
+                <>
+                  <label htmlFor={field.name} className="label">
+                    Description
+                  </label>
+                  <textarea
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    className="textarea w-full"
+                    placeholder="Description"
+                  ></textarea>
                   {errors.length > 0 && (
                     <p className="text-error">{errors[0].message}</p>
                   )}

@@ -1,12 +1,10 @@
 "use client";
 
-import { useContext } from "react";
-import { MyContext } from "@/context/MyProvider";
+import { useCart } from "@/context/CartContext";
 import Link from "next/link";
 
 const Overview = ({ isCheckout, ref, isPending, paymentMethod }) => {
-  const { calculateTotalPrice, deliveryAdd, shippingPrice } =
-    useContext(MyContext);
+  const { cartSubTotal, cartOriginalTotal, shippingPrice } = useCart();
 
   return (
     <div className="bg-base-100 rounded-box p-5">
@@ -16,12 +14,10 @@ const Overview = ({ isCheckout, ref, isPending, paymentMethod }) => {
         <div>
           <h3 className="flex justify-between">
             <span>Subtotal: </span>
-            <span className="font-bold">
-              $ {calculateTotalPrice().toFixed(2)}
-            </span>
+            <span className="font-bold">$ {cartOriginalTotal?.toFixed(2)}</span>
           </h3>
         </div>
-        {deliveryAdd && (
+        {/* {deliveryAdd && (
           <>
             <div className="divider"></div>
             <div>
@@ -31,17 +27,13 @@ const Overview = ({ isCheckout, ref, isPending, paymentMethod }) => {
               </h3>
             </div>
           </>
-        )}
+        )} */}
         <div className="divider"></div>
         <div>
           <h3 className="flex justify-between">
             <span>Total: </span>
             <span className="font-bold text-xl text-main">
-              ${" "}
-              {Number(
-                calculateTotalPrice() +
-                  (Number(shippingPrice?.baseCharge) || 0),
-              ).toFixed(2)}
+              $ {cartOriginalTotal.toFixed(2)}
             </span>
           </h3>
         </div>

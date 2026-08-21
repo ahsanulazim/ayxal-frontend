@@ -4,6 +4,7 @@ import moment from "moment";
 import { useContext, useRef, useState } from "react";
 import { LuSquarePen, LuTrash2 } from "react-icons/lu";
 import CategoryDeleteModal from "./CategoryDeleteModal";
+import EditCategoryModal from "./EditCategoryModal";
 
 const CategoryData = () => {
   const { categories, categoriesLoading, categoriesError } =
@@ -11,10 +12,12 @@ const CategoryData = () => {
 
   const [categoryId, setCategoryId] = useState("");
   const categoryDelRef = useRef(null);
+  const categoryEditRef = useRef(null);
 
   return (
     <div className="my-5">
       <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+        <EditCategoryModal categoryId={categoryId} ref={categoryEditRef} />
         <CategoryDeleteModal ref={categoryDelRef} id={categoryId} />
         <table className="table">
           {/* head */}
@@ -105,7 +108,13 @@ const CategoryData = () => {
                   <td>{moment(category.createdAt).format("MMMM Do, YYYY")}</td>
                   <td>
                     <div className="flex gap-3">
-                      <button className="btn btn-circle btn-soft btn-info">
+                      <button
+                        className="btn btn-circle btn-soft btn-info"
+                        onClick={() => {
+                          setCategoryId(category._id);
+                          categoryEditRef.current.showModal();
+                        }}
+                      >
                         <LuSquarePen />
                       </button>
                       <button

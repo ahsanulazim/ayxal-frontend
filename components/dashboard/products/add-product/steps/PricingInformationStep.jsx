@@ -10,13 +10,13 @@ const PricingInformationStep = ({
   control,
   trigger,
   setValue,
+  getValues,
+  cjVariants = [],
 }) => {
   const { attributes, attributesError, attributesLoading } =
     useContext(MyContext);
   const hasVariations = watch("hasVariations") === true;
   const selectedAttributes = watch("attributes");
-
-  console.log(attributes);
 
   const activeAttributes = attributes.filter((attr) =>
     selectedAttributes?.includes(attr.value),
@@ -62,12 +62,21 @@ const PricingInformationStep = ({
       return;
     }
 
-    const currentVariations = watch("variations") || [];
+    const currentVariations =
+      (getValues ? getValues("variations") : watch("variations")) || [];
 
-    const newVariations = combinations.map((combo, index) => {
-      const existing = currentVariations[index] || {};
+    const newVariations = combinations.map((combo) => {
+      const existing =
+        currentVariations.find((v) =>
+          activeAttributesWithOptions.every(
+            (attr) => v[attr.key] === combo[attr.key],
+          ),
+        ) || {};
+
       return {
         ...combo,
+        vid: existing.vid || "",
+        weight: existing.weight !== undefined ? existing.weight : 0,
         stock: existing.stock !== undefined ? existing.stock : 0,
         price: existing.price !== undefined ? existing.price : 0,
         discount: existing.discount !== undefined ? existing.discount : 0,
@@ -77,7 +86,7 @@ const PricingInformationStep = ({
     });
 
     setValue("variations", newVariations);
-  }, [serializedCombinations, hasVariations, setValue]);
+  }, [serializedCombinations, hasVariations, setValue, getValues]);
 
   return (
     <div>
@@ -140,7 +149,7 @@ const PricingInformationStep = ({
             ))}
           </div>
         )}
-        <form
+        <div
           className={`fieldset bg-base-100 p-5 rounded-box ${hasVariations && "w-1/2"}`}
         >
           <h2 className="text-xl font-bold">Pricing & Offers</h2>
@@ -196,7 +205,7 @@ const PricingInformationStep = ({
               )}
             </div>
           </div>
-        </form>
+        </div>
       </div>
       {hasVariations && combinations.length > 0 && (
         <div className="mt-5">
@@ -208,6 +217,7 @@ const PricingInformationStep = ({
                   {activeAttributesWithOptions.map((attr) => (
                     <th key={attr.key}>{attr.label}</th>
                   ))}
+                  <th>Cj Variants</th>
                   <th>Stock</th>
                   <th>Price</th>
                   <th>Discount</th>
@@ -222,11 +232,33 @@ const PricingInformationStep = ({
                       </td>
                     ))}
                     <td>
+                      <Controller
+                        name={`variations.${index}.vid`}
+                        control={control}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            value={field.value || ""}
+                            className="select w-full min-w-[250px]"
+                          >
+                            <option value="">Select CJ variant</option>
+
+                            {cjVariants.map((variant) => (
+                              <option key={variant.vid} value={variant.vid}>
+                                {variant.variantKey} — $
+                                {variant.variantSellPrice} —{" "}
+                                {variant.variantWeight}g
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                    </td>
+                    <td>
                       <div className="fieldset">
                         <input
                           type="number"
                           min={0}
-                          defaultValue={0}
                           {...register(`variations.${index}.stock`)}
                           className="input"
                         />
@@ -241,7 +273,6 @@ const PricingInformationStep = ({
                       <div className="fieldset">
                         <input
                           type="number"
-                          defaultValue={0}
                           min={1}
                           step={0.01}
                           {...register(`variations.${index}.price`)}
@@ -258,7 +289,6 @@ const PricingInformationStep = ({
                       <div className="fieldset">
                         <input
                           type="number"
-                          defaultValue={0}
                           min={0}
                           step={0.01}
                           {...register(`variations.${index}.discount`)}

@@ -35,7 +35,7 @@ const ProductToolbar = ({ total = 0, isFetching }) => {
         <div>
           <p className="text-sm text-gray-500">
             <span className="font-semibold text-gray-900">{total}</span>{" "}
-            products found
+            Products found
             {isFetching && (
               <span className="ml-2 text-xs text-gray-400">Updating...</span>
             )}

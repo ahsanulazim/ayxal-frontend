@@ -23,80 +23,44 @@ export const mapCjProductToForm = (cjProduct) => {
 
   // Extract dimensions and weight from first variant if available
   const firstVariant = cjProduct.variants?.[0] || {};
-  const weight = firstVariant.variantWeight || 0;
-  const dimensions = {
-    length: firstVariant.variantLength || 0,
-    width: firstVariant.variantWidth || 0,
-    height: firstVariant.variantHeight || 0,
-  };
+  const cjVariants =
+    cjProduct.variants?.map((v) => ({
+      vid: v.vid,
+      variantKey: v.variantKey || "",
+      variantSku: v.variantSku || "",
+      variantImage: v.variantImage || "",
+      variantWeight: v.variantWeight ?? 0,
+      variantSellPrice: v.variantSellPrice ?? 0,
 
-  // Determine if it has variations
-  const hasVariations = cjProduct.variants && cjProduct.variants.length > 1;
-
-  // Attributes mapping
-  // CJ offers attributes in "productKeyEn" like "capacity-Color"
-  const cjKeys =
-    cjProduct.productKeyEnSet || cjProduct.productKeyEn?.split("-") || [];
-
-  // Map attributes and variations to match your form structure
-  const attributes = cjKeys.map((key) => key.toLowerCase()); // e.g., ['size', 'color']
-
-  // Map variations if needed
-  const variations = hasVariations
-    ? cjProduct.variants.map((v) => {
-        // e.g. "300ml Garbage Bag-Indigo" -> ['300ml Garbage Bag', 'Indigo']
-        const keys = v.variantKey?.split("-") || [];
-        const variantData = {
-          stock: v.inventoryNum || 0,
-          price: v.variantSellPrice || 0,
-          discount: 0,
-          thumbnail: { url: v.variantImage || null, publicId: null },
-          images: [],
-        };
-
-        // Dynamic key mappings based on cjKeys
-        cjKeys.forEach((key, idx) => {
-          variantData[key.toLowerCase()] = keys[idx] || "";
-        });
-
-        return variantData;
-      })
-    : [];
+      dimensions: {
+        length: v.variantLength ?? 0,
+        width: v.variantWidth ?? 0,
+        height: v.variantHeight ?? 0,
+      },
+    })) || [];
 
   return {
     title: cjProduct.productNameEn || "",
     //category: cjProduct.categoryName || "", // categoryName matching
     brand: cjProduct.brand || "",
     noBrand: !cjProduct.brand,
-    hasVariations: hasVariations,
-    attributes: attributes, // ['size', 'color']
-    basePrice: basePrice,
+    cjPid: cjProduct.pid || "",
+    cjProductSku: cjProduct.sku || "",
+    cjVariants,
+    basePrice: 0,
     baseStock: 0,
     baseDiscount: 0,
-    variations: variations,
+    variations: [],
     thumbnail: { url: cjProduct.bigImage || null, publicId: null },
     images: images.map((image) => ({ url: image, publicId: null })),
-    description: htmlToEditorJs(cjProduct.description) || cjProduct.description || "",
-    weight: weight,
-    dimensions: dimensions,
+    description:
+      htmlToEditorJs(cjProduct.description) || cjProduct.description || "",
+    weight: Number(firstVariant.variantWeight) ?? 0,
+    dimensions: {
+      height: Number(firstVariant.variantHeight) ?? 0,
+      length: Number(firstVariant.variantLength) ?? 0,
+      width: Number(firstVariant.variantWidth) ?? 0,
+    },
     freeShipping: false,
-
-    // For react-hook-form to dynamically populate attribute values
-    ...cjKeys.reduce((acc, key, idx) => {
-      // Collect unique options for each attribute key from variations
-      const uniqueValues = Array.from(
-        new Set(
-          cjProduct.variants
-            ?.map((v) => v.variantKey?.split("-")[idx])
-            .filter(Boolean),
-        ),
-      );
-      // Format as react-select options
-      acc[key.toLowerCase()] = uniqueValues.map((val) => ({
-        value: val.toLowerCase(),
-        label: val,
-      }));
-      return acc;
-    }, {}),
   };
 };

@@ -22,13 +22,15 @@ const DescriptionStep = ({
   const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const newTag = tag
+      const enteredTags = tag
         .split(",")
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
-      if (newTag && !tagValue.includes(newTag)) {
+
+      const uniqueNewTags = enteredTags.filter((t) => !tagValue.includes(t));
+      if (uniqueNewTags.length > 0) {
+        setValue("tags", [...tagValue, ...uniqueNewTags]);
         await trigger("tags");
-        setValue("tags", [...tagValue, ...newTag]);
         setTag("");
       }
     }

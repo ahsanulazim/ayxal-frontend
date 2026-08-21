@@ -134,6 +134,7 @@ const useMultiStepForm = (initialData = {}) => {
     updateFormData,
     formData,
     currentSchema,
+    submittingForm: mutation.isPending,
     submttingForm: mutation.isPending,
   };
 };

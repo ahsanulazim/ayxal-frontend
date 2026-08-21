@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/thumbs";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import Image from "next/image";
 
 export default function ProductGallery({ images, title }) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -39,7 +40,9 @@ export default function ProductGallery({ images, title }) {
           {images.map((image, index) => (
             <SwiperSlide key={`${image}-${index}`}>
               <div className="aspect-square">
-                <img
+                <Image
+                  width={800}
+                  height={800}
                   src={image}
                   alt={`${title} ${index + 1}`}
                   className="h-full w-full object-contain"
@@ -81,9 +84,11 @@ export default function ProductGallery({ images, title }) {
           {images.map((image, index) => (
             <SwiperSlide key={`thumb-${index}`} className="">
               <div className="aspect-square cursor-pointer overflow-hidden rounded-box">
-                <img
+                <Image
+                  width={300}
+                  height={300}
                   src={image}
-                  alt=""
+                  alt={`${title} ${index + 1} thumbnail`}
                   className="h-full w-full object-cover"
                 />
               </div>

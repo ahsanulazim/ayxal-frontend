@@ -1,20 +1,25 @@
 import ProductCard from "../ui/ProductCard";
+import ProductCardSkeleton from "../ui/skeleton/ProductCardSkeleton";
 import ProductFilter from "./ProductFilter";
 import ProductToolbar from "./ProductToolbar";
 
-const ProductSidebar = ({ total, products }) => {
+const ProductSidebar = ({ total, products, isFetching, isLoading }) => {
   return (
-    <div className="drawer lg:drawer-open gap-5">
+    <div className="drawer lg:drawer-open lg:gap-5">
       <input id="filter" type="checkbox" className="drawer-toggle lg:hidden" />
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
-        <ProductToolbar total={total} />
+        <ProductToolbar total={total} isFetching={isFetching} />
         {/* Page content here */}
         <main className="py-5">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 md:gap-5 mt-5">
-            {products.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 md:gap-5">
+            {isLoading
+              ? Array.from({ length: 12 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))
+              : products?.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
           </div>
         </main>
       </div>

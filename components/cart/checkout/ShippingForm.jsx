@@ -23,8 +23,9 @@ const ShippingForm = ({ ref, setIsPending, paymentMethod }) => {
       email: "",
       phone: "",
       address: "",
-      thana: "",
-      district: "",
+      city: "",
+      state: "",
+      zip: "",
       comment: "",
     },
   });
@@ -119,13 +120,13 @@ const ShippingForm = ({ ref, setIsPending, paymentMethod }) => {
       )}
       <div className="flex justify-baseline items-center gap-5">
         <div className="fieldset flex-1">
-          <label htmlFor="thana" className="label">
-            Upazilla/Thana<span className="text-red-600">*</span>
+          <label htmlFor="city" className="label">
+            City<span className="text-red-600">*</span>
           </label>
           <input
             type="text"
             className="input w-full"
-            {...register("thana", { required: "Upazilla/Thana is Required" })}
+            {...register("city", { required: "City is Required" })}
           />
           {errors.thana && (
             <p className="text-red-600">{errors.thana.message}</p>
@@ -159,6 +160,17 @@ const ShippingForm = ({ ref, setIsPending, paymentMethod }) => {
           {errors.district && (
             <p className="text-red-600">{errors.district.message}</p>
           )}
+        </div>
+        <div className="fieldset">
+          <label htmlFor="zip" className="label">
+            Zip Code<span className="text-red-600">*</span>
+          </label>
+          <input
+            type="text"
+            className="input w-full"
+            {...register("zip", { required: "Zip Code is Required" })}
+          />
+          {errors.zip && <p className="text-red-600">{errors.zip.message}</p>}
         </div>
       </div>
       <div className="flex justify-baseline items-center gap-5">

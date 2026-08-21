@@ -16,7 +16,12 @@ const Categories = () => {
         </h2>
         <div className="grid grid-cols-4 lg:grid-cols-8 gap-3 lg:gap-5 mt-5">
           {categoriesLoading
-            ? "loading..."
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="skeleton aspect-square h-30 lg:h-40 w-full"
+                ></div>
+              ))
             : categoriesError
               ? "Cannot get categories"
               : categories.map((category) => (

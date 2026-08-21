@@ -23,7 +23,10 @@ const page = async ({ params }) => {
 
       <section>
         <div className="">
-          <ProductForm intitialData={convertedProductData} />
+          <ProductForm
+            initialData={convertedProductData}
+            cjVariants={convertedProductData.cjVariants}
+          />
         </div>
       </section>
     </>

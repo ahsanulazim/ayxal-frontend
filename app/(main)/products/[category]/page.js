@@ -1,10 +1,9 @@
 "use client";
 import { getProductsByCategory } from "@/api/productApi";
-import Filter from "@/components/product/Filter";
 import ShopNav from "@/components/product/ShopNav";
 import ProductHeader from "@/components/shop/ProductHeader";
 import ProductSidebar from "@/components/shop/ProductSidebar";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 
 const page = () => {
@@ -31,26 +30,48 @@ const page = () => {
     sort,
   };
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ["product-list", category, queryParams],
     queryFn: getProductsByCategory,
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 10,
   });
-
-  console.log("data", data);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>
       <section className="max-w-360 mx-auto px-5 mb-5">
-        <ShopNav category={data?.category?.name} slug={data?.category?.slug} />
-        <ProductHeader title={data?.category?.name} />
+        {isLoading ? (
+          <>
+            <div className="breadcrumbs text-sm">
+              <ul>
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <li key={i}>
+                    <div className="skeleton w-16 xs:w-20 h-6"></div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="skeleton w-56 h-10"></div>
+            <div className="skeleton w-full h-6 my-3"></div>
+            <div className="skeleton w-full max-w-3/4 h-6"></div>
+          </>
+        ) : (
+          <>
+            <ShopNav
+              category={data?.category?.name}
+              slug={data?.category?.slug}
+            />
+            <ProductHeader
+              title={data?.category?.name}
+              description={data?.category?.description}
+            />
+          </>
+        )}
       </section>
-      {/* <Filter category={category} /> */}
       <section className="max-w-360 mx-auto px-5">
         <ProductSidebar
+          isLoading={isLoading}
+          isFetching={isFetching}
           total={data?.pagination?.total}
           products={data?.products}
         />
