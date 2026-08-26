@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LuHeart, LuMenu, LuSearch, LuUser } from "react-icons/lu";
+import { LuHeart, LuMenu, LuSearch } from "react-icons/lu";
 import Search from "./Search";
-import { FaGift, FaMoon } from "react-icons/fa6";
+import { FaGift } from "react-icons/fa6";
 import Cart from "./Cart";
+import AccountBtn from "./AccountBtn";
 
 const Navbar = () => {
   return (
@@ -46,12 +47,7 @@ const Navbar = () => {
               Offers
             </button>
           </Link>
-          <Link href="/login">
-            <button className="hidden lg:inline-flex btn btn-main rounded-full">
-              <LuUser className="size-[1.2rem]" />
-              Account
-            </button>
-          </Link>
+          <AccountBtn />
           <button className="btn btn-ghost btn-circle lg:hidden">
             <LuSearch className="h-5 w-5" />
           </button>

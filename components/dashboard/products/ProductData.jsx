@@ -15,7 +15,7 @@ const ProductData = ({ products, productsLoading, productsError }) => {
       <table className="table">
         {/* head */}
         <thead>
-          <tr>
+          <tr className="bg-base-300">
             <th>
               <label>
                 <input type="checkbox" className="checkbox" />
