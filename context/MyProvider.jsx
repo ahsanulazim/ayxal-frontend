@@ -69,12 +69,7 @@ const MyProvider = ({ children }) => {
     setIsHydrated(true);
   }, []);
 
-  // 2. After initial hydration, save cart items to localStorage whenever they change
-  useEffect(() => {
-    if (isHydrated) {
-      localStorage.setItem("cart", JSON.stringify(cartItems));
-    }
-  }, [cartItems, isHydrated]);
+  // 2. Do not write to localStorage here to avoid overriding CartContext
 
   // 3. Add function to update cart items
   const addToCart = (product, variant, quantity) => {
@@ -144,12 +139,6 @@ const MyProvider = ({ children }) => {
   const { data: locations, isLoading: locationsLoading } = useQuery({
     queryKey: ["locations"],
     queryFn: getAllLocations,
-  });
-
-  //fetch shipping data
-  const { data: shippingRates, isLoading: shippingRatesLoading } = useQuery({
-    queryKey: ["shippingRates"],
-    queryFn: getAllShippingRates,
   });
 
   const [deliveryAdd, setDeliveryAdd] = useState(null);
@@ -234,8 +223,7 @@ const MyProvider = ({ children }) => {
     calculateTotalItem,
     locations,
     locationsLoading,
-    shippingRates,
-    shippingRatesLoading,
+
     deliveryAdd,
     setDeliveryAdd,
     shippingPrice,

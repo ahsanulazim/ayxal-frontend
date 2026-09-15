@@ -1,129 +1,137 @@
 "use client";
-import { getCarousels, uploadCarousel } from "@/api/carouselApi";
+import { getCarousels } from "@/api/carouselApi";
 import Breadcrumbs from "@/components/dashboard/Breadcrumbs";
+import CarouselAddModal from "@/components/dashboard/carousel/CarouselAddModal";
 import CarouselCard from "@/components/dashboard/carousel/CarouselCard";
-import CarouselUploader from "@/components/dashboard/carousel/CarouselUploader";
-import { MyContext } from "@/context/MyProvider";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useContext } from "react";
-import { useForm } from "react-hook-form";
-import { LuLink, LuUpload } from "react-icons/lu";
-import { toast } from "react-toastify";
+import CarouselDeleteModal from "@/components/dashboard/carousel/CarouselDeleteModal";
+import CarouselEditModal from "@/components/dashboard/carousel/CarouselEditModal";
+import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { LuImage, LuPlus } from "react-icons/lu";
 
-const page = () => {
-  const { carousels, carouselsLoading, carouselsError } = useContext(MyContext);
+const CarouselDashboardPage = () => {
+  const [selectedForDelete, setSelectedForDelete] = useState(null);
+  const [selectedForEdit, setSelectedForEdit] = useState(null);
+  const bannerAddRef = useRef();
 
+  // Fetch all carousels for the dashboard
   const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
-
-  const onSubmit = (data) => {
-    mutation.mutate(data);
-  };
-
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: uploadCarousel,
-    onSuccess: () => {
-      reset();
-      toast.success("Carousel Added");
-      queryClient.invalidateQueries({ queryKey: ["carousels"] });
-    },
-    onError: (error) => {
-      toast.error("Carousel cannot be added");
-      console.log(error);
-    },
+    data: carouselData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["carousels"],
+    queryFn: () => getCarousels(),
   });
+
+  const carousels = carouselData?.carousels || [];
 
   return (
     <>
       <Breadcrumbs title="Carousel" />
-      <section className="mb-5">
-        <div className="flex justify-between items-center gap-5">
-          <h2 className="font-bold text-2xl w-1/2">Carousel</h2>
-        </div>
-      </section>
-      <section>
-        <div className="w-full max-w-3xl mx-auto bg-base-300 rounded-md p-5">
-          <form className="fieldset" onSubmit={handleSubmit(onSubmit)}>
-            <h2 className="text-xl font-bold text-main">
-              Upload image for carousel
+
+      {/* Header Bar */}
+      <section className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-base-100 p-5 rounded-xl border border-base-200 shadow-sm">
+          <div>
+            <h2 className="font-bold text-2xl text-base-content flex items-center gap-2">
+              <LuImage className="text-primary" /> Hero Carousel Banners
             </h2>
-            <label htmlFor="title" className="label">
-              Carousel Title
-            </label>
-            <input
-              type="text"
-              className="input w-full"
-              placeholder="Exclusive deals"
-              {...register("title", { required: "Title is required" })}
-            />
-            {errors?.title && (
-              <span className="text-error text-xs">{errors.title.message}</span>
-            )}
-            <label htmlFor="link" className="label">
-              Page link
-            </label>
-            <label className="input w-full">
-              <LuLink className="h-[1em] opacity-50" />
-              <input
-                type="url"
-                placeholder="https://"
-                {...register("link", {
-                  required: "Link is required",
-                  pattern: {
-                    value:
-                      /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$/,
-                    message: "Must be valid URL",
-                  },
-                })}
+            <p className="text-sm text-base-content/70 mt-1">
+              Manage promotional hero banners, destination links, and display
+              order for your homepage.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary gap-2 shadow-sm"
+            onClick={() => bannerAddRef.current.showModal()}
+          >
+            <LuPlus size={18} />
+            Add New Banner
+          </button>
+        </div>
+      </section>
+
+      {/* Carousels List Section */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-lg text-base-content">
+            Active & Draft Banners ({carousels.length})
+          </h3>
+        </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((n) => (
+              <div
+                key={n}
+                className="bg-base-100 rounded-xl p-4 border border-base-200 shadow-sm space-y-3"
+              >
+                <div className="skeleton aspect-video w-full rounded-lg"></div>
+                <div className="skeleton h-4 w-3/4"></div>
+                <div className="skeleton h-3 w-1/2"></div>
+                <div className="skeleton h-8 w-full"></div>
+              </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="alert alert-error">
+            <span>
+              Failed to load carousel banners. Please check your network or
+              server.
+            </span>
+          </div>
+        ) : carousels.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {carousels.map((carousel) => (
+              <CarouselCard
+                key={carousel._id}
+                carousel={carousel}
+                onEdit={(c) => setSelectedForEdit(c)}
+                onDelete={(c) => setSelectedForDelete(c)}
               />
-            </label>
-            {errors?.link && (
-              <span className="text-error text-xs">{errors.link.message}</span>
-            )}
-            <label htmlFor="image" className="label">
-              Choose an image for carousel (PNG, JPG, WEBP)
-            </label>
-            <CarouselUploader name="image" control={control} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-base-100 rounded-2xl border border-dashed border-base-300">
+            <LuImage className="mx-auto text-base-content/30 mb-3" size={48} />
+            <h4 className="font-semibold text-lg text-base-content">
+              No Carousel Banners Found
+            </h4>
+            <p className="text-sm text-base-content/60 max-w-sm mx-auto mt-1 mb-5">
+              You haven&apos;t added any homepage promotional banners yet. Click
+              the button below to publish your first banner!
+            </p>
             <button
-              className="btn btn-success mt-4"
-              type="submit"
-              disabled={mutation.isPending}
+              type="button"
+              className="btn btn-primary btn-sm gap-2"
+              onClick={() => setIsAddOpen(true)}
             >
-              {mutation.isPending ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                <>
-                  <LuUpload /> Upload
-                </>
-              )}
+              <LuPlus size={16} /> Add Your First Banner
             </button>
-          </form>
-        </div>
+          </div>
+        )}
       </section>
-      <section className="mt-5">
-        <div className="grid grid-cols-5 gap-5">
-          {carouselsLoading ? (
-            <p>Loading...</p>
-          ) : carouselsError ? (
-            <p>Something went wrong</p>
-          ) : carousels.carousels.length > 0 ? (
-            carousels.carousels.map((carousel) => (
-              <CarouselCard key={carousel._id} carousel={carousel} />
-            ))
-          ) : (
-            <p>No carousels found</p>
-          )}
-        </div>
-      </section>
+
+      {/* Add New Banner Modal */}
+      <CarouselAddModal ref={bannerAddRef} />
+
+      {/* Delete Confirmation Modal */}
+      <CarouselDeleteModal
+        isOpen={Boolean(selectedForDelete)}
+        carousel={selectedForDelete}
+        onClose={() => setSelectedForDelete(null)}
+      />
+
+      {/* Edit Banner Modal */}
+      <CarouselEditModal
+        isOpen={Boolean(selectedForEdit)}
+        carousel={selectedForEdit}
+        onClose={() => setSelectedForEdit(null)}
+      />
     </>
   );
 };
 
-export default page;
+export default CarouselDashboardPage;

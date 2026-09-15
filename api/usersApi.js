@@ -28,3 +28,44 @@ export const deleteUser = async (email) => {
     return error;
   }
 };
+
+export const getUserData = async (email) => {
+  const res = await api.get(`/users/getUser?email=${email}`);
+  return res.data;
+};
+
+export const updateUserProfile = async (data) => {
+  const res = await api.put("/users/updateProfile", data);
+  return res.data;
+};
+
+export const addPet = async (data) => {
+  const res = await api.post("/users/addPet", data);
+  return res.data;
+};
+
+export const deletePet = async (email, petId) => {
+  const res = await api.delete(`/users/deletePet?email=${email}&petId=${petId}`);
+  return res.data;
+};
+
+export const addAddress = async (data) => {
+  const res = await api.post("/users/addAddress", data);
+  return res.data;
+};
+
+export const deleteAddress = async (email, addressId) => {
+  const res = await api.delete(`/users/deleteAddress?email=${email}&addressId=${addressId}`);
+  return res.data;
+};
+
+export const setDefaultAddress = async (email, addressId) => {
+  const res = await api.patch("/users/setDefaultAddress", { email, addressId });
+  return res.data;
+};
+
+export const toggleWishlist = async (email, productId) => {
+  const res = await api.post("/users/toggleWishlist", { email, productId });
+  return res.data;
+};
+

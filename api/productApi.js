@@ -5,6 +5,11 @@ export const createProduct = async (productData) => {
   return res.data;
 };
 
+export const createProductStepper = async (productData) => {
+  const res = await api.post("/products/createProductStepper", productData);
+  return res.data;
+};
+
 export const getAllProducts = async ({ queryKey }) => {
   const [, page, search, limit] = queryKey;
   const res = await api.get("/products/getAllProducts", {
@@ -24,6 +29,33 @@ export const getNewArrivals = async () => {
 
 export const deleteProduct = async (id) => {
   const res = await api.delete("/products/delete", {
+    params: {
+      id,
+    },
+  });
+  return res.data;
+};
+
+export const deleteProductStepper = async (id) => {
+  const res = await api.delete("/products/deleteProductStepper", {
+    params: {
+      id,
+    },
+  });
+  return res.data;
+};
+
+export const getProductById = async (id) => {
+  const res = await api.get("/products/getProductById", {
+    params: {
+      id,
+    },
+  });
+  return res.data;
+};
+
+export const updateProductStepper = async ({ id, data }) => {
+  const res = await api.put("/products/updateProductStepper", data, {
     params: {
       id,
     },

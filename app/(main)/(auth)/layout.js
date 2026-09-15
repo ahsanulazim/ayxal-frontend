@@ -12,7 +12,11 @@ const layout = ({ children }) => {
 
   useEffect(() => {
     if (!loading && newUser) {
-      router.push("/dashboard");
+      if (newUser?.user?.role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/account");
+      }
     }
   }, [loading, newUser, router]);
 

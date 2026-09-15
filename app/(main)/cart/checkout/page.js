@@ -1,76 +1,77 @@
 "use client";
 
 import Link from "next/link";
-import { LuHouse } from "react-icons/lu";
-import { useContext, useEffect, useRef, useState } from "react";
-import { MyContext } from "@/context/MyProvider";
+import { LuHouse, LuShieldCheck, LuLock } from "react-icons/lu";
+import { useRef, useState, useEffect } from "react";
+import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import ShippingForm from "@/components/cart/checkout/ShippingForm";
 import Overview from "@/components/cart/Overview";
 import Spinner from "@/components/skeleton/Spinner";
-import PaymentMethod from "@/components/cart/checkout/PaymentMethod";
 
-const page = () => {
+const CheckoutPage = () => {
   const router = useRouter();
-  const { cartItems, isHydrated } = useContext(MyContext);
+  const { cart, loaded } = useCart();
   const [isPending, setIsPending] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-
-  useEffect(() => {
-    if (isHydrated && cartItems.length === 0) {
-      router.push("/cart");
-    }
-  }, [isHydrated, cartItems, router]);
-
   const checkoutRef = useRef(null);
 
-  if (!isHydrated) {
+  useEffect(() => {
+    if (loaded && cart.length === 0) {
+      router.push("/cart");
+    }
+  }, [loaded, cart, router]);
+
+  if (!loaded) {
     return <Spinner />;
   }
 
   return (
-    <>
-      <section className="px-5">
-        <div className="max-w-360 mx-auto">
-          <div className="breadcrumbs text-sm">
+    <main className="min-h-screen bg-zinc-50/60 pb-16">
+      {/* Breadcrumb & Security Header */}
+      <section className="px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-zinc-200/60 pb-3">
+          <div className="breadcrumbs text-xs text-zinc-500">
             <ul>
               <li>
-                <Link href="/">
-                  <LuHouse />
+                <Link href="/" className="hover:text-main flex items-center gap-1">
+                  <LuHouse className="w-3.5 h-3.5" />
+                  <span>Home</span>
                 </Link>
               </li>
               <li>
-                <Link href="/cart">Cart</Link>
+                <Link href="/cart" className="hover:text-main">
+                  Cart
+                </Link>
               </li>
-              <li>Checkout</li>
+              <li className="font-semibold text-zinc-800">Secure Checkout</li>
             </ul>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs text-zinc-500">
+            <span className="flex items-center gap-1 text-emerald-700 font-medium">
+              <LuShieldCheck className="w-4 h-4 text-emerald-600" />
+              Guaranteed Safe Checkout
+            </span>
+            <span className="text-zinc-300">•</span>
+            <span className="flex items-center gap-1 text-zinc-600">
+              <LuLock className="w-3.5 h-3.5 text-zinc-400" />
+              Stripe 256-bit Encryption
+            </span>
           </div>
         </div>
       </section>
-      <section className="px-5 mb-5">
-        <div className="max-w-360 mx-auto grid grid-cols-1 lg:grid-cols-8 gap-5">
-          <div className="lg:col-span-4">
-            <div className="bg-base-100 p-5 rounded-box">
-              <h2 className="text-xl font-bold">Shipping & Billing</h2>
-              <div className="divider"></div>
-              <div>
-                <ShippingForm
-                  ref={checkoutRef}
-                  setIsPending={setIsPending}
-                  paymentMethod={paymentMethod}
-                />
-              </div>
-            </div>
+
+      {/* Main Checkout Columns */}
+      <section className="px-4 sm:px-6 lg:px-8 mt-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Column: Customer & Shipping Details */}
+          <div className="lg:col-span-7 xl:col-span-8">
+            <ShippingForm ref={checkoutRef} setIsPending={setIsPending} />
           </div>
-          <div className="lg:col-span-2">
-            <PaymentMethod
-              paymentMethod={paymentMethod}
-              setPaymentMethod={setPaymentMethod}
-            />
-          </div>
-          <div className="lg:col-span-2">
+
+          {/* Right Column: Order Summary & Instant Checkout */}
+          <div className="lg:col-span-5 xl:col-span-4">
             <Overview
-              paymentMethod={paymentMethod}
               ref={checkoutRef}
               isCheckout={true}
               isPending={isPending}
@@ -78,8 +79,8 @@ const page = () => {
           </div>
         </div>
       </section>
-    </>
+    </main>
   );
 };
 
-export default page;
+export default CheckoutPage;

@@ -1,6 +1,7 @@
 "use client";
 
-import { LuStar, LuTrash2 } from "react-icons/lu";
+import Link from "next/link";
+import { LuStar, LuTrash2, LuPencil } from "react-icons/lu";
 import ProductDeleteModal from "./ProductDeleteModal";
 import { useRef, useState } from "react";
 import moment from "moment";
@@ -90,9 +91,12 @@ const ProductData = ({ products, productsLoading, productsError }) => {
                   </label>
                 </th>
                 <td>
-                  <div className="flex items-center gap-3">
+                  <Link
+                    href={`/dashboard/products/${product._id}`}
+                    className="flex items-center gap-3 hover:opacity-85 transition group"
+                  >
                     <div className="avatar">
-                      <div className="mask mask-squircle h-12 w-12">
+                      <div className="mask mask-squircle h-12 w-12 border border-base-300">
                         <img
                           src={
                             product?.thumbnail?.url ||
@@ -104,11 +108,11 @@ const ProductData = ({ products, productsLoading, productsError }) => {
                       </div>
                     </div>
                     <div>
-                      <div className="font-bold line-clamp-1">
+                      <div className="font-bold line-clamp-1 group-hover:text-primary transition">
                         {product.title}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="whitespace-nowrap">{product.category}</td>
                 <td className="whitespace-nowrap">${product.price}</td>
@@ -130,16 +134,26 @@ const ProductData = ({ products, productsLoading, productsError }) => {
                 <td className="whitespace-nowrap">
                   {moment(product.updatedAt).format("MMM Do, YY")}
                 </td>
-                <td>
-                  <button
-                    className="btn btn-soft btn-error btn-circle"
-                    onClick={() => {
-                      setProductId(product._id);
-                      productRef.current?.showModal();
-                    }}
-                  >
-                    <LuTrash2 />
-                  </button>
+                <td className="whitespace-nowrap">
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      href={`/dashboard/products/${product._id}`}
+                      className="btn btn-soft btn-primary btn-circle btn-sm"
+                      title="Edit Product"
+                    >
+                      <LuPencil className="w-4 h-4" />
+                    </Link>
+                    <button
+                      className="btn btn-soft btn-error btn-circle btn-sm"
+                      title="Delete Product"
+                      onClick={() => {
+                        setProductId(product._id);
+                        productRef.current?.showModal();
+                      }}
+                    >
+                      <LuTrash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))

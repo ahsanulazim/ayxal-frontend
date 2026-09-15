@@ -17,6 +17,7 @@ import {
   LuSwatchBook,
   LuTruck,
   LuUser,
+  LuSparkles,
 } from "react-icons/lu";
 
 const Layout = ({ children }) => {
@@ -24,10 +25,22 @@ const Layout = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !newUser) {
-      router.push("/login");
+    if (!loading) {
+      if (!newUser) {
+        router.push("/login");
+      } else if (newUser?.user?.role !== "admin") {
+        router.push("/account");
+      }
     }
   }, [loading, newUser, router]);
+
+  if (loading || !newUser || newUser?.user?.role !== "admin") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-300">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
 
   return (
     <div className="drawer lg:drawer-open">
@@ -36,7 +49,9 @@ const Layout = ({ children }) => {
         {/* Navbar */}
         <DashNav />
         {/* Page content here */}
-        <main className="p-4 min-h-[calc(100dvh-64px)]">{children}</main>
+        <main className="bg-base-300 p-4 min-h-[calc(100dvh-64px)]">
+          {children}
+        </main>
       </div>
 
       <div className="drawer-side is-drawer-close:overflow-visible">
@@ -45,7 +60,7 @@ const Layout = ({ children }) => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <div className="flex min-h-full flex-col items-start bg-base-300 is-drawer-close:w-14 is-drawer-open:w-64">
+        <div className="flex min-h-full flex-col items-start bg-base-100 is-drawer-close:w-14 is-drawer-open:w-64">
           {/* Sidebar content here */}
           <ul className="menu w-full grow">
             {/* List item */}
@@ -85,6 +100,20 @@ const Layout = ({ children }) => {
                 <span className="is-drawer-close:hidden">Products</span>
               </ActiveLink>
             </li>
+
+            {/* <li>
+              <ActiveLink
+                href="/dashboard/products-v2"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                dataTip="Products V2"
+              >
+                <LuSparkles className="my-1.5 inline-block size-4 text-primary" />
+                <span className="is-drawer-close:hidden flex items-center justify-between flex-1">
+                  <span>Products (V2)</span>
+                  <span className="badge badge-primary badge-xs">New</span>
+                </span>
+              </ActiveLink>
+            </li> */}
 
             {/* List item */}
             <li>
@@ -154,17 +183,7 @@ const Layout = ({ children }) => {
                 <span className="is-drawer-close:hidden">Location</span>
               </ActiveLink>
             </li>
-            <li>
-              <ActiveLink
-                href="/dashboard/shipping"
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                dataTip="Shipping"
-              >
-                {/* Home icon */}
-                <LuTruck className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Shipping</span>
-              </ActiveLink>
-            </li>
+
             <li>
               <ActiveLink
                 href="/dashboard/users"

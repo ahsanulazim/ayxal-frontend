@@ -7,6 +7,10 @@ import {
   getAttributeOptions,
   getImageUrl,
   isAttributeOptionAvailable,
+  getNormalizedAttributes,
+  getAttributeKey,
+  getAttributeName,
+  getVariationAttributeValue,
 } from "./utils";
 
 export default function ProductVariations({
@@ -14,64 +18,42 @@ export default function ProductVariations({
   selectedAttributes,
   onChange,
 }) {
+  const attributes = getNormalizedAttributes(product);
+
   if (
     !product?.hasVariations ||
     !product?.variations?.length ||
-    !product?.attributes?.length
+    !attributes.length
   ) {
     return null;
   }
+
   const handleAttributeChange = (attribute, value) => {
-    /*
-     * Clicking already selected option
-     */
-    if (selectedAttributes?.[attribute] === value) {
+    const attrKey = getAttributeKey(attribute);
+
+    // Clicking already selected option
+    if (selectedAttributes?.[attrKey] === value) {
       return;
     }
 
-    /*
-     * Find best in-stock variation
-     * for clicked value
-     */
+    // Find best in-stock variation for clicked value
     const bestVariation = findBestVariationForAttribute({
       variations: product.variations,
-      attributes: product.attributes,
+      attributes,
       selectedAttributes,
       changedAttribute: attribute,
       value,
     });
 
-    /*
-     * যদি এই attribute value-এর কোনো
-     * in-stock combination না থাকে,
-     * selection allow করছি না।
-     */
     if (!bestVariation) {
       return;
     }
 
-    /*
-     * Rebuild full selected attributes
-     * from matched variation.
-     *
-     * Example:
-     *
-     * clicked orange while blue+s selected
-     *
-     * orange+s unavailable
-     * orange+l available
-     *
-     * becomes:
-     *
-     * {
-     *   color: "orange",
-     *   size: "l"
-     * }
-     */
-    const nextSelectedAttributes = product.attributes.reduce(
+    // Rebuild full selected attributes from matched variation
+    const nextSelectedAttributes = attributes.reduce(
       (result, currentAttribute) => {
-        result[currentAttribute] = bestVariation[currentAttribute];
-
+        const key = getAttributeKey(currentAttribute);
+        result[key] = getVariationAttributeValue(bestVariation, currentAttribute);
         return result;
       },
       {},
@@ -79,52 +61,59 @@ export default function ProductVariations({
 
     onChange(nextSelectedAttributes);
   };
+
   return (
-    <div className="mt-8">
-      {product.attributes.map((attribute) => {
+    <div className="mt-6 space-y-5">
+      {attributes.map((attribute) => {
+        const attrKey = getAttributeKey(attribute);
+        const attrName = getAttributeName(attribute);
         const values = getAttributeOptions(product.variations, attribute);
 
-        return (
-          <div key={attribute}>
-            {/* Attribute title */}
+        if (!values.length) return null;
 
-            <div className="mb-3 flex items-center gap-2">
-              <span className="font-semibold">{formatLabel(attribute)}</span>
+        // Check if options under this attribute have distinct image thumbnails
+        const optionImageMap = {};
+        values.forEach((val) => {
+          const matching = product.variations.find(
+            (v) => getVariationAttributeValue(v, attribute) === val,
+          );
+          const url = getImageUrl(matching?.thumbnail);
+          if (url) optionImageMap[val] = url;
+        });
+
+        const distinctImageCount = new Set(Object.values(optionImageMap)).size;
+        const showThumbnails = distinctImageCount > 1;
+
+        return (
+          <div key={attrKey}>
+            {/* Attribute title */}
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="text-sm font-bold text-zinc-900">
+                {formatLabel(attrName)}
+              </span>
 
               <span className="text-zinc-300">:</span>
 
-              <span className="text-sm font-medium capitalize text-zinc-600">
-                {formatLabel(selectedAttributes?.[attribute])}
+              <span className="text-sm font-semibold text-main capitalize">
+                {formatLabel(selectedAttributes?.[attrKey])}
               </span>
             </div>
 
             {/* Attribute options */}
-
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5">
               {values.map((value) => {
-                const active = selectedAttributes?.[attribute] === value;
+                const active = selectedAttributes?.[attrKey] === value;
 
                 const available = isAttributeOptionAvailable({
                   variations: product.variations,
-                  attributes: product.attributes,
+                  attributes,
                   selectedAttributes,
                   attribute,
                   value,
                 });
 
-                /*
-                 * For color selector we can show image.
-                 *
-                 * Find any variation of this color.
-                 */
-                const exampleVariation = product.variations.find(
-                  (variation) => variation?.[attribute] === value,
-                );
-
-                const image =
-                  attribute === "color"
-                    ? getImageUrl(exampleVariation?.thumbnail)
-                    : null;
+                const image = optionImageMap[value];
+                const hasImagePreview = showThumbnails && Boolean(image);
 
                 return (
                   <button
@@ -133,49 +122,48 @@ export default function ProductVariations({
                     disabled={!available}
                     onClick={() => handleAttributeChange(attribute, value)}
                     className={`
-                      relative flex items-center gap-2
-                      rounded-xl border-2 transition
+                      relative flex items-center gap-2 rounded-xl border-2 transition-all duration-150 select-none cursor-pointer
 
                       ${
-                        attribute === "color"
-                          ? "p-2 pr-4"
-                          : "min-w-14.5 justify-center px-4 py-2.5"
+                        hasImagePreview
+                          ? "p-1.5 pr-3.5"
+                          : "min-w-12 justify-center px-3.5 py-2"
                       }
 
                       ${
                         active
-                          ? "border-emerald-600 bg-emerald-50"
-                          : "border-zinc-200 bg-white"
+                          ? "border-main bg-main/5 text-main font-bold shadow-xs"
+                          : "border-zinc-200 bg-white text-zinc-800 hover:border-zinc-300"
                       }
 
                       ${
                         available
-                          ? "hover:border-emerald-400"
-                          : "cursor-not-allowed opacity-40"
+                          ? "hover:border-main/50"
+                          : "cursor-not-allowed opacity-40 line-through bg-zinc-50 text-zinc-400"
                       }
                     `}
                   >
-                    {image && (
+                    {hasImagePreview && (
                       <img
                         src={image}
                         alt={formatLabel(value)}
-                        className="h-11 w-11 rounded-lg object-cover"
+                        className="h-10 w-10 rounded-lg object-contain bg-zinc-50 border border-zinc-100"
                       />
                     )}
 
-                    <span className="text-sm font-semibold">
+                    <span className="text-sm">
                       {formatLabel(value)}
                     </span>
 
                     {active && available && (
-                      <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white">
-                        <LuCheck size={12} strokeWidth={3} />
+                      <span className="absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-main text-white shadow-xs">
+                        <LuCheck size={11} strokeWidth={3} />
                       </span>
                     )}
 
                     {!available && (
-                      <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-400 text-white">
-                        <LuX size={11} strokeWidth={3} />
+                      <span className="absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-zinc-400 text-white">
+                        <LuX size={10} strokeWidth={3} />
                       </span>
                     )}
                   </button>

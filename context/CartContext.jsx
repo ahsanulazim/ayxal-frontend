@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 
 const CartContext = createContext(null);
 
@@ -60,17 +60,37 @@ const createCartItem = ({ product, variation = null, quantity = 1 }) => {
 
   const selectedAttributes = {};
 
-  if (product?.hasVariations && variation && product?.attributes?.length) {
-    product.attributes.forEach((attribute) => {
-      selectedAttributes[attribute] = variation?.[attribute] ?? null;
+  if (product?.hasVariations && variation) {
+    const rawAttrs =
+      Array.isArray(product?.attributes) && product.attributes.length > 0
+        ? product.attributes
+        : variation.variantKey
+          ? [{ name: "Variant", slug: "variant" }]
+          : [];
+
+    rawAttrs.forEach((attribute) => {
+      const attrKey =
+        typeof attribute === "string"
+          ? attribute
+          : attribute.slug ||
+            attribute.key ||
+            attribute.name?.toLowerCase() ||
+            "variant";
+      const attrVal =
+        variation[attrKey] ??
+        variation.variantKey ??
+        variation.variant ??
+        variation.name ??
+        "";
+      selectedAttributes[attrKey] = attrVal;
     });
   }
 
   const variationKey =
     product?.hasVariations && variation
-      ? (product.attributes || [])
-          .map((attribute) => `${attribute}:${variation?.[attribute] ?? ""}`)
-          .join("|")
+      ? Object.entries(selectedAttributes)
+          .map(([k, v]) => `${k}:${v}`)
+          .join("|") || variation.vid || variation.cjVid || ""
       : "";
 
   const key = variationKey ? `${productId}::${variationKey}` : productId;
@@ -100,6 +120,18 @@ const createCartItem = ({ product, variation = null, quantity = 1 }) => {
     stock,
 
     quantity: Number(quantity) || 1,
+
+    vid: variation?.vid || variation?.cjVid || "",
+
+    cjVid: variation?.cjVid || variation?.vid || "",
+
+    sku: variation?.cjSku || variation?.sku || product?.sku || "",
+
+    weight: Number(variation?.weight || product?.weight || 0),
+
+    isDropshipped: Boolean(product?.isDropshipped),
+
+    supplier: product?.supplier || "",
   };
 };
 
@@ -110,6 +142,7 @@ const createCartItem = ({ product, variation = null, quantity = 1 }) => {
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [selectedShipping, setSelectedShipping] = useState(null);
 
   /* =======================================================
      LOAD CART
@@ -384,14 +417,14 @@ export const CartProvider = ({ children }) => {
      CLEAR CART
   ======================================================= */
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
 
     return {
       success: true,
       message: "Cart cleared",
     };
-  };
+  }, []);
 
   /* =======================================================
      CHECK ITEM EXISTS
@@ -478,6 +511,18 @@ export const CartProvider = ({ children }) => {
   }, [cartOriginalTotal, cartSubtotal]);
 
   /* =======================================================
+     SHIPPING & GRAND TOTAL
+  ======================================================= */
+
+  const shippingCost = useMemo(() => {
+    return Number(selectedShipping?.price ?? selectedShipping?.logisticPrice ?? 0);
+  }, [selectedShipping]);
+
+  const cartGrandTotal = useMemo(() => {
+    return Number((cartSubtotal + shippingCost).toFixed(2));
+  }, [cartSubtotal, shippingCost]);
+
+  /* =======================================================
      CONTEXT VALUE
   ======================================================= */
 
@@ -496,6 +541,14 @@ export const CartProvider = ({ children }) => {
       cartOriginalTotal,
 
       cartSavings,
+
+      selectedShipping,
+
+      setSelectedShipping,
+
+      shippingCost,
+
+      cartGrandTotal,
 
       addToCart,
 
@@ -521,6 +574,17 @@ export const CartProvider = ({ children }) => {
       cartSubtotal,
       cartOriginalTotal,
       cartSavings,
+      selectedShipping,
+      shippingCost,
+      cartGrandTotal,
+      addToCart,
+      removeFromCart,
+      updateCartQuantity,
+      increaseCartQuantity,
+      decreaseCartQuantity,
+      clearCart,
+      isInCart,
+      getCartItem,
     ],
   );
 

@@ -1,5 +1,5 @@
 const TakaSymbol = () => {
-  return <span className="font-hind-siliguri">৳</span>;
+  return <span>$</span>;
 };
 
 export default TakaSymbol;

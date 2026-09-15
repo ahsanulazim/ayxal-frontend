@@ -2,7 +2,6 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import CategoryNav from "./CategoryNav";
-import TakaSymbol from "../ui/TakaSymbol";
 import { useQuery } from "@tanstack/react-query";
 import { fetchFilters } from "@/api/productApi";
 import AllProducts from "./AllProducts";
@@ -78,14 +77,8 @@ const Filter = ({ category }) => {
                         )}
                       />
                       <div className="flex items-center justify-between mt-5 gap-10">
-                        <span>
-                          <TakaSymbol />
-                          {price[0]}
-                        </span>
-                        <span>
-                          <TakaSymbol />
-                          {price[1]}
-                        </span>
+                        <span>${price[0]}</span>
+                        <span>${price[1]}</span>
                       </div>
                     </div>
                   </div>

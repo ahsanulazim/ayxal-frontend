@@ -25,23 +25,31 @@ export default function ProductSpecifications({ product }) {
 
     {
       label: "Brand",
-      value: product.noBrand ? "No Brand" : product.brand || "Not specified",
+      value: product.noBrand ? "No Brand" : product.brand || "PretyPet",
     },
+
+    product.freeShipping != null
+      ? {
+          label: "Shipping",
+          value: product.freeShipping ? "Free Shipping" : "Standard Shipping",
+        }
+      : null,
   ].filter(Boolean);
 
   return (
-    <div className="rounded-2xl shadow-md bg-base-100 p-6 sm:p-8">
-      <h2 className="text-2xl font-bold">Specifications</h2>
+    <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 sm:p-8 shadow-xs">
+      <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">
+        Product Specifications
+      </h2>
 
-      <div className="mt-5">
+      <div className="mt-6 divide-y divide-zinc-100 border-t border-b border-zinc-100">
         {specifications.map((item, index) => (
           <div
             key={`${item.label}-${index}`}
-            className="grid grid-cols-[120px_1fr] gap-4 py-2 text-sm"
+            className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-2 py-3.5 text-sm"
           >
-            <span className="text-zinc-500">{item.label}</span>
-
-            <span className="font-medium">{item.value}</span>
+            <span className="font-medium text-zinc-500">{item.label}</span>
+            <span className="font-semibold text-zinc-900">{item.value}</span>
           </div>
         ))}
       </div>

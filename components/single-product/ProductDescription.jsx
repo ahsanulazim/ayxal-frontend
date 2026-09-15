@@ -198,10 +198,10 @@ export default function ProductDescription({ description }) {
   };
 
   return (
-    <div className="rounded-2xl shadow-md bg-base-100 p-6 sm:p-8">
-      <h2 className="text-2xl font-bold">Product Description</h2>
+    <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 sm:p-8 shadow-xs">
+      <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">Product Description</h2>
 
-      <div className="mt-6 space-y-4 leading-7 text-zinc-600 wrap-break-word [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-2 [&_p]:mb-2 [&_b]:font-bold [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5">
+      <div className="mt-6 space-y-4 leading-relaxed text-zinc-600 wrap-break-word [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-3 [&_p]:mb-3 [&_b]:font-bold [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-semibold">
         {blocks
           ? blocks.map((block, idx) => renderBlock(block, idx))
           : <div dangerouslySetInnerHTML={{ __html: htmlContent }} />}
