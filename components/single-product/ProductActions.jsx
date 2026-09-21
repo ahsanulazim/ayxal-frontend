@@ -1,29 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { LuHeart, LuShoppingCart, LuZap, LuLoader } from "react-icons/lu";
-import { toast } from "react-toastify";
 import { formatPrice } from "./utils";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function ProductActions({
   outOfStock,
   isAdding = false,
   onAddToCart,
   onBuyNow,
+  product,
   price = 0,
 }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const productId = product?._id || product?.slug || product?.pid;
+  const isSaved = isWishlisted(productId);
 
   const handleWishlistToggle = () => {
-    setIsWishlisted((prev) => {
-      const next = !prev;
-      if (next) {
-        toast.success("Saved to your wishlist!");
-      } else {
-        toast.info("Removed from your wishlist");
-      }
-      return next;
-    });
+    toggleWishlist(product);
   };
 
   return (
@@ -69,22 +63,22 @@ export default function ProductActions({
           type="button"
           onClick={handleWishlistToggle}
           className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors border ${
-            isWishlisted
+            isSaved
               ? "bg-red-50 border-red-200 text-red-600"
               : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
           }`}
         >
           <LuHeart
             className={`w-4.5 h-4.5 transition-transform active:scale-125 ${
-              isWishlisted ? "fill-red-500 text-red-500" : ""
+              isSaved ? "fill-red-500 text-red-500" : ""
             }`}
           />
-          <span>{isWishlisted ? "Saved to Wishlist" : "Add to Wishlist"}</span>
+          <span>{isSaved ? "Saved to Wishlist" : "Add to Wishlist"}</span>
         </button>
       </div>
 
       {/* Mobile Fixed Bottom Action Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-zinc-200 px-4 py-2.5 shadow-2xl flex items-center justify-between gap-3">
+      <div className="lg:hidden fixed bottom-16 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-zinc-200 px-4 py-2.5 shadow-2xl flex items-center justify-between gap-3">
         <div className="flex flex-col">
           <span className="text-[11px] text-zinc-400 uppercase font-medium">
             Price

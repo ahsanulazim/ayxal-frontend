@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
@@ -23,13 +23,46 @@ import {
   LuTruck,
   LuSparkles,
   LuCircleCheck,
+  LuExternalLink,
+  LuLayers,
 } from "react-icons/lu";
 import {
   getAllOrderData,
   getOrderStats,
   updateOrderStatus,
+  syncCjOrderStatus,
 } from "@/api/orderApi";
 import OrderDeleteModal from "./OrderDeleteModal";
+import CjFulfillConfirmModal from "./CjFulfillConfirmModal";
+import BulkFulfillModal from "./BulkFulfillModal";
+
+const CJ_STATUS_CONFIG = {
+  submitted: {
+    label: "Submitted",
+    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    dotClass: "bg-blue-500",
+  },
+  processing: {
+    label: "Processing",
+    badgeClass: "bg-sky-50 text-sky-700 border-sky-200",
+    dotClass: "bg-sky-500",
+  },
+  shipped: {
+    label: "Shipped",
+    badgeClass: "bg-purple-50 text-purple-700 border-purple-200",
+    dotClass: "bg-purple-500",
+  },
+  delivered: {
+    label: "Delivered",
+    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    dotClass: "bg-emerald-500",
+  },
+  cancelled: {
+    label: "Cancelled",
+    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    dotClass: "bg-rose-500",
+  },
+};
 
 const ORDER_STATUS_CONFIG = {
   pending: {
@@ -101,6 +134,38 @@ const OrderData = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedId, setCopiedId] = useState(null);
   const [orderToDelete, setOrderToDelete] = useState(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [orderToFulfillCj, setOrderToFulfillCj] = useState(null);
+  const [syncingOrderId, setSyncingOrderId] = useState(null);
+
+  // Dialog modal refs
+  const deleteModalRef = useRef(null);
+  const cjFulfillModalRef = useRef(null);
+  const bulkFulfillModalRef = useRef(null);
+
+  const handleOpenSingleFulfill = (order) => {
+    setOrderToFulfillCj(order);
+    cjFulfillModalRef.current?.showModal();
+  };
+
+  const handleOpenBulkFulfill = () => {
+    bulkFulfillModalRef.current?.showModal();
+  };
+
+  const handleOpenDelete = (order) => {
+    setOrderToDelete(order);
+    deleteModalRef.current?.showModal();
+  };
+
+  // Clear selection when filters or page change (React 19 pattern)
+  const [prevFilterKey, setPrevFilterKey] = useState("");
+  const currentFilterKey = `${currentPage}-${activeTab}-${searchTerm}-${paymentFilter}`;
+  if (prevFilterKey !== currentFilterKey) {
+    setPrevFilterKey(currentFilterKey);
+    if (selectedOrderIds.length > 0) {
+      setSelectedOrderIds([]);
+    }
+  }
 
   // Fetch KPI Stats
   const { data: statsData } = useQuery({
@@ -142,6 +207,29 @@ const OrderData = () => {
     },
   });
 
+  // Sync CJ Status Mutation
+  const syncCjMutation = useMutation({
+    mutationFn: (orderId) => syncCjOrderStatus(orderId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success(data?.message || "CJ status updated");
+      setSyncingOrderId(null);
+    },
+    onError: (err) => {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to sync CJ status",
+      );
+      setSyncingOrderId(null);
+    },
+  });
+
+  const handleSyncCj = (orderId) => {
+    setSyncingOrderId(orderId);
+    syncCjMutation.mutate(orderId);
+  };
+
   const handleCopy = (text, id) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -163,6 +251,43 @@ const OrderData = () => {
     page: 1,
     limit: 15,
   };
+
+  const isAllSelected =
+    orders.length > 0 && orders.every((o) => selectedOrderIds.includes(o._id));
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedOrderIds([]);
+    } else {
+      setSelectedOrderIds(orders.map((o) => o._id));
+    }
+  };
+
+  const handleToggleSelectRow = (orderId) => {
+    setSelectedOrderIds((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId],
+    );
+  };
+
+  const handleSelectUnfulfilled = () => {
+    const unfulfilledOnPage = orders
+      .filter((o) => !o.cjOrder?.cjOrderId)
+      .map((o) => o._id);
+    setSelectedOrderIds(unfulfilledOnPage);
+    if (unfulfilledOnPage.length === 0) {
+      toast.info("No unfulfilled orders found on this page.");
+    }
+  };
+
+  const selectedOrders = useMemo(() => {
+    return orders.filter((o) => selectedOrderIds.includes(o._id));
+  }, [orders, selectedOrderIds]);
+
+  const unfulfilledSelectedCount = useMemo(() => {
+    return selectedOrders.filter((o) => !o.cjOrder?.cjOrderId).length;
+  }, [selectedOrders]);
 
   return (
     <div className="space-y-6">
@@ -323,17 +448,79 @@ const OrderData = () => {
         </div>
       </div>
 
+      {/* Floating / Sticky Bulk Action Bar */}
+      {selectedOrderIds.length > 0 && (
+        <div className="sticky top-20 z-20 bg-zinc-900 text-white p-3.5 sm:px-5 sm:py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 flex-wrap animate-fade-in border border-zinc-800">
+          <div className="flex items-center gap-2.5">
+            <span className="badge badge-sm badge-success font-mono font-bold text-xs">
+              {selectedOrderIds.length}
+            </span>
+            <span className="text-xs font-semibold text-zinc-100">
+              order{selectedOrderIds.length > 1 ? "s" : ""} selected
+            </span>
+            <span className="text-zinc-600 hidden sm:inline">·</span>
+            <span className="text-xs text-zinc-400 hidden sm:inline">
+              <span className="font-semibold text-teal-400">
+                {unfulfilledSelectedCount}
+              </span>{" "}
+              unfulfilled with CJ
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSelectUnfulfilled}
+              className="btn btn-xs btn-ghost text-zinc-300 hover:text-white rounded-lg text-xs"
+            >
+              Select Unfulfilled Only
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOpenBulkFulfill}
+              className="btn btn-xs btn-main rounded-xl text-xs font-bold gap-1.5 shadow-sm px-3"
+            >
+              <LuSparkles className="w-3.5 h-3.5" />
+              Bulk Fulfill with CJ ({unfulfilledSelectedCount})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedOrderIds([])}
+              className="btn btn-xs btn-ghost text-zinc-400 hover:text-rose-400 rounded-lg text-xs"
+            >
+              Deselect All
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 3. Orders Table */}
       <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-zinc-50/80 border-b border-zinc-200/80 text-zinc-500 font-semibold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-3 text-center w-10">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleToggleSelectAll}
+                    className="checkbox checkbox-xs rounded border-zinc-300 focus:ring-main"
+                    title={
+                      isAllSelected
+                        ? "Deselect all"
+                        : "Select all orders on page"
+                    }
+                  />
+                </th>
                 <th className="py-3.5 px-4">Order Details</th>
                 <th className="py-3.5 px-4">Customer</th>
                 <th className="py-3.5 px-4">Items Preview</th>
                 <th className="py-3.5 px-4">Payment</th>
-                <th className="py-3.5 px-4">Fulfillment</th>
+                <th className="py-3.5 px-4">Order Status</th>
+                <th className="py-3.5 px-4">CJ Dropshipping</th>
                 <th className="py-3.5 px-4 text-right">Total</th>
                 <th className="py-3.5 px-4 text-center">Actions</th>
               </tr>
@@ -342,6 +529,9 @@ const OrderData = () => {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, idx) => (
                   <tr key={idx} className="animate-pulse">
+                    <td className="p-3 text-center">
+                      <div className="h-4 w-4 bg-zinc-200 rounded mx-auto"></div>
+                    </td>
                     <td className="p-4">
                       <div className="h-4 bg-zinc-200 rounded-md w-24 mb-1"></div>
                       <div className="h-3 bg-zinc-100 rounded-md w-16"></div>
@@ -359,6 +549,9 @@ const OrderData = () => {
                     <td className="p-4">
                       <div className="h-5 bg-zinc-200 rounded-full w-24"></div>
                     </td>
+                    <td className="p-4">
+                      <div className="h-6 bg-zinc-200 rounded-full w-24"></div>
+                    </td>
                     <td className="p-4 text-right">
                       <div className="h-4 bg-zinc-200 rounded-md w-16 ml-auto"></div>
                     </td>
@@ -369,7 +562,7 @@ const OrderData = () => {
                 ))
               ) : isError ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-rose-500">
+                  <td colSpan={9} className="py-12 text-center text-rose-500">
                     <p className="font-semibold">Failed to load orders.</p>
                     <button
                       onClick={() => refetch()}
@@ -381,7 +574,7 @@ const OrderData = () => {
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-zinc-400">
+                  <td colSpan={9} className="py-16 text-center text-zinc-400">
                     <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto mb-3 text-zinc-400">
                       <LuPackage className="w-7 h-7" />
                     </div>
@@ -419,8 +612,22 @@ const OrderData = () => {
                   return (
                     <tr
                       key={order._id}
-                      className="hover:bg-zinc-50/70 transition-colors group"
+                      className={`hover:bg-zinc-50/70 transition-colors group ${
+                        selectedOrderIds.includes(order._id)
+                          ? "bg-teal-50/30"
+                          : ""
+                      }`}
                     >
+                      {/* Selection Checkbox */}
+                      <td className="py-3.5 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedOrderIds.includes(order._id)}
+                          onChange={() => handleToggleSelectRow(order._id)}
+                          className="checkbox checkbox-xs rounded border-zinc-300 focus:ring-main"
+                        />
+                      </td>
+
                       {/* Order Details */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-1.5">
@@ -510,14 +717,22 @@ const OrderData = () => {
                             />
                             {payConf.label}
                           </span>
-                          <span className="text-[10px] text-zinc-400 flex items-center gap-1">
-                            <LuCreditCard className="w-3 h-3 text-zinc-400" />{" "}
-                            Stripe
+                          <span className="text-[10px] text-zinc-500 font-medium flex items-center gap-1">
+                            <LuCreditCard className="w-3 h-3 text-zinc-400" />
+                            {order?.paymentDetails ? (
+                              <span>
+                                {order.paymentDetails.wallet
+                                  ? `${order.paymentDetails.wallet === "apple_pay" ? "Apple Pay" : order.paymentDetails.wallet === "google_pay" ? "Google Pay" : order.paymentDetails.wallet}`
+                                  : `${order.paymentDetails.brand ? order.paymentDetails.brand.toUpperCase() : "Card"} ••${order.paymentDetails.last4 || ""}`}
+                              </span>
+                            ) : (
+                              <span>Stripe Card</span>
+                            )}
                           </span>
                         </div>
                       </td>
 
-                      {/* Fulfillment Status & Quick Changer */}
+                      {/* Store Order Status & Quick Changer */}
                       <td className="py-3.5 px-4">
                         <div className="relative group/status">
                           <select
@@ -539,6 +754,105 @@ const OrderData = () => {
                         </div>
                       </td>
 
+                      {/* CJ Dropshipping Fulfillment Status & Action */}
+                      <td className="py-3.5 px-4">
+                        {order.cjOrder?.cjOrderId ? (
+                          <div className="flex flex-col gap-1.5 items-start">
+                            {/* CJ Status Badge & Sync */}
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${
+                                  (
+                                    CJ_STATUS_CONFIG[
+                                      (
+                                        order.cjOrder.status || "submitted"
+                                      ).toLowerCase()
+                                    ] || CJ_STATUS_CONFIG.submitted
+                                  ).badgeClass
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    (
+                                      CJ_STATUS_CONFIG[
+                                        (
+                                          order.cjOrder.status || "submitted"
+                                        ).toLowerCase()
+                                      ] || CJ_STATUS_CONFIG.submitted
+                                    ).dotClass
+                                  }`}
+                                />
+                                {order.cjOrder.status || "SUBMITTED"}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={() => handleSyncCj(order._id)}
+                                disabled={syncingOrderId === order._id}
+                                className="p-1 text-zinc-400 hover:text-main rounded-md hover:bg-zinc-100 transition-colors"
+                                title="Sync CJ Tracking & Status"
+                              >
+                                <LuRefreshCw
+                                  className={`w-3 h-3 ${
+                                    syncingOrderId === order._id
+                                      ? "animate-spin text-main"
+                                      : ""
+                                  }`}
+                                />
+                              </button>
+                            </div>
+
+                            {/* CJ Order ID */}
+                            <div className="flex items-center gap-1 font-mono text-[10px] text-zinc-600 bg-zinc-100/80 border border-zinc-200/80 px-1.5 py-0.5 rounded">
+                              <span>CJ: {order.cjOrder.cjOrderId}</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopy(
+                                    order.cjOrder.cjOrderId,
+                                    `cj-${order._id}`,
+                                  )
+                                }
+                                className="text-zinc-400 hover:text-zinc-700 p-0.5"
+                                title="Copy CJ ID"
+                              >
+                                {copiedId === `cj-${order._id}` ? (
+                                  <LuCheck className="w-2.5 h-2.5 text-emerald-600" />
+                                ) : (
+                                  <LuCopy className="w-2.5 h-2.5" />
+                                )}
+                              </button>
+                            </div>
+
+                            {/* Tracking Number if available */}
+                            {(order.cjOrder.trackingNumber ||
+                              order.shipping?.trackingNumber) && (
+                              <a
+                                href={`https://t.17track.net/en#nums=${order.cjOrder.trackingNumber || order.shipping?.trackingNumber}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 font-mono text-[10px] text-primary hover:underline"
+                                title="Track parcel online"
+                              >
+                                <LuTruck className="w-3 h-3 text-zinc-400" />
+                                <span>
+                                  {order.cjOrder.trackingNumber ||
+                                    order.shipping?.trackingNumber}
+                                </span>
+                                <LuExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                              Unfulfilled
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
                       {/* Total Price */}
                       <td className="py-3.5 px-4 text-right">
                         <span className="font-bold text-zinc-900 text-sm">
@@ -554,6 +868,27 @@ const OrderData = () => {
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-center">
                         <div className="flex items-center justify-center gap-1">
+                          {/* Fulfill Button with Truck Icon (if not fulfilled) */}
+                          {!order.cjOrder?.cjOrderId ? (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenSingleFulfill(order)}
+                              className="btn btn-sm btn-square btn-ghost text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl"
+                              title="Fulfill Order with CJ Dropshipping"
+                            >
+                              <LuTruck className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              disabled
+                              type="button"
+                              className="btn btn-sm btn-square btn-ghost rounded-xl"
+                              title="Fulfill Order with CJ Dropshipping"
+                            >
+                              <LuTruck className="w-4 h-4" />
+                            </button>
+                          )}
+
                           <Link
                             href={`/dashboard/orders/${order._id}`}
                             className="btn btn-sm btn-square btn-ghost text-zinc-500 hover:text-main hover:bg-main/10 rounded-xl"
@@ -564,7 +899,7 @@ const OrderData = () => {
 
                           <button
                             type="button"
-                            onClick={() => setOrderToDelete(order)}
+                            onClick={() => handleOpenDelete(order)}
                             className="btn btn-sm btn-square btn-ghost text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
                             title="Delete Order"
                           >
@@ -618,9 +953,31 @@ const OrderData = () => {
 
       {/* Controlled Delete Modal */}
       <OrderDeleteModal
-        isOpen={Boolean(orderToDelete)}
+        ref={deleteModalRef}
         order={orderToDelete}
         onClose={() => setOrderToDelete(null)}
+      />
+
+      {/* Single CJ Fulfill Confirmation Modal */}
+      <CjFulfillConfirmModal
+        ref={cjFulfillModalRef}
+        order={orderToFulfillCj}
+        onSuccess={() => {
+          setSelectedOrderIds((prev) =>
+            orderToFulfillCj
+              ? prev.filter((id) => id !== orderToFulfillCj?._id)
+              : prev,
+          );
+        }}
+      />
+
+      {/* Bulk CJ Fulfill Modal */}
+      <BulkFulfillModal
+        ref={bulkFulfillModalRef}
+        selectedOrders={selectedOrders}
+        onSuccess={() => {
+          setSelectedOrderIds([]);
+        }}
       />
     </div>
   );

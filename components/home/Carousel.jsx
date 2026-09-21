@@ -20,7 +20,9 @@ const Carousel = () => {
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   if (carouselsLoading) {
-    return <div className="skeleton w-full h-72 md:h-80 lg:h-96 rounded-md"></div>;
+    return (
+      <div className="skeleton w-full h-72 md:h-80 lg:h-96 rounded-md"></div>
+    );
   }
 
   if (carouselsError) {
@@ -66,7 +68,10 @@ const Carousel = () => {
           : {};
 
         return (
-          <SwiperSlide key={carousel._id || index} className="relative w-full h-full">
+          <SwiperSlide
+            key={carousel._id || index}
+            className="relative w-full h-full"
+          >
             <Wrapper
               {...wrapperProps}
               className={`block relative w-full h-full select-none ${
@@ -76,9 +81,9 @@ const Carousel = () => {
               <Image
                 src={carousel.image?.url || ""}
                 alt={carousel.title || "Promotional banner"}
-                fill
+                width={1942}
+                height={809}
                 priority={index === 0}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 850px"
                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-[1.02]"
               />
 

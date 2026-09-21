@@ -4,6 +4,7 @@ import QueryProvider from "@/query/QueryProvider";
 import MyProvider from "@/context/MyProvider";
 import { ToastContainer } from "react-toastify";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const dm_sans = DM_Sans({
   variable: "--font-dm-sans",
@@ -25,8 +26,10 @@ export default function RootLayout({ children }) {
         <QueryProvider>
           <MyProvider>
             <CartProvider>
-              <ToastContainer />
-              {children}
+              <WishlistProvider>
+                <ToastContainer />
+                {children}
+              </WishlistProvider>
             </CartProvider>
           </MyProvider>
         </QueryProvider>

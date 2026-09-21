@@ -5,8 +5,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { LuTrash2, LuTriangleAlert, LuX } from "react-icons/lu";
 
-const OrderDeleteModal = ({ isOpen, onClose, order }) => {
+const OrderDeleteModal = ({ ref, order, onClose }) => {
   const queryClient = useQueryClient();
+
+  const orderId = order?._id;
+  const orderNumber = order?.orderNumber || orderId || "";
 
   const mutation = useMutation({
     mutationFn: (id) => deleteOrder(id),
@@ -14,17 +17,21 @@ const OrderDeleteModal = ({ isOpen, onClose, order }) => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["orderStats"] });
       toast.success("Order deleted successfully");
-      onClose();
+      ref?.current?.close();
+      if (onClose) onClose();
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to delete order");
     },
   });
 
-  if (!isOpen || !order) return null;
+  const handleClose = () => {
+    ref?.current?.close();
+    if (onClose) onClose();
+  };
 
   return (
-    <dialog className="modal modal-open bg-black/40 backdrop-blur-xs z-50">
+    <dialog ref={ref} className="modal bg-black/40 backdrop-blur-xs z-50">
       <div className="modal-box max-w-md p-6 rounded-3xl border border-zinc-200 bg-white shadow-xl">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
           <div className="flex items-center gap-2.5 text-rose-600">
@@ -35,7 +42,7 @@ const OrderDeleteModal = ({ isOpen, onClose, order }) => {
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="btn btn-sm btn-circle btn-ghost text-zinc-400 hover:text-zinc-700"
           >
             <LuX className="w-4 h-4" />
@@ -46,7 +53,7 @@ const OrderDeleteModal = ({ isOpen, onClose, order }) => {
           <p>
             Are you sure you want to permanently delete order{" "}
             <span className="font-semibold text-zinc-900 font-mono">
-              #{order.orderNumber || order._id}
+              #{orderNumber}
             </span>
             ?
           </p>
@@ -57,19 +64,21 @@ const OrderDeleteModal = ({ isOpen, onClose, order }) => {
         </div>
 
         <div className="modal-action mt-4 pt-3 border-t border-zinc-100 flex items-center justify-end gap-2.5">
-          <button
-            type="button"
-            className="btn btn-ghost rounded-xl px-4 text-zinc-600"
-            onClick={onClose}
-            disabled={mutation.isPending}
-          >
-            Cancel
-          </button>
+          <form method="dialog">
+            <button
+              type="submit"
+              className="btn btn-ghost rounded-xl px-4 text-zinc-600"
+              onClick={handleClose}
+              disabled={mutation.isPending}
+            >
+              Cancel
+            </button>
+          </form>
           <button
             type="button"
             className="btn btn-error text-white rounded-xl px-5 gap-2"
-            disabled={mutation.isPending}
-            onClick={() => mutation.mutate(order._id)}
+            disabled={mutation.isPending || !orderId}
+            onClick={() => orderId && mutation.mutate(orderId)}
           >
             {mutation.isPending ? (
               <span className="loading loading-spinner loading-sm"></span>
@@ -82,7 +91,7 @@ const OrderDeleteModal = ({ isOpen, onClose, order }) => {
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button onClick={onClose}>close</button>
+        <button onClick={handleClose}>close</button>
       </form>
     </dialog>
   );

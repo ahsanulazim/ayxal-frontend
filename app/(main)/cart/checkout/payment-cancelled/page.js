@@ -44,9 +44,9 @@ const page = () => {
             Need help? Contact our support team at{" "}
             <a
               className="link text-main link-hover"
-              href="mailto:support@oiki.store"
+              href="mailto:support@ayxal.com"
             >
-              support@oiki.store
+              support@ayxal.com
             </a>
           </p>
         </PaymentCard>

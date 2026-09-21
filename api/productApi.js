@@ -22,6 +22,26 @@ export const getAllProducts = async ({ queryKey }) => {
   return res.data;
 };
 
+export const searchProducts = async ({ queryKey }) => {
+  const [, queryParams] = queryKey;
+  const res = await api.get("/products/getAllProducts", {
+    params: queryParams,
+  });
+  return res.data;
+};
+
+export const getQuickSearchSuggestions = async (search) => {
+  if (!search || !search.trim()) return { products: [] };
+  const res = await api.get("/products/getAllProducts", {
+    params: {
+      search: search.trim(),
+      limit: 6,
+      page: 1,
+    },
+  });
+  return res.data;
+};
+
 export const getNewArrivals = async () => {
   const res = await api.get("/products/getNewArrivals");
   return res.data;
@@ -93,17 +113,19 @@ export const getProductsByCategory = async ({ queryKey }) => {
   return res.data;
 };
 
-//cj add to store product
-export const addProductToStore = async (productId) => {
+// CJ Dropshipping: Add product to CJ shortlist/import list
+export const addProductToImportList = async (productId) => {
   try {
     const res = await api.post("/products/add", { productId });
-    const data = res.data;
-    return data;
+    return res.data;
   } catch (error) {
-    console.error("❌ Cannot add Product", error);
+    console.error("❌ Cannot add product to import list", error);
     throw new Error(error.response?.data?.message || error.message);
   }
 };
+
+// Kept for backward compatibility
+export const addProductToStore = addProductToImportList;
 
 export const getCjStoreProducts = async ({ queryKey }) => {
   try {

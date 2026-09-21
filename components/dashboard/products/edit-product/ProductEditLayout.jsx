@@ -3,9 +3,14 @@
 import React, { useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
-import { updateStoreProduct, syncCjProduct } from "@/api/cjDropshipApi";
+import {
+  updateStoreProduct,
+  syncCjProduct,
+  getCjProductForImport,
+} from "@/api/cjDropshipApi";
+import api from "@/axios/axiosInstance";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -28,15 +33,21 @@ import {
   LuEye,
   LuFileText,
   LuImage,
+  LuImagePlus,
   LuInfo,
   LuLayers,
+  LuLink,
   LuPenLine,
+  LuPlus,
   LuRefreshCw,
   LuSave,
   LuShoppingBag,
   LuSparkles,
+  LuTrash2,
   LuTrendingUp,
+  LuUpload,
   LuWeight,
+  LuX,
 } from "react-icons/lu";
 
 const ClientSideEditor = dynamic(
@@ -44,7 +55,7 @@ const ClientSideEditor = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-[300px] bg-base-200/50 animate-pulse rounded-xl border border-base-200 flex items-center justify-center text-xs text-base-content/40">
+      <div className="h-75 bg-base-200/50 animate-pulse rounded-xl border border-base-200 flex items-center justify-center text-xs text-base-content/40">
         Loading Rich Text Editor...
       </div>
     ),
@@ -132,12 +143,11 @@ export default function ProductEditLayout({
   const [selectedImages, setSelectedImages] = useState(rawImages);
 
   // Variants state
-  const hasVariations = Boolean(
-    initialProduct.hasVariations && initialProduct.variations?.length > 0,
-  );
   const [variants, setVariants] = useState(() => {
-    if (!hasVariations) return [];
-    return initialProduct.variations.map((v) => ({
+    const list = Array.isArray(initialProduct.variations)
+      ? initialProduct.variations
+      : [];
+    return list.map((v) => ({
       ...v,
       price: v.price !== undefined ? v.price : initialProduct.price || 0,
       costPrice: v.costPrice || 0,
@@ -150,6 +160,154 @@ export default function ProductEditLayout({
           : v.thumbnail?.url || v.variantImage || selectedThumbnail,
     }));
   });
+
+  const hasVariations = variants.length > 0;
+
+  // Query CJ product details to detect missing variants and supplier images
+  const { data: cjDetailsData } = useQuery({
+    queryKey: ["cjProductDetails", initialProduct.cjProductId],
+    queryFn: () => getCjProductForImport(initialProduct.cjProductId),
+    enabled: Boolean(isDropshipped && initialProduct.cjProductId),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const cjProduct = cjDetailsData?.product;
+
+  // Detect missing CJ variants
+  const missingCjVariants = useMemo(() => {
+    if (!cjProduct?.variants || !Array.isArray(cjProduct.variants)) return [];
+    const currentVids = new Set(variants.map((v) => String(v.cjVid || v.vid)));
+    return cjProduct.variants.filter((cv) => !currentVids.has(String(cv.vid)));
+  }, [cjProduct, variants]);
+
+  // Restore missing CJ variants handler
+  const handleRestoreMissingVariants = () => {
+    if (!missingCjVariants.length) return;
+    const restored = missingCjVariants.map((cv, idx) => ({
+      vid: cv.vid || `vid-restored-${Date.now()}-${idx}`,
+      cjVid: cv.vid || "",
+      cjSku: cv.variantSku || "",
+      variantKey: cv.variantKey || `Variant ${variants.length + idx + 1}`,
+      price:
+        cv.suggestedPrice > 0
+          ? cv.suggestedPrice
+          : cv.price || Number(((cv.costPrice || 5) * 2).toFixed(2)),
+      costPrice: cv.costPrice || 0,
+      stock: cv.stock !== undefined ? cv.stock : 0,
+      weight: cv.weight !== undefined ? cv.weight : initialProduct.weight || 0,
+      isActive: false, // restore as inactive so user can review and enable
+      variantImage: cv.variantImage || selectedThumbnail || "",
+    }));
+    setVariants((prev) => [...prev, ...restored]);
+    toast.success(
+      `Restored ${restored.length} variant(s)! Added as disabled in table below.`,
+    );
+  };
+
+  // Detect unused CJ supplier images
+  const unusedCjImages = useMemo(() => {
+    if (!cjProduct?.images || !Array.isArray(cjProduct.images)) return [];
+    return cjProduct.images.filter((img) => !selectedImages.includes(img));
+  }, [cjProduct, selectedImages]);
+
+  const handleAddCjImage = (imgUrl) => {
+    if (selectedImages.includes(imgUrl)) return;
+    setSelectedImages((prev) => [...prev, imgUrl]);
+    toast.success("Added supplier image to gallery!");
+  };
+
+  // Upload & Add Image State
+  const [isUploading, setIsUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [customImageUrl, setCustomImageUrl] = useState("");
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    const toastId = toast.loading(`Uploading ${files.length} image(s)...`);
+
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("image", file);
+        const res = await api.post("/upload/single", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        if (res.data?.url) {
+          uploadedUrls.push(res.data.url);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setSelectedImages((prev) => [...prev, ...uploadedUrls]);
+        if (!selectedThumbnail) {
+          setSelectedThumbnail(uploadedUrls[0]);
+        }
+        toast.update(toastId, {
+          render: `Uploaded ${uploadedUrls.length} image(s) successfully!`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+        });
+      } else {
+        toast.update(toastId, {
+          render: "No images were uploaded",
+          type: "error",
+          isLoading: false,
+          autoClose: 3000,
+        });
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.update(toastId, {
+        render: err.response?.data?.error || "Failed to upload image",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleAddUrlImage = (e) => {
+    e?.preventDefault();
+    const trimmed = customImageUrl.trim();
+    if (!trimmed) return;
+    if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+      toast.error("Please enter a valid image URL (http:// or https://)");
+      return;
+    }
+    if (selectedImages.includes(trimmed)) {
+      toast.warning("This image is already in the gallery");
+      return;
+    }
+    setSelectedImages((prev) => [...prev, trimmed]);
+    if (!selectedThumbnail) {
+      setSelectedThumbnail(trimmed);
+    }
+    setCustomImageUrl("");
+    setShowUrlInput(false);
+    toast.success("Image URL added to gallery!");
+  };
+
+  const handleRemoveImage = (imgUrl) => {
+    if (selectedImages.length <= 1) {
+      toast.warning("Product requires at least 1 image");
+      return;
+    }
+    const nextImages = selectedImages.filter((u) => u !== imgUrl);
+    setSelectedImages(nextImages);
+    if (selectedThumbnail === imgUrl) {
+      setSelectedThumbnail(nextImages[0] || "");
+    }
+    toast.info("Image removed from gallery");
+  };
 
   // PID copy state
   const [copiedPid, setCopiedPid] = useState(false);
@@ -251,18 +409,7 @@ export default function ProductEditLayout({
   };
 
   const toggleImageSelection = (imgUrl) => {
-    if (selectedImages.includes(imgUrl)) {
-      if (selectedImages.length === 1) {
-        toast.warning("Product requires at least 1 image");
-        return;
-      }
-      setSelectedImages((prev) => prev.filter((url) => url !== imgUrl));
-      if (selectedThumbnail === imgUrl) {
-        setSelectedThumbnail(selectedImages.find((u) => u !== imgUrl));
-      }
-    } else {
-      setSelectedImages((prev) => [...prev, imgUrl]);
-    }
+    handleRemoveImage(imgUrl);
   };
 
   const copyPid = () => {
@@ -279,6 +426,9 @@ export default function ProductEditLayout({
       toast.success(res.message || "Synced stock and cost with CJ!");
       queryClient.invalidateQueries({
         queryKey: ["product", initialProduct._id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cjProductDetails", initialProduct.cjProductId],
       });
     },
     onError: (err) => {
@@ -325,7 +475,7 @@ export default function ProductEditLayout({
       thumbnail: selectedThumbnail,
       images: selectedImages,
       description: formData.description,
-      variations: hasVariations ? activeVariants : [],
+      variations: hasVariations ? variants : [],
     };
 
     updateMutation.mutate(payload);
@@ -428,7 +578,7 @@ export default function ProductEditLayout({
 
             {/* Swiper Media Gallery */}
             <div className="p-4 space-y-3">
-              {rawImages.length > 0 ? (
+              {selectedImages.length > 0 ? (
                 <div className="space-y-2">
                   <div className="relative aspect-square rounded-xl overflow-hidden bg-base-200 border border-base-200 group">
                     <Swiper
@@ -446,7 +596,7 @@ export default function ProductEditLayout({
                       }}
                       className="size-full"
                     >
-                      {rawImages.map((img, index) => (
+                      {selectedImages.map((img, index) => (
                         <SwiperSlide key={`edit-main-${index}`}>
                           <div className="size-full relative">
                             <img
@@ -475,7 +625,7 @@ export default function ProductEditLayout({
                       ))}
                     </Swiper>
 
-                    {rawImages.length > 1 && (
+                    {selectedImages.length > 1 && (
                       <>
                         <button
                           type="button"
@@ -496,7 +646,7 @@ export default function ProductEditLayout({
                   </div>
 
                   {/* Thumbnails Strip */}
-                  {rawImages.length > 1 && (
+                  {selectedImages.length > 1 && (
                     <Swiper
                       onSwiper={setThumbsSwiper}
                       modules={[FreeMode, Thumbs]}
@@ -506,7 +656,7 @@ export default function ProductEditLayout({
                       freeMode
                       className="thumbs-swiper"
                     >
-                      {rawImages.map((img, index) => (
+                      {selectedImages.map((img, index) => (
                         <SwiperSlide
                           key={`edit-thumb-${index}`}
                           className="cursor-pointer"
@@ -963,6 +1113,30 @@ export default function ProductEditLayout({
                   </span>
                 </div>
 
+                {/* Missing CJ variants alert */}
+                {isDropshipped && missingCjVariants.length > 0 && (
+                  <div className="alert alert-warning border-warning alert-soft">
+                    <LuInfo className="stroke-current shrink-0" />
+                    <div className="text-xs">
+                      <span>
+                        Found{" "}
+                        <strong>
+                          {missingCjVariants.length} supplier variant(s)
+                        </strong>{" "}
+                        from CJ that are currently excluded.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRestoreMissingVariants}
+                      className="btn btn-xs btn-warning text-white gap-1 font-semibold shrink-0 shadow-xs"
+                    >
+                      <LuPlus className="size-3.5" /> Restore Missing Variants (
+                      {missingCjVariants.length})
+                    </button>
+                  </div>
+                )}
+
                 <div className="overflow-x-auto rounded-xl border border-base-200">
                   <table className="table table-sm w-full">
                     <thead className="bg-base-200/70 text-xs text-base-content/70">
@@ -1116,20 +1290,117 @@ export default function ProductEditLayout({
               </div>
             )}
 
-            {/* Section 4: Image Selector */}
+            {/* If product has NO variations currently but CJ has variants to restore */}
+            {!hasVariations &&
+              isDropshipped &&
+              missingCjVariants.length > 0 && (
+                <div className="card bg-base-100 border border-amber-500/30 shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs bg-amber-500/5">
+                  <div className="flex items-center gap-2 text-amber-900 dark:text-amber-100">
+                    <LuInfo className="size-4 text-amber-500 shrink-0" />
+                    <span>
+                      This supplier product has{" "}
+                      <strong>
+                        {missingCjVariants.length} variants available
+                      </strong>{" "}
+                      on CJ.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRestoreMissingVariants}
+                    className="btn btn-xs btn-warning text-white gap-1 font-semibold shrink-0 shadow-xs"
+                  >
+                    <LuPlus className="size-3.5" /> Restore All CJ Variants (
+                    {missingCjVariants.length})
+                  </button>
+                </div>
+              )}
+
+            {/* Section 4: Image Selector & Uploader */}
             <div className="card bg-base-100 border border-base-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-base-200 pb-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-base-200 pb-3 gap-2">
                 <div className="flex items-center gap-2">
                   <span className="size-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
                     4
                   </span>
                   <h2 className="font-bold text-base">Gallery Images</h2>
+                  <span className="badge badge-sm badge-neutral font-medium">
+                    {selectedImages.length} active
+                  </span>
                 </div>
-                <span className="text-xs text-base-content/60">
-                  {selectedImages.length} images active
-                </span>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="btn btn-xs btn-primary gap-1 font-semibold"
+                  >
+                    {isUploading ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <LuUpload className="size-3.5" /> Upload Images
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput((prev) => !prev)}
+                    className="btn btn-xs btn-outline gap-1 text-xs"
+                  >
+                    <LuLink className="size-3" /> Add by URL
+                  </button>
+                </div>
               </div>
 
+              {/* Add by URL input */}
+              {showUrlInput && (
+                <form
+                  onSubmit={handleAddUrlImage}
+                  className="p-3 rounded-xl bg-base-200/50 border border-base-200 flex items-center gap-2"
+                >
+                  <input
+                    type="url"
+                    placeholder="Paste public image URL (https://...)"
+                    value={customImageUrl}
+                    onChange={(e) => setCustomImageUrl(e.target.value)}
+                    className="input input-sm input-bordered flex-1 text-xs focus:input-primary"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-sm btn-primary text-xs font-semibold"
+                  >
+                    Add Image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUrlInput(false);
+                      setCustomImageUrl("");
+                    }}
+                    className="btn btn-sm btn-ghost btn-circle"
+                  >
+                    <LuX className="size-4" />
+                  </button>
+                </form>
+              )}
+
+              {/* Gallery Grid */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {selectedImages.map((img, idx) => {
                   const isThumb = selectedThumbnail === img;
@@ -1137,7 +1408,11 @@ export default function ProductEditLayout({
                   return (
                     <div
                       key={idx}
-                      className="relative aspect-square rounded-xl overflow-hidden border-2 border-primary shadow-sm group"
+                      className={`relative aspect-square rounded-xl overflow-hidden border-2 shadow-sm group transition-all ${
+                        isThumb
+                          ? "border-primary ring-2 ring-primary/20"
+                          : "border-base-200"
+                      }`}
                     >
                       <img
                         src={img}
@@ -1145,21 +1420,94 @@ export default function ProductEditLayout({
                         className="size-full object-cover"
                       />
 
+                      {/* Remove image button */}
                       <button
                         type="button"
-                        onClick={() => setSelectedThumbnail(img)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage(img);
+                        }}
+                        className="absolute top-1.5 right-1.5 size-6 rounded-full bg-error text-white flex items-center justify-center hover:bg-error-focus transition-all shadow opacity-80 hover:opacity-100 hover:scale-110 z-10"
+                        title="Remove image from gallery"
+                      >
+                        <LuTrash2 className="size-3.5" />
+                      </button>
+
+                      {/* Set Main Thumbnail button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedThumbnail(img);
+                          toast.info("Set as main thumbnail!");
+                        }}
                         className={`absolute bottom-1.5 left-1.5 right-1.5 text-[9px] py-0.5 rounded font-medium text-center transition-all ${
                           isThumb
                             ? "bg-primary text-white"
                             : "bg-black/60 text-white opacity-0 group-hover:opacity-100"
                         }`}
                       >
-                        {isThumb ? "Main Thumbnail" : "Set as Main"}
+                        {isThumb ? "✓ Main Thumbnail" : "Set as Main"}
                       </button>
                     </div>
                   );
                 })}
+
+                {/* Upload Image Tile */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="aspect-square rounded-xl border-2 border-dashed border-base-300 hover:border-primary/60 bg-base-200/20 hover:bg-primary/5 flex flex-col items-center justify-center gap-1.5 text-base-content/60 hover:text-primary transition-all p-2 text-center group"
+                >
+                  {isUploading ? (
+                    <span className="loading loading-spinner loading-sm text-primary" />
+                  ) : (
+                    <>
+                      <LuImagePlus className="size-6 text-base-content/40 group-hover:text-primary transition-colors" />
+                      <span className="text-[11px] font-semibold">
+                        Upload Image
+                      </span>
+                    </>
+                  )}
+                </button>
               </div>
+
+              {/* Unused Supplier Images from CJ */}
+              {isDropshipped && unusedCjImages.length > 0 && (
+                <div className="pt-4 border-t border-base-200 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-base-content/80 flex items-center gap-1.5">
+                      <LuShoppingBag className="size-3.5 text-primary" />
+                      Available Supplier Images from CJ ({
+                        unusedCjImages.length
+                      }{" "}
+                      unselected)
+                    </span>
+                    <span className="text-[11px] text-base-content/50">
+                      Click image to add it to your store gallery
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5">
+                    {unusedCjImages.map((cjImg, cjIdx) => (
+                      <div
+                        key={cjIdx}
+                        className="relative aspect-square rounded-lg overflow-hidden border border-base-300 group bg-base-200 cursor-pointer"
+                        onClick={() => handleAddCjImage(cjImg)}
+                      >
+                        <img
+                          src={cjImg}
+                          alt=""
+                          className="size-full object-cover opacity-75 group-hover:opacity-100 transition-opacity"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-0.5 text-white text-[10px] font-semibold">
+                          <LuPlus className="size-4 text-white" />
+                          <span>Add</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Bottom Fixed Action Bar */}

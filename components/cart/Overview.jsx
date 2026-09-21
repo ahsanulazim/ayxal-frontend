@@ -223,12 +223,16 @@ const Overview = ({ isCheckout, ref, isPending }) => {
           {isPending ? (
             <>
               <span className="loading loading-spinner loading-sm"></span>
-              <span>Preparing Secure Checkout...</span>
+              <span>Processing Payment...</span>
             </>
           ) : (
             <>
               <LuLock className="w-4 h-4" />
-              <span>Pay with Stripe</span>
+              <span>
+                {cartGrandTotal > 0
+                  ? `Pay $${cartGrandTotal.toFixed(2)}`
+                  : "Complete Order"}
+              </span>
             </>
           )}
         </button>

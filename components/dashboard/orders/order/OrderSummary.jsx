@@ -98,10 +98,37 @@ const OrderSummary = ({ order }) => {
         <div className="mt-4 pt-4 border-t border-zinc-100/80 bg-zinc-50/70 -mx-5 -mb-5 p-5 space-y-2 text-xs text-zinc-500 rounded-b-2xl">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1 text-zinc-600">
-              <LuCreditCard className="w-3.5 h-3.5 text-zinc-400" /> Payment Gateway:
+              <LuCreditCard className="w-3.5 h-3.5 text-zinc-400" /> Payment Method:
             </span>
-            <span className="font-semibold text-zinc-800">Stripe Checkout</span>
+            <span className="font-semibold text-zinc-800">
+              {order?.paymentDetails ? (
+                order.paymentDetails.wallet
+                  ? `${order.paymentDetails.wallet === "apple_pay" ? "Apple Pay" : order.paymentDetails.wallet === "google_pay" ? "Google Pay" : order.paymentDetails.wallet} (${order.paymentDetails.brand?.toUpperCase()} ••${order.paymentDetails.last4})`
+                  : `${order.paymentDetails.brand ? order.paymentDetails.brand.toUpperCase() : "Card"} •••• ${order.paymentDetails.last4 || ""}`
+              ) : (
+                "Credit / Debit Card"
+              )}
+            </span>
           </div>
+
+          <div className="flex items-center justify-between text-[11px] text-zinc-400">
+            <span>Gateway:</span>
+            <span>Stripe</span>
+          </div>
+
+          {order?.paymentDetails?.receiptUrl && (
+            <div className="flex items-center justify-between">
+              <span>Stripe Receipt:</span>
+              <a
+                href={order.paymentDetails.receiptUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-main hover:underline text-xs"
+              >
+                View Receipt ↗
+              </a>
+            </div>
+          )}
 
           {order?.paidAt && (
             <div className="flex items-center justify-between">
@@ -112,18 +139,25 @@ const OrderSummary = ({ order }) => {
             </div>
           )}
 
-          {stripeSessionId && (
+          {(order?.stripePaymentIntentId || order?.stripeSessionId) && (
             <div className="flex items-center justify-between pt-1">
-              <span>Stripe Session:</span>
+              <span>Payment Ref:</span>
               <div className="flex items-center gap-1">
                 <span className="font-mono text-[11px] text-zinc-700 bg-white px-2 py-0.5 rounded border border-zinc-200 truncate max-w-[170px]">
-                  {stripeSessionId}
+                  {order?.stripePaymentIntentId || order?.stripeSessionId}
                 </span>
                 <button
                   type="button"
-                  onClick={handleCopySession}
+                  onClick={() => {
+                    const id = order?.stripePaymentIntentId || order?.stripeSessionId;
+                    if (id) {
+                      navigator.clipboard.writeText(id);
+                      setCopiedSession(true);
+                      setTimeout(() => setCopiedSession(false), 2000);
+                    }
+                  }}
                   className="text-zinc-400 hover:text-zinc-700 p-1"
-                  title="Copy Session ID"
+                  title="Copy Reference"
                 >
                   {copiedSession ? (
                     <LuCheck className="w-3 h-3 text-emerald-600" />

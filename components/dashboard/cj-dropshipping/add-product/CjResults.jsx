@@ -37,11 +37,14 @@ const CjResults = ({
         <div>Something went wrong</div>
       ) : productList.length > 0 ? (
         <section>
-          <div className="">
-            <h1 className="font-bold text-xl mb-3">Search Results</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-lg">Search Results ({productList.length} products on this page)</h2>
+            <span className="text-xs text-base-content/60">
+              Click &quot;Add to Import List&quot; to shortlist for customization
+            </span>
           </div>
 
-          <div className="grid grid-cols-6 @[112rem]:grid-cols-8 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {productList.map((product) => (
               <CjProductCard key={product.id} product={product} />
             ))}

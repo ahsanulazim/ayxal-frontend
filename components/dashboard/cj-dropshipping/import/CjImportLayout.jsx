@@ -38,13 +38,19 @@ import {
   LuEye,
   LuFileText,
   LuImage,
+  LuImagePlus,
   LuInfo,
+  LuLink,
   LuPackage,
   LuPenLine,
+  LuPlus,
   LuSparkles,
   LuTrendingUp,
+  LuUpload,
   LuWeight,
+  LuX,
 } from "react-icons/lu";
+import api from "@/axios/axiosInstance";
 
 export default function CjImportLayout({ cjData }) {
   const router = useRouter();
@@ -59,14 +65,23 @@ export default function CjImportLayout({ cjData }) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const mainSwiperRef = useRef(null);
 
+  // Extra uploaded/custom images
+  const [extraImages, setExtraImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [customImageUrl, setCustomImageUrl] = useState("");
+  const fileInputRef = useRef(null);
+
   // Media Selection State
   const allImages = useMemo(() => {
-    return rawProduct.images && rawProduct.images.length > 0
-      ? rawProduct.images
-      : rawProduct.thumbnail
-        ? [rawProduct.thumbnail]
-        : [];
-  }, [rawProduct]);
+    const supplierImages =
+      rawProduct.images && rawProduct.images.length > 0
+        ? rawProduct.images
+        : rawProduct.thumbnail
+          ? [rawProduct.thumbnail]
+          : [];
+    return [...supplierImages, ...extraImages];
+  }, [rawProduct, extraImages]);
 
   const [selectedThumbnail, setSelectedThumbnail] = useState(
     rawProduct.thumbnail || allImages[0] || ""
@@ -250,6 +265,71 @@ export default function CjImportLayout({ cjData }) {
     setTimeout(() => setCopiedPid(false), 2000);
   };
 
+  // Upload custom images
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    const toastId = toast.loading(`Uploading ${files.length} image(s)...`);
+
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("image", file);
+        const res = await api.post("/upload/single", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        if (res.data?.url) {
+          uploadedUrls.push(res.data.url);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setExtraImages((prev) => [...prev, ...uploadedUrls]);
+        setSelectedImages((prev) => [...prev, ...uploadedUrls]);
+        if (!selectedThumbnail) {
+          setSelectedThumbnail(uploadedUrls[0]);
+        }
+        toast.update(toastId, {
+          render: `Uploaded ${uploadedUrls.length} image(s) successfully!`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+        });
+      }
+    } catch (err) {
+      toast.update(toastId, {
+        render: err.response?.data?.error || "Failed to upload image",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleAddUrlImage = (e) => {
+    e?.preventDefault();
+    const trimmed = customImageUrl.trim();
+    if (!trimmed) return;
+    if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+      toast.error("Please enter a valid image URL (http:// or https://)");
+      return;
+    }
+    setExtraImages((prev) => [...prev, trimmed]);
+    setSelectedImages((prev) => [...prev, trimmed]);
+    if (!selectedThumbnail) {
+      setSelectedThumbnail(trimmed);
+    }
+    setCustomImageUrl("");
+    setShowUrlInput(false);
+    toast.success("Image URL added to gallery!");
+  };
+
   // Import Mutation
   const importMutation = useMutation({
     mutationFn: importProductToStore,
@@ -285,7 +365,7 @@ export default function CjImportLayout({ cjData }) {
       images: selectedImages,
       description: formData.description,
       weight: rawProduct.weight,
-      variants: activeVariants,
+      variants: variants, // Send all variants including isActive: false
     };
 
     importMutation.mutate(payload);
@@ -974,17 +1054,87 @@ export default function CjImportLayout({ cjData }) {
 
             {/* Section 4: Image Selector */}
             <div className="card bg-base-100 border border-base-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-base-200 pb-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-base-200 pb-3 gap-2">
                 <div className="flex items-center gap-2">
                   <span className="size-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
                     4
                   </span>
                   <h2 className="font-bold text-base">Store Gallery Images</h2>
+                  <span className="badge badge-sm badge-neutral font-medium">
+                    {selectedImages.length} selected
+                  </span>
                 </div>
-                <span className="text-xs text-base-content/60">
-                  {selectedImages.length} images selected for storefront
-                </span>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="btn btn-xs btn-primary gap-1 font-semibold"
+                  >
+                    {isUploading ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <LuUpload className="size-3.5" /> Upload Images
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput((prev) => !prev)}
+                    className="btn btn-xs btn-outline gap-1 text-xs"
+                  >
+                    <LuLink className="size-3" /> Add by URL
+                  </button>
+                </div>
               </div>
+
+              {/* Add by URL input */}
+              {showUrlInput && (
+                <form
+                  onSubmit={handleAddUrlImage}
+                  className="p-3 rounded-xl bg-base-200/50 border border-base-200 flex items-center gap-2"
+                >
+                  <input
+                    type="url"
+                    placeholder="Paste public image URL (https://...)"
+                    value={customImageUrl}
+                    onChange={(e) => setCustomImageUrl(e.target.value)}
+                    className="input input-sm input-bordered flex-1 text-xs focus:input-primary"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-sm btn-primary text-xs font-semibold"
+                  >
+                    Add Image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUrlInput(false);
+                      setCustomImageUrl("");
+                    }}
+                    className="btn btn-sm btn-ghost btn-circle"
+                  >
+                    <LuX className="size-4" />
+                  </button>
+                </form>
+              )}
 
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {allImages.map((img, idx) => {
@@ -1035,6 +1185,23 @@ export default function CjImportLayout({ cjData }) {
                     </div>
                   );
                 })}
+
+                {/* Upload Image Tile */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="aspect-square rounded-xl border-2 border-dashed border-base-300 hover:border-primary/60 bg-base-200/20 hover:bg-primary/5 flex flex-col items-center justify-center gap-1.5 text-base-content/60 hover:text-primary transition-all p-2 text-center group"
+                >
+                  {isUploading ? (
+                    <span className="loading loading-spinner loading-sm text-primary" />
+                  ) : (
+                    <>
+                      <LuImagePlus className="size-6 text-base-content/40 group-hover:text-primary transition-colors" />
+                      <span className="text-[11px] font-semibold">Upload Image</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 

@@ -49,3 +49,20 @@ export const updateStoreProduct = async ({ id, data }) => {
   const res = await api.put(`/cj-dropship/update/${id}`, data);
   return res.data;
 };
+
+/**
+ * Trigger on-demand full inventory & price sync across all dropshipped items
+ */
+export const syncAllCjProducts = async () => {
+  const res = await api.post("/cj-dropship/sync-all");
+  return res.data;
+};
+
+/**
+ * Get automated sync health status
+ */
+export const getCjSyncStatus = async () => {
+  const res = await api.get("/cj-dropship/sync-status");
+  return res.data;
+};
+

@@ -9,6 +9,7 @@ import {
   LuPackage,
   LuShieldCheck,
   LuShoppingBag,
+  LuCreditCard,
 } from "react-icons/lu";
 import { verifyOrderPayment } from "@/api/orderApi";
 import { useCart } from "@/context/CartContext";
@@ -16,12 +17,17 @@ import { useCart } from "@/context/CartContext";
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const paymentIntentId =
+    searchParams.get("payment_intent") ||
+    searchParams.get("payment_intent_id");
   const orderId = searchParams.get("order_id");
   const orderNumberParam = searchParams.get("order_number");
 
   const { clearCart } = useCart();
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(Boolean(sessionId));
+  const [loading, setLoading] = useState(
+    Boolean(sessionId || paymentIntentId || orderId),
+  );
   const [error, setError] = useState(null);
   const hasProcessed = useRef(false);
 
@@ -32,8 +38,10 @@ function PaymentSuccessContent() {
     // Clear cart immediately on successful return from checkout
     clearCart();
 
-    if (sessionId) {
-      verifyOrderPayment(sessionId, orderId)
+    const identifier = paymentIntentId || sessionId;
+
+    if (identifier || orderId) {
+      verifyOrderPayment(identifier || { order_id: orderId, order_number: orderNumberParam }, orderId)
         .then((res) => {
           if (res?.success && res?.order) {
             setOrder(res.order);
@@ -41,18 +49,18 @@ function PaymentSuccessContent() {
         })
         .catch((err) => {
           console.error("Verification error:", err);
-          setError("Order confirmed. Could not refresh live order details.");
+          setError("Order confirmed. Live order details could not be refreshed.");
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [sessionId, orderId, clearCart]);
+  }, [sessionId, paymentIntentId, orderId, orderNumberParam, clearCart]);
 
   const displayOrderNumber =
     order?.orderNumber ||
     orderNumberParam ||
-    (sessionId ? sessionId.slice(-8) : "Confirmed");
+    (paymentIntentId ? paymentIntentId.slice(-8) : sessionId ? sessionId.slice(-8) : "Confirmed");
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
@@ -90,6 +98,35 @@ function PaymentSuccessContent() {
               <span className="font-semibold text-zinc-800">
                 {order.shipping.name}
               </span>
+            </div>
+          )}
+
+          {/* Payment Method */}
+          <div className="flex justify-between items-center">
+            <span className="text-zinc-500">Payment Method:</span>
+            <span className="font-semibold text-zinc-800 flex items-center gap-1.5">
+              <LuCreditCard className="w-3.5 h-3.5 text-zinc-500" />
+              <span>
+                {order?.paymentDetails
+                  ? order.paymentDetails.wallet
+                    ? `${order.paymentDetails.wallet === "apple_pay" ? "Apple Pay" : order.paymentDetails.wallet === "google_pay" ? "Google Pay" : order.paymentDetails.wallet} (${order.paymentDetails.brand?.toUpperCase()} ••${order.paymentDetails.last4})`
+                    : `${order.paymentDetails.brand?.toUpperCase()} ending in ${order.paymentDetails.last4 || "••••"}`
+                  : "Card via Stripe"}
+              </span>
+            </span>
+          </div>
+
+          {order?.paymentDetails?.receiptUrl && (
+            <div className="flex justify-between items-center">
+              <span className="text-zinc-500">Stripe Receipt:</span>
+              <a
+                href={order.paymentDetails.receiptUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-semibold text-main hover:underline"
+              >
+                View Receipt ↗
+              </a>
             </div>
           )}
 

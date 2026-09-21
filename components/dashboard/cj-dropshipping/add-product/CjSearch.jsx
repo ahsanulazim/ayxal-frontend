@@ -47,10 +47,13 @@ const CjSearch = () => {
 
   return (
     <>
-      <div className="text-center">
-        <h1 className="font-bold text-xl mb-3">Search in CJ</h1>
-        <div className="join max-w-250 mx-auto w-full">
-          <label className="input flex-1 join-item focus:outline-none focus-within:outline-none">
+      <div className="text-center max-w-2xl mx-auto mb-8">
+        <h1 className="font-bold text-2xl mb-1 text-base-content">Search CJ Dropshipping Catalog</h1>
+        <p className="text-xs text-base-content/60 mb-4">
+          Discover products directly from CJ suppliers. Shortlist them to your <strong>Import List</strong> to customize titles, images, and profit margins.
+        </p>
+        <div className="join max-w-2xl mx-auto w-full shadow-sm">
+          <label className="input flex-1 join-item focus:outline-none focus-within:outline-none border-base-300">
             <LuSearch className="h-[1em] opacity-50" />
             <input
               type="search"
@@ -58,7 +61,7 @@ const CjSearch = () => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               required
-              placeholder="Search for products"
+              placeholder="Search by keywords (e.g. dog harness, cat feeder, pet brush)..."
             />
           </label>
           <button

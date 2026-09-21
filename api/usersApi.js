@@ -69,3 +69,11 @@ export const toggleWishlist = async (email, productId) => {
   return res.data;
 };
 
+export const getWishlistProducts = async (email) => {
+  const res = await api.get("/users/wishlist-products", {
+    params: { email },
+  });
+  return res.data;
+};
+
+

@@ -1,11 +1,13 @@
-const page = () => {
-  return (
-    <div className="min-h-[calc(100dvh-95px)]">
-      <h2 className="text-2xl font-bold text-center pt-12">
-        There are no offer now!
-      </h2>
-    </div>
-  );
+import OffersContent from "@/components/offers/OffersContent";
+
+export const metadata = {
+  title: "Special Pet Deals & Discount Coupons | PrettyPet",
+  description:
+    "Explore exclusive pet vouchers, limited flash deals, and save up to 40% on nutritious food, cozy beds, toys, and grooming essentials for your pets.",
 };
 
-export default page;
+const OffersPage = () => {
+  return <OffersContent />;
+};
+
+export default OffersPage;

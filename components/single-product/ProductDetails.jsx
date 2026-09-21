@@ -24,10 +24,22 @@ import {
 } from "react-icons/lu";
 
 export default function ProductDetails({
-  product,
+  product: initialProduct,
   categoryInfo,
   relatedProducts = [],
 }) {
+  const product = useMemo(() => {
+    if (!initialProduct) return initialProduct;
+    const activeVariations = Array.isArray(initialProduct.variations)
+      ? initialProduct.variations.filter((v) => v.isActive !== false)
+      : [];
+    return {
+      ...initialProduct,
+      variations: activeVariations,
+      hasVariations: activeVariations.length > 0,
+    };
+  }, [initialProduct]);
+
   const [selectedAttributes, setSelectedAttributes] = useState(() =>
     getInitialSelectedAttributes(product),
   );
@@ -51,12 +63,7 @@ export default function ProductDetails({
       selectedAttributes,
       attributes,
     );
-  }, [
-    product?.variations,
-    attributes,
-    product?.hasVariations,
-    selectedAttributes,
-  ]);
+  }, [product, attributes, selectedAttributes]);
 
   /*
   |--------------------------------------------------------------------------

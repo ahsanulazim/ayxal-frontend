@@ -1,5 +1,5 @@
 import { useController } from "react-hook-form";
-import { useImageUpload } from "../products/add-product/hooks/useImageUpload";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import { LuCloudUpload, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
 import { useState } from "react";

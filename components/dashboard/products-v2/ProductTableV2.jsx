@@ -241,7 +241,7 @@ const ProductTableV2 = ({
                               Variable
                             </span>
                           ) : (
-                            <span className="badge badge-xs font-semibold badge-soft badge-ghost">
+                            <span className="badge badge-xs font-semibold badge-soft">
                               Single
                             </span>
                           )}
@@ -345,7 +345,7 @@ const ProductTableV2 = ({
                     <div className="flex items-center justify-end gap-1">
                       {/* View Storefront Link */}
                       <Link
-                        href={`/products/${product.slug || product._id}`}
+                        href={`/products/${product.categorySlug}/${product.slug || product._id}`}
                         target="_blank"
                         className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-base-content"
                         title="View on Storefront"

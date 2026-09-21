@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { LuHouse, LuShieldCheck, LuLock } from "react-icons/lu";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import { Elements } from "@stripe/react-stripe-js";
+import { stripePromise } from "@/lib/stripe";
+import { buildStripeElementsOptions } from "@/lib/stripeTheme";
 import ShippingForm from "@/components/cart/checkout/ShippingForm";
 import Overview from "@/components/cart/Overview";
 import Spinner from "@/components/skeleton/Spinner";
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const { cart, loaded } = useCart();
+  const { cart, loaded, cartGrandTotal } = useCart();
   const [isPending, setIsPending] = useState(false);
   const checkoutRef = useRef(null);
 
@@ -20,6 +23,11 @@ const CheckoutPage = () => {
       router.push("/cart");
     }
   }, [loaded, cart, router]);
+
+  const stripeOptions = useMemo(
+    () => buildStripeElementsOptions(cartGrandTotal),
+    [cartGrandTotal],
+  );
 
   if (!loaded) {
     return <Spinner />;
@@ -63,21 +71,27 @@ const CheckoutPage = () => {
 
       {/* Main Checkout Columns */}
       <section className="px-4 sm:px-6 lg:px-8 mt-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Customer & Shipping Details */}
-          <div className="lg:col-span-7 xl:col-span-8">
-            <ShippingForm ref={checkoutRef} setIsPending={setIsPending} />
-          </div>
+        <Elements stripe={stripePromise} options={stripeOptions}>
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Column: Customer & Shipping Details */}
+            <div className="lg:col-span-7 xl:col-span-8">
+              <ShippingForm
+                ref={checkoutRef}
+                setIsPending={setIsPending}
+                isPending={isPending}
+              />
+            </div>
 
-          {/* Right Column: Order Summary & Instant Checkout */}
-          <div className="lg:col-span-5 xl:col-span-4">
-            <Overview
-              ref={checkoutRef}
-              isCheckout={true}
-              isPending={isPending}
-            />
+            {/* Right Column: Order Summary & Instant Checkout */}
+            <div className="lg:col-span-5 xl:col-span-4">
+              <Overview
+                ref={checkoutRef}
+                isCheckout={true}
+                isPending={isPending}
+              />
+            </div>
           </div>
-        </div>
+        </Elements>
       </section>
     </main>
   );

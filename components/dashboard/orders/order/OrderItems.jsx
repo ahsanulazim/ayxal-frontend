@@ -85,6 +85,12 @@ const OrderItems = ({ order }) => {
                         SKU: {product.sku}
                       </span>
                     )}
+
+                    {(product.isDropshipped || product.vid || product.cjVid) && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-teal-50 text-[10px] font-semibold text-main border border-teal-200/50">
+                        CJ Item
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

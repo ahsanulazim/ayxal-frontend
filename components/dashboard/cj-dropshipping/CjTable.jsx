@@ -1,7 +1,12 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getCjImportList, syncCjProduct } from "@/api/cjDropshipApi";
+import {
+  getCjImportList,
+  syncCjProduct,
+  syncAllCjProducts,
+  getCjSyncStatus,
+} from "@/api/cjDropshipApi";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   LuCheck,
@@ -11,6 +16,7 @@ import {
   LuStore,
   LuWeight,
   LuClock,
+  LuSearch,
 } from "react-icons/lu";
 import moment from "moment";
 import React from "react";
@@ -29,6 +35,12 @@ const CjTable = () => {
     keepPreviousData: true,
   });
 
+  const { data: syncStatusData } = useQuery({
+    queryKey: ["cjSyncStatus"],
+    queryFn: getCjSyncStatus,
+    refetchInterval: 30000,
+  });
+
   const syncMutation = useMutation({
     mutationFn: (id) => syncCjProduct(id),
     onSuccess: () => {
@@ -37,6 +49,23 @@ const CjTable = () => {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to sync with CJ");
+    },
+  });
+
+  const syncAllMutation = useMutation({
+    mutationFn: syncAllCjProducts,
+    onSuccess: (res) => {
+      toast.success(res?.message || "All CJ products synced successfully!");
+      queryClient.invalidateQueries({ queryKey: ["cjImportList"] });
+      queryClient.invalidateQueries({ queryKey: ["cjSyncStatus"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (err) => {
+      toast.error(
+        err?.response?.data?.message ||
+          err.message ||
+          "Failed to sync CJ inventory",
+      );
     },
   });
 
@@ -49,6 +78,45 @@ const CjTable = () => {
 
   return (
     <div className="space-y-4">
+      {/* Sync Control & Health Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-base-100 p-3.5 rounded-xl border border-base-200 shadow-2xs">
+        <div className="flex items-center gap-2 text-xs text-base-content/70">
+          <span className="size-2 rounded-full bg-success animate-pulse"></span>
+          <span>
+            <strong>Auto-Sync Active:</strong> Daily at 02:00 AM
+          </span>
+          {syncStatusData?.status?.lastRunAt && (
+            <span className="text-base-content/40 hidden md:inline">
+              • Last run: {moment(syncStatusData.status.lastRunAt).fromNow()}{" "}
+              (Checked {syncStatusData.status.totalChecked} items)
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => syncAllMutation.mutate()}
+            disabled={
+              syncAllMutation.isPending || syncStatusData?.status?.isRunning
+            }
+            className="btn btn-xs btn-outline rounded-lg gap-1.5 font-medium shadow-2xs"
+            title="Force refresh stock & prices for all dropshipped products from CJ"
+          >
+            <LuRefreshCw
+              className={`size-3.5 ${
+                syncAllMutation.isPending || syncStatusData?.status?.isRunning
+                  ? "animate-spin text-primary"
+                  : ""
+              }`}
+            />
+            {syncAllMutation.isPending || syncStatusData?.status?.isRunning
+              ? "Syncing All Products..."
+              : "Sync All Stock & Prices"}
+          </button>
+        </div>
+      </div>
+
       {/* Table Container */}
       <div className="overflow-x-auto bg-base-100 rounded-xl border border-base-200 shadow-sm">
         <table className="table table-zebra w-full">
@@ -59,8 +127,8 @@ const CjTable = () => {
               <th>Product Details</th>
               <th>CJ Supplier Cost</th>
               <th>Package Weight</th>
-              <th>Import Status</th>
-              <th>Added Date</th>
+              <th>Storefront Status</th>
+              <th>Shortlisted Date</th>
               <th className="text-right pr-6">Action</th>
             </tr>
           </thead>
@@ -113,15 +181,22 @@ const CjTable = () => {
               </tr>
             ) : content.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center py-12">
-                  <div className="text-base-content/60 text-sm">
-                    No products found in your CJ shortlist.
+                <td colSpan="7" className="text-center py-14">
+                  <div className="size-12 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-3 text-base-content/40">
+                    <LuSearch className="size-6" />
                   </div>
+                  <div className="text-base-content font-semibold text-sm">
+                    Your CJ Import List is empty
+                  </div>
+                  <p className="text-xs text-base-content/60 max-w-sm mx-auto mt-1 mb-4">
+                    Search CJ Dropshipping&apos;s catalog and shortlist products
+                    here to customize pricing and publish to your store.
+                  </p>
                   <Link
                     href="/dashboard/cj-dropshipping/add-product"
-                    className="btn btn-sm btn-primary mt-3"
+                    className="btn btn-sm btn-main gap-1.5 shadow-xs"
                   >
-                    Search CJ Products
+                    <LuSearch className="size-4" /> Search CJ Catalog
                   </Link>
                 </td>
               </tr>
@@ -132,7 +207,10 @@ const CjTable = () => {
                 const storeProd = product.storeProduct;
 
                 return (
-                  <tr key={pid} className="hover:bg-base-200/50 transition-colors">
+                  <tr
+                    key={pid}
+                    className="hover:bg-base-200/50 transition-colors"
+                  >
                     <td className="text-center text-xs text-base-content/50 font-mono">
                       {(page - 1) * 10 + idx + 1}
                     </td>
@@ -189,23 +267,24 @@ const CjTable = () => {
                       </div>
                     </td>
 
-                    {/* Import Status Badge */}
+                    {/* Storefront Status Badge */}
                     <td>
                       {isImported ? (
                         <div className="flex flex-col gap-1 items-start">
                           <span className="badge badge-sm badge-success badge-soft gap-1 font-semibold whitespace-nowrap">
                             <LuCheck className="size-3" />
-                            In Store
+                            Live in Store
                           </span>
                           {storeProd?.status && (
                             <span className="text-[10px] uppercase font-mono tracking-wider text-base-content/50 pl-1">
-                              {storeProd.status}
+                              Status: {storeProd.status}
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="badge badge-sm badge-ghost badge-soft text-base-content/60 font-medium whitespace-nowrap">
-                          Not Imported
+                        <span className="badge badge-sm badge-warning badge-soft text-warning-content font-medium whitespace-nowrap gap-1">
+                          <LuClock className="size-3" />
+                          In Staging (Draft)
                         </span>
                       )}
                     </td>
@@ -214,7 +293,9 @@ const CjTable = () => {
                     <td>
                       <div className="flex items-center gap-1 text-xs text-base-content/70 whitespace-nowrap">
                         <LuClock className="size-3 opacity-50" />
-                        <span>{moment(product.createAt).format("MMM D, YYYY")}</span>
+                        <span>
+                          {moment(product.createAt).format("MMM D, YYYY")}
+                        </span>
                       </div>
                     </td>
 
@@ -227,7 +308,7 @@ const CjTable = () => {
                           target="_blank"
                           rel="noreferrer"
                           className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-base-content"
-                          title="View on CJ Dropshipping"
+                          title="View on CJ Dropshipping Portal"
                         >
                           <LuExternalLink className="size-3.5" />
                         </a>
@@ -237,38 +318,44 @@ const CjTable = () => {
                             {/* Sync Stock Button */}
                             <button
                               type="button"
-                              onClick={() => storeProd?._id && syncMutation.mutate(storeProd._id)}
+                              onClick={() =>
+                                storeProd?._id &&
+                                syncMutation.mutate(storeProd._id)
+                              }
                               disabled={syncMutation.isPending}
                               className="btn btn-soft btn-ghost btn-xs btn-circle"
                               title="Sync Stock & Cost with CJ"
                             >
                               <LuRefreshCw
                                 className={`size-3.5 ${
-                                  syncMutation.isPending ? "animate-spin text-primary" : ""
+                                  syncMutation.isPending
+                                    ? "animate-spin text-primary"
+                                    : ""
                                 }`}
                               />
                             </button>
 
                             {/* View in Products */}
                             <Link
-                              href={`/dashboard/products-v2?search=${encodeURIComponent(
-                                storeProd?.title || ""
+                              href={`/dashboard/products?search=${encodeURIComponent(
+                                storeProd?.title || "",
                               )}`}
                               className="btn btn-xs btn-soft btn-success gap-1 font-medium"
-                              title="View in Custom Products Dashboard"
+                              title="View in Store Products"
                             >
                               <LuStore className="size-3" />
-                              Store
+                              View in Store
                             </Link>
                           </>
                         ) : (
-                          /* Customize & Import Button */
+                          /* Customize & Publish Button */
                           <Link
                             href={`/dashboard/cj-dropshipping/${pid}`}
-                            className="btn btn-xs btn-primary gap-1 font-medium shadow-sm hover:shadow"
+                            className="btn btn-xs btn-primary gap-1 font-medium shadow-xs hover:shadow-sm"
+                            title="Customize pricing, variants and publish to store"
                           >
                             <LuSparkles className="size-3" />
-                            Customize & Import
+                            Customize & Publish
                           </Link>
                         )}
                       </div>
@@ -302,20 +389,25 @@ const CjTable = () => {
                 (p) =>
                   p === 1 ||
                   p === totalPages ||
-                  (p >= page - 1 && p <= page + 1)
+                  (p >= page - 1 && p <= page + 1),
               )
               .map((p, idx, arr) => {
                 const prev = arr[idx - 1];
                 return (
                   <React.Fragment key={p}>
                     {prev && p - prev > 1 && (
-                      <button className="join-item btn btn-sm btn-disabled" disabled>
+                      <button
+                        className="join-item btn btn-sm btn-disabled"
+                        disabled
+                      >
                         ...
                       </button>
                     )}
                     <button
                       className={`join-item btn btn-sm ${
-                        Number(page) === p ? "btn-primary font-bold" : "bg-base-100"
+                        Number(page) === p
+                          ? "btn-primary font-bold"
+                          : "bg-base-100"
                       }`}
                       onClick={() => goToPage(p)}
                     >

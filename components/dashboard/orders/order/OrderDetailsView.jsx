@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import moment from "moment";
@@ -24,10 +24,19 @@ import {
   LuClock,
   LuCircleAlert,
   LuCircleCheck,
+  LuBoxes,
+  LuRefreshCw,
+  LuSparkles,
+  LuExternalLink,
 } from "react-icons/lu";
 import OrderItems from "./OrderItems";
 import OrderSummary from "./OrderSummary";
-import { updateOrderStatus, deleteOrder } from "@/api/orderApi";
+import {
+  updateOrderStatus,
+  deleteOrder,
+  fulfillOrderWithCj,
+  syncCjOrderStatus,
+} from "@/api/orderApi";
 import OrderDeleteModal from "../OrderDeleteModal";
 
 const TIMELINE_STEPS = [
@@ -56,7 +65,7 @@ const OrderDetailsView = ({ initialOrder }) => {
   const [trackingNumber, setTrackingNumber] = useState(
     order.shipping?.trackingNumber || "",
   );
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const deleteModalRef = useRef(null);
   const [copiedField, setCopiedField] = useState(null);
 
   const handleCopy = (val, fieldKey) => {
@@ -80,6 +89,44 @@ const OrderDetailsView = ({ initialOrder }) => {
     onError: (err) => {
       toast.error(
         err?.response?.data?.message || "Failed to update order status",
+      );
+    },
+  });
+
+  const fulfillCjMutation = useMutation({
+    mutationFn: () => fulfillOrderWithCj(order._id),
+    onSuccess: (data) => {
+      if (data?.order) {
+        setOrder(data.order);
+        setSelectedStatus(data.order.orderStatus || data.order.status);
+      }
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["orderStats"] });
+      toast.success(data?.message || "Order sent to CJ Dropshipping!");
+    },
+    onError: (err) => {
+      toast.error(
+        err?.response?.data?.message || err.message || "Failed to fulfill with CJ",
+      );
+    },
+  });
+
+  const syncCjStatusMutation = useMutation({
+    mutationFn: () => syncCjOrderStatus(order._id),
+    onSuccess: (data) => {
+      if (data?.order) {
+        setOrder(data.order);
+        setSelectedStatus(data.order.orderStatus || data.order.status);
+        if (data.trackingNumber) {
+          setTrackingNumber(data.trackingNumber);
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success(data?.message || "CJ status synced!");
+    },
+    onError: (err) => {
+      toast.error(
+        err?.response?.data?.message || err.message || "Failed to sync CJ status",
       );
     },
   });
@@ -172,7 +219,7 @@ const OrderDetailsView = ({ initialOrder }) => {
 
           <button
             type="button"
-            onClick={() => setIsDeleteOpen(true)}
+            onClick={() => deleteModalRef.current?.showModal()}
             className="btn btn-sm btn-outline btn-error rounded-xl text-xs gap-1.5"
           >
             <LuTrash2 className="w-4 h-4" /> Delete
@@ -251,6 +298,147 @@ const OrderDetailsView = ({ initialOrder }) => {
 
         {/* Right Column (Status manager, Customer & Shipping) */}
         <div className="space-y-6">
+          {/* CJ Dropshipping Fulfillment Card */}
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+              <h3 className="font-bold text-sm text-zinc-900 flex items-center gap-2">
+                <LuBoxes className="w-4 h-4 text-primary" /> CJ Dropshipping
+              </h3>
+              {order.cjOrder?.cjOrderId ? (
+                <span className="badge badge-success badge-soft text-[10px] font-semibold gap-1">
+                  <LuCheck className="w-3 h-3" /> Sent to CJ
+                </span>
+              ) : (
+                <span className="badge badge-warning badge-soft text-[10px] font-semibold">
+                  Awaiting Fulfillment
+                </span>
+              )}
+            </div>
+
+            {order.cjOrder?.cjOrderId ? (
+              <div className="space-y-3">
+                <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-500">CJ Order ID:</span>
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-zinc-800">
+                      <span>{order.cjOrder.cjOrderId}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(order.cjOrder.cjOrderId, "cjOrderId")}
+                        className="text-zinc-400 hover:text-zinc-700"
+                        title="Copy CJ Order ID"
+                      >
+                        {copiedField === "cjOrderId" ? (
+                          <LuCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <LuCopy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-500">Supplier Status:</span>
+                    <span className="font-semibold text-zinc-700 uppercase font-mono text-[11px]">
+                      {order.cjOrder.status || "SUBMITTED"}
+                    </span>
+                  </div>
+
+                  {order.cjOrder.logisticName && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500">Shipping Line:</span>
+                      <span className="font-semibold text-zinc-700 truncate max-w-[150px]">
+                        {order.cjOrder.logisticName}
+                      </span>
+                    </div>
+                  )}
+
+                  {order.shipping?.trackingNumber && (
+                    <div className="flex items-center justify-between pt-1 border-t border-zinc-200/60">
+                      <span className="text-zinc-500">Tracking Number:</span>
+                      <a
+                        href={`https://t.17track.net/en#nums=${order.shipping.trackingNumber}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono font-bold text-primary hover:underline flex items-center gap-1 text-[11px]"
+                        title="Track parcel online"
+                      >
+                        {order.shipping.trackingNumber}
+                        <LuExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => syncCjStatusMutation.mutate()}
+                    disabled={syncCjStatusMutation.isPending}
+                    className="btn btn-sm btn-outline w-full rounded-xl text-xs gap-1.5 font-semibold"
+                  >
+                    <LuRefreshCw
+                      className={`w-3.5 h-3.5 ${
+                        syncCjStatusMutation.isPending ? "animate-spin text-primary" : ""
+                      }`}
+                    />
+                    {syncCjStatusMutation.isPending
+                      ? "Checking CJ..."
+                      : "Sync CJ Status & Tracking"}
+                  </button>
+
+                  {order.cjOrder.cjPayUrl && (
+                    <a
+                      href={order.cjOrder.cjPayUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-sm btn-primary w-full rounded-xl text-xs gap-1.5 font-semibold text-center"
+                    >
+                      <LuExternalLink className="w-3.5 h-3.5" /> Pay on CJ Portal
+                    </a>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Automatically submit customer address and ordered items to CJ Dropshipping for fulfillment.
+                </p>
+
+                <div className="p-3 bg-zinc-50 border border-zinc-100 rounded-xl space-y-1 text-xs">
+                  <p className="text-zinc-600">
+                    <strong>Shipping to:</strong>{" "}
+                    {order.customer?.city || "Unknown City"},{" "}
+                    {order.customer?.country || "US"}
+                  </p>
+                  <p className="text-zinc-600 truncate">
+                    <strong>Courier:</strong>{" "}
+                    {order.shipping?.name || order.shipping?.logisticName || "CJPacket Ordinary"}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => fulfillCjMutation.mutate()}
+                  disabled={fulfillCjMutation.isPending}
+                  className="btn btn-main btn-sm w-full rounded-xl text-xs font-bold gap-1.5 shadow-sm"
+                >
+                  {fulfillCjMutation.isPending ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Sending to CJ Dropshipping...
+                    </>
+                  ) : (
+                    <>
+                      <LuSparkles className="w-4 h-4" />
+                      Fulfill Order with CJ
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Status & Courier Update Card */}
           <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
             <h3 className="font-bold text-sm text-zinc-900 mb-3 pb-3 border-b border-zinc-100 flex items-center gap-2">
@@ -441,10 +629,9 @@ const OrderDetailsView = ({ initialOrder }) => {
 
       {/* Delete Modal */}
       <OrderDeleteModal
-        isOpen={isDeleteOpen}
+        ref={deleteModalRef}
         order={order}
         onClose={() => {
-          setIsDeleteOpen(false);
           router.push("/dashboard/orders");
         }}
       />

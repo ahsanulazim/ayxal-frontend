@@ -12,7 +12,7 @@ const Dock = () => {
   const accountHref = !newUser ? "/login" : isAdmin ? "/dashboard" : "/account";
 
   return (
-    <div className="dock bg-main text-neutral-content sticky lg:hidden">
+    <div className="dock z-20 bg-main text-neutral-content sticky lg:hidden">
       <Link href="/">
         <LuHouse className="size-[1.2em]" />
         <span className="dock-label">Home</span>
